@@ -3,7 +3,7 @@ enum DeploymentEnvironment { local, dev, prod }
 class AppConstants {
   // ---- Deploy on Production or Development by changing this ----
   static const DeploymentEnvironment deploymentEnvironment =
-      DeploymentEnvironment.dev;
+      DeploymentEnvironment.local;
 
   // Other constant classes
   static final Roles roles = Roles();
@@ -13,19 +13,19 @@ class AppConstants {
   static const _localConfiguration = _EnvConfig(
     deploymentEnvironmentName: 'local',
     renderBaseUrl: 'http://192.168.100.99:4000/api/',
-    oneSignalAppId: 'a6697fe1-be34-420f-9aa7-1fa369e1b07c',
+    oneSignalAppId: 'a0e49af5-e4b3-4c25-9661-942110d82981',
   );
 
   static const _devConfiguration = _EnvConfig(
     deploymentEnvironmentName: 'dev',
     renderBaseUrl: 'https://otobix-app-backend-development.onrender.com/api/',
-    oneSignalAppId: 'a6697fe1-be34-420f-9aa7-1fa369e1b07c',
+    oneSignalAppId: 'a0e49af5-e4b3-4c25-9661-942110d82981',
   );
 
   static const _prodConfiguration = _EnvConfig(
     deploymentEnvironmentName: 'prod',
     renderBaseUrl: 'https://otobix-app-backend-rq8m.onrender.com/api/',
-    oneSignalAppId: 'a6697fe1-be34-420f-9aa7-1fa369e1b07c',
+    oneSignalAppId: 'a0e49af5-e4b3-4c25-9661-942110d82981',
   );
 
   static _EnvConfig get env =>

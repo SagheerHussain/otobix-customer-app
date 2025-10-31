@@ -2,15 +2,15 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
+import 'package:otobix_customer_app/services/notification_sevice.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 
 import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/views/customer_homepage.dart';
-  import 'package:otobix_customer_app/views/waiting_for_approval_page.dart';
-  
-import 'package:otobix_customer_app/widgets/toast_widget.dart';
+import 'package:otobix_customer_app/views/waiting_for_approval_page.dart';
 
+import 'package:otobix_customer_app/widgets/toast_widget.dart';
 
 class LoginController extends GetxController {
   @override
@@ -54,13 +54,13 @@ class LoginController extends GetxController {
         // debugPrint("approvalStatus: $approvalStatus");
 
         // Link current userid in OneSignal to receive push notifications
-        // await NotificationService.instance.login(userId);
+        await NotificationService.instance.login(userId);
 
         if (approvalStatus == 'Approved') {
           await SharedPrefsHelper.saveString(SharedPrefsHelper.tokenKey, token);
         }
 
-        debugPrint("Token saved in local: $token");
+        // debugPrint("Token saved in local: $token");
         await SharedPrefsHelper.saveString(
           SharedPrefsHelper.userKey,
           jsonEncode(user),

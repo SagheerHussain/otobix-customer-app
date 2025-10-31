@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:otobix_customer_app/services/notification_sevice.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 import 'package:otobix_customer_app/services/socket_service.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
@@ -50,23 +52,23 @@ Future<Widget> init() async {
 
   // await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  // await NotificationService.instance.init();
+  await NotificationService.instance.init();
 
   await SharedPrefsHelper.init();
 
-  // final userId = await SharedPrefsHelper.getString(SharedPrefsHelper.userIdKey);
-  // if (userId != null && userId.isNotEmpty) {
-  //   await NotificationService.instance.login(userId);
-  // }
+  final userId = await SharedPrefsHelper.getString(SharedPrefsHelper.userIdKey);
+  if (userId != null && userId.isNotEmpty) {
+    await NotificationService.instance.login(userId);
+  }
 
   // Initialize socket connection globally
   SocketService.instance.initSocket(AppUrls.socketBaseUrl);
-  // // await Get.putAsync<ConnectivityService>(() => ConnectivityService().init());
 
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   final token = await SharedPrefsHelper.getString(SharedPrefsHelper.tokenKey);
 
+  debugPrint('PlayerID: ${await OneSignal.User.pushSubscription.id}');
   // Decide first screen BEFORE runApp
   Widget start;
   if (token != null && token.isNotEmpty) {
