@@ -42,6 +42,10 @@
     		<string>remote-notification</string>
     		<string>fetch</string>
   		</array>
+
+  		<!-- ===== Tell App Store that app uses encryption ===== -->
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
 		<!-- ===== Defined By Muhammad Ahsan ===== -->
 
 		<key>UILaunchStoryboardName</key>
