@@ -94,31 +94,38 @@ class GlobalFunctions {
   static String? getFormattedDate({
     required DateTime? date,
     required String type,
+    bool treatAsIndiaLocal = true,
   }) {
     if (date == null) return null;
+
+    // For India-only business dates
+    final DateTime indiaDate = treatAsIndiaLocal
+        ? date.toUtc().add(const Duration(hours: 5, minutes: 30))
+        : date.toLocal();
+
     switch (type.toLowerCase()) {
       case year:
-        return DateFormat('yyyy').format(date);
+        return DateFormat('yyyy').format(indiaDate);
       case month:
-        return DateFormat('MM').format(date);
+        return DateFormat('MM').format(indiaDate);
       case monthName:
-        return DateFormat('MMMM').format(date);
+        return DateFormat('MMMM').format(indiaDate);
       case day:
-        return DateFormat('dd').format(date);
+        return DateFormat('dd').format(indiaDate);
       case weekday:
-        return DateFormat('EEEE').format(date);
+        return DateFormat('EEEE').format(indiaDate);
       case time:
-        return DateFormat('hh:mm a').format(date);
+        return DateFormat('hh:mm a').format(indiaDate);
       case dateTime:
-        return DateFormat('dd-MM-yyyy hh:mm a').format(date);
+        return DateFormat('dd-MM-yyyy hh:mm a').format(indiaDate);
       case fullDate:
-        return DateFormat('dd-MM-yyyy').format(date);
+        return DateFormat('dd-MM-yyyy').format(indiaDate);
       case monthYear:
-        return DateFormat('MM-yyyy').format(date);
+        return DateFormat('MM-yyyy').format(indiaDate);
       case dayMonth:
-        return DateFormat('dd-MM').format(date);
+        return DateFormat('dd-MM').format(indiaDate);
       default:
-        return DateFormat('dd-MM-yyyy').format(date); // fallback
+        return DateFormat('dd-MM-yyyy').format(indiaDate); // fallback
     }
   }
 
@@ -129,8 +136,9 @@ class GlobalFunctions {
     if (value == null) return null;
 
     // Convert to number
-    final num? numValue =
-        (value is num) ? value : num.tryParse(value.toString());
+    final num? numValue = (value is num)
+        ? value
+        : num.tryParse(value.toString());
     if (numValue == null) return null;
 
     // Round to nearest 1000

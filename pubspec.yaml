@@ -56,29 +56,30 @@ dependencies:
   onesignal_flutter: ^5.3.4
   firebase_core: ^4.1.0
   firebase_messaging: ^16.0.1
+  cached_network_image: ^3.4.1
 
-flutter_launcher_icons:
-  android: true
-  ios: true
-  image_path: "lib/assets/images/appLogo.png"
+# flutter_launcher_icons:
+#   android: true
+#   ios: true
+#   image_path: "lib/assets/images/appLogo.png"
 
 # flutter_native_splash:
 #   color: "#FFFFFF"                # background color
-#   image: lib/assets/images/splashLogo.png
+#   image: lib/assets/images/appLogo.png
 #   android: true
 #   ios: true
 #   web: false
 #   android_12:
-#     image: lib/assets/images/splashLogo.png
+#     image: lib/assets/images/appLogo.png
 #     icon_background_color: "#FFFFFF"
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.14.4
+  # flutter_launcher_icons: ^0.14.4
   # flutter_native_splash: ^2.4.7
-  rename: ^3.1.0
+  # rename: ^3.1.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is

@@ -111,7 +111,7 @@ class LoginPage extends StatelessWidget {
 
   // App Logo
   Widget _buildAppLogo() =>
-      Image.asset(AppImages.appLogo, height: 150, width: 150);
+      Image.asset(AppImages.otobixLogo, height: 150, width: 150);
 
   //Welcome Text
   Widget _buildSignInText() => Column(

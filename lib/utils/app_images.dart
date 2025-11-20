@@ -1,6 +1,10 @@
 class AppImages {
+  static const String otobixLogo = 'lib/assets/images/otobixLogo.png';
   static const String appLogo = 'lib/assets/images/appLogo.png';
   static const String splashLogo = 'lib/assets/images/splashLogo.png';
+
+  // Car Images
+  static const String carNotFound = 'lib/assets/images/carNotFound.png';
 
   // Forget Password Images
   static const String forgetPasswordPageOneImage =

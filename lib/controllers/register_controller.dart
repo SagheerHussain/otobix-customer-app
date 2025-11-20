@@ -40,7 +40,7 @@ class RegisterController extends GetxController {
         //   type: ToastType.error,
         // );
         // return;
-        selectedRole.value = AppConstants.roles.dealer;
+        selectedRole.value = AppConstants.roles.customer;
       }
       // if (selectedRole.value == 'Customer' ||
       //     selectedRole.value == 'Sales\nManager') {

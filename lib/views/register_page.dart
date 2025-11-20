@@ -78,7 +78,7 @@ class RegisterPage extends StatelessWidget {
 
   // App Logo
   Widget _buildAppLogo() =>
-      Image.asset(AppImages.appLogo, height: 150, width: 150);
+      Image.asset(AppImages.otobixLogo, height: 150, width: 150);
 
   //Welcome Text
   Widget _buildWelcomeText() => Column(
@@ -271,10 +271,10 @@ class RegisterPage extends StatelessWidget {
   Widget _buildContinueButton(BuildContext context) => ButtonWidget(
     text: 'Continue',
     isLoading: getxController.isLoading,
-    onTap: () {},
-    // onTap: () => getxController.sendOTP(
-    //   phoneNumber: getxController.phoneController.text,
-    // ),
+    // onTap: () {},
+    onTap: () => getxController.sendOTP(
+      phoneNumber: getxController.phoneController.text,
+    ),
     height: 40,
     width: 150,
     backgroundColor: AppColors.green,

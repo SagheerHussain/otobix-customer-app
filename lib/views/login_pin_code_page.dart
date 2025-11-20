@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/controllers/login_pin_code_controller.dart';
-import 'package:otobix_customer_app/views/customer_homepage.dart';
+import 'package:otobix_customer_app/views/bottom_navigation_bar_page.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 
@@ -147,7 +147,7 @@ class LoginPinCodePage extends StatelessWidget {
               title: "OTP Verified Successfully",
               type: ToastType.success,
             );
-            Get.to(() => CustomerHomepage());
+            Get.to(() => BottomNavigationBarPage());
 
             // pinCodeFieldsController.verifyOtp(
             //   phoneNumber: phoneNumber,

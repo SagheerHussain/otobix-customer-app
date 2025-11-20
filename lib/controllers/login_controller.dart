@@ -7,7 +7,7 @@ import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 
 import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
-import 'package:otobix_customer_app/views/customer_homepage.dart';
+import 'package:otobix_customer_app/views/bottom_navigation_bar_page.dart';
 import 'package:otobix_customer_app/views/waiting_for_approval_page.dart';
 
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
@@ -89,7 +89,7 @@ class LoginController extends GetxController {
             );
           } else if (approvalStatus == 'Approved') {
             if (userType == AppConstants.roles.customer) {
-              Get.offAll(() => CustomerHomepage());
+              Get.offAll(() => BottomNavigationBarPage());
             } else if (userType == AppConstants.roles.salesManager) {
               // Get.offAll(() => SalesManagerHomepage());
             } else if (userType == AppConstants.roles.dealer) {

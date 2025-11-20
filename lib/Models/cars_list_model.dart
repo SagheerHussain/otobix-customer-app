@@ -1,14 +1,9 @@
-import 'dart:async';
-
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:otobix_customer_app/Models/car_model.dart';
 
 class CarsListModel {
-  RxString remainingAuctionTime = '00h : 00m : 00s'.obs;
-  Timer? auctionTimer;
-
-  ///
   final String id;
+  final String appointmentId;
   final String imageUrl;
   final String make;
   final String model;
@@ -24,6 +19,7 @@ class CarsListModel {
   final String registrationNumber;
   final String registeredRto;
   final String registrationState;
+  final DateTime? registrationDate;
   final String inspectionLocation;
   final bool isInspected;
   final int cubicCapacity;
@@ -44,6 +40,7 @@ class CarsListModel {
 
   CarsListModel({
     required this.id,
+    required this.appointmentId,
     required this.imageUrl,
     required this.make,
     required this.model,
@@ -59,6 +56,7 @@ class CarsListModel {
     required this.registrationNumber,
     required this.registeredRto,
     required this.registrationState,
+    required this.registrationDate,
     required this.inspectionLocation,
     required this.isInspected,
     required this.cubicCapacity,
@@ -85,6 +83,7 @@ class CarsListModel {
     return CarsListModel(
       id: id,
       imageUrl: data['imageUrl'] ?? '',
+      appointmentId: data['appointmentId'] ?? '',
       make: data['make'] ?? '',
       model: data['model'] ?? '',
       variant: data['variant'] ?? '',
@@ -105,6 +104,7 @@ class CarsListModel {
       registrationNumber: data['registrationNumber'],
       registeredRto: data['registeredRto'],
       registrationState: data["registrationState"] ?? 'N/A',
+      registrationDate: parseMongoDbDate(data["registrationDate"]),
       inspectionLocation: data['inspectionLocation'],
       isInspected: data['isInspected'] ?? false,
       cubicCapacity: data['cubicCapacity'] ?? 0,
@@ -132,6 +132,7 @@ class CarsListModel {
   // Convert Car object to JSON map
   Map<String, dynamic> toJson() {
     return {
+      'appointmentId': appointmentId,
       'imageUrl': imageUrl,
       'make': make,
       'model': model,
@@ -147,6 +148,7 @@ class CarsListModel {
       'registrationNumber': registrationNumber,
       'registeredRto': registeredRto,
       'registrationState': registrationState,
+      'registrationDate': registrationDate,
       'inspectionLocation': inspectionLocation,
       'isInspected': isInspected,
       'cubicCapacity': cubicCapacity,

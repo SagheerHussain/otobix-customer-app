@@ -41,7 +41,7 @@ class RegisterPinCodeController extends GetxController {
           Get.delete<RegistrationFormController>();
           Get.to(
             () => RegistrationFormPage(
-              userRole: AppConstants.roles.dealer,
+              userRole: AppConstants.roles.customer,
               phoneNumber: phoneNumber,
             ),
           );
