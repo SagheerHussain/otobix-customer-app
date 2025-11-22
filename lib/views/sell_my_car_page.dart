@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/controllers/sell_my_car_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
+import 'package:otobix_customer_app/utils/app_images.dart';
+import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
+import 'package:otobix_customer_app/widgets/dropdown_textfield_widget.dart';
+import 'package:otobix_customer_app/widgets/images_scroll_widget.dart';
 
 class SellMyCarPage extends StatelessWidget {
   SellMyCarPage({super.key});
@@ -12,94 +16,26 @@ class SellMyCarPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBarWidget(title: 'Sell My Car'),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Column(
             children: [
               const SizedBox(height: 20),
-
-              /// TOP – “Why Us?”
-              Container(
-                width: double.infinity,
-                margin: const EdgeInsets.symmetric(horizontal: 15),
-
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Why Choose Us?',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-
-                          // Benefits in a beautiful list
-                          _buildBenefitItem(
-                            Icons.attach_money,
-                            'Best Price Guaranteed',
-                          ),
-                          _buildBenefitItem(
-                            Icons.local_offer,
-                            'Transparent Deals',
-                          ),
-                          _buildBenefitItem(Icons.bolt, 'Instant Payments'),
-                          _buildBenefitItem(Icons.visibility, 'Secure Process'),
-                        ],
-                      ),
-                    ),
-
-                    // Info Icon
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: AppColors.green,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.green.withOpacity(0.3),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.info_outline_rounded,
-                        size: 22,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
+              ImagesScrollWidget(
+                imageUrls: [AppImages.appLogo, AppImages.carNotFound],
+                onTaps: [() {}, () {}],
               ),
-
               const SizedBox(height: 20),
 
-              /// CARD + FORM
+              // Car details form
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(color: AppColors.white),
                 child: Form(
                   key: getxController.formKey,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  // autovalidateMode: AutovalidateMode.onUserInteraction,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -118,15 +54,44 @@ class SellMyCarPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
 
-                      // 1. Car Number
-                      _buildCustomTextField(
-                        label: 'Car Number',
-                        icon: Icons.directions_car,
-                        controller: getxController.carNumberController,
-                        hintText: 'e.g. MH 12 AB 1234',
-                        keyboardType: TextInputType.text,
-                        isRequired: true,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.green.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: [
+                            // 1. Car Number
+                            _buildCustomTextField(
+                              label: 'Car Number',
+                              icon: Icons.directions_car,
+                              controller: getxController.carNumberController,
+                              hintText: 'e.g. MH 12 AB 1234',
+                              keyboardType: TextInputType.text,
+                              isRequired: true,
+                            ),
+
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: ButtonWidget(
+                                text: 'Fetch Details',
+                                height: 35,
+                                isLoading:
+                                    getxController.isFetchCarDetailsLoading,
+                                onTap: () {
+                                  getxController.fetchCarDetails();
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
+
+                      const SizedBox(height: 20),
 
                       // 2. Name
                       _buildCustomTextField(
@@ -139,14 +104,36 @@ class SellMyCarPage extends StatelessWidget {
                       ),
 
                       // 3. Model
-                      _buildCustomTextField(
+                      DropdownTextfieldWidget<String>(
                         label: 'Car Model',
-                        icon: Icons.directions_car_filled,
                         controller: getxController.modelController,
-                        hintText: 'e.g. Swift VXI',
-                        keyboardType: TextInputType.text,
+                        hintText: 'Select Car Model',
+                        icon: Icons.business,
                         isRequired: true,
+                        allowCustomEntries: false,
+                        customEntryValidationMessage:
+                            'Please select a valid Car Model from the list',
+                        items: getxController.carModels.map((model) {
+                          return DropdownMenuItem(
+                            value: model,
+                            child: Text(model),
+                          );
+                        }).toList(),
+                        validator: (value) {
+                          if (value == 'invalid') {
+                            return 'This Car Model is not available';
+                          }
+                          return null;
+                        },
                       ),
+                      // _buildCustomTextField(
+                      //   label: 'Car Model',
+                      //   icon: Icons.directions_car_filled,
+                      //   controller: getxController.modelController,
+                      //   hintText: 'e.g. Swift VXI',
+                      //   keyboardType: TextInputType.text,
+                      //   isRequired: true,
+                      // ),
 
                       // 4. Variant
                       _buildCustomTextField(
@@ -208,10 +195,10 @@ class SellMyCarPage extends StatelessWidget {
                         width: double.infinity,
                         height: 50,
                         decoration: BoxDecoration(
-                          color: AppColors.grey.withOpacity(0.1),
+                          color: AppColors.grey.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppColors.grey.withOpacity(0.3),
+                            color: AppColors.grey.withValues(alpha: 0.3),
                           ),
                         ),
                         child: Material(
@@ -219,21 +206,23 @@ class SellMyCarPage extends StatelessWidget {
                           child: InkWell(
                             borderRadius: BorderRadius.circular(12),
                             onTap: () {
-                              // TODO: open image picker
+                              //  open image picker
                             },
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
                                   Icons.camera_alt_outlined,
-                                  color: AppColors.grey.withOpacity(0.7),
+                                  color: AppColors.grey.withValues(alpha: 0.7),
                                   size: 20,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
                                   'Upload Car Images',
                                   style: TextStyle(
-                                    color: AppColors.grey.withOpacity(0.8),
+                                    color: AppColors.grey.withValues(
+                                      alpha: 0.8,
+                                    ),
                                     fontWeight: FontWeight.w500,
                                     fontSize: 14,
                                   ),
@@ -253,7 +242,7 @@ class SellMyCarPage extends StatelessWidget {
                             child: ButtonWidget(
                               text: 'Request a Callback',
                               isLoading: false.obs,
-                              fontSize: 9,
+                              fontSize: 11,
                               elevation: 5,
                               onTap: () {},
                             ),
@@ -263,7 +252,7 @@ class SellMyCarPage extends StatelessWidget {
                             child: ButtonWidget(
                               text: 'Schedule Inspection',
                               isLoading: false.obs,
-                              fontSize: 9,
+                              fontSize: 11,
                               elevation: 5,
                               onTap: () {},
                             ),
@@ -276,6 +265,11 @@ class SellMyCarPage extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
+              ImagesScrollWidget(
+                imageUrls: [AppImages.appLogo, AppImages.carNotFound],
+                onTaps: [() {}, () {}],
+              ),
               const SizedBox(height: 30),
             ],
           ),
@@ -284,7 +278,7 @@ class SellMyCarPage extends StatelessWidget {
     );
   }
 
-  /// Improved TextField with better styling
+  // TextField
   Widget _buildCustomTextField({
     required String label,
     required TextEditingController controller,
@@ -322,7 +316,7 @@ class SellMyCarPage extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.withOpacity(0.3)),
+            border: Border.all(color: AppColors.grey.withValues(alpha: 0.3)),
           ),
           child: TextFormField(
             controller: controller,
@@ -361,6 +355,7 @@ class SellMyCarPage extends StatelessWidget {
     );
   }
 
+  // Notes field
   Widget _buildNotesField() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -377,7 +372,7 @@ class SellMyCarPage extends StatelessWidget {
         Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.withOpacity(0.3)),
+            border: Border.all(color: AppColors.grey.withValues(alpha: 0.3)),
           ),
           child: TextFormField(
             controller: getxController.notesController,
@@ -396,35 +391,98 @@ class SellMyCarPage extends StatelessWidget {
       ],
     );
   }
-
-  // Helper method for benefit items
-  Widget _buildBenefitItem(IconData icon, String text) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              color: AppColors.green.withOpacity(0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: 18, color: AppColors.green),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              text,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Colors.black87,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
+
+
+
+              /// TOP – “Why Us?”
+              // Container(
+              //   width: double.infinity,
+              //   margin: const EdgeInsets.symmetric(horizontal: 15),
+
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //     children: [
+              //       Expanded(
+              //         child: Column(
+              //           crossAxisAlignment: CrossAxisAlignment.start,
+              //           children: [
+              //             const Text(
+              //               'Why Choose Us?',
+              //               style: TextStyle(
+              //                 fontSize: 18,
+              //                 fontWeight: FontWeight.bold,
+              //                 color: Colors.black87,
+              //               ),
+              //             ),
+
+              //             // Benefits in a beautiful list
+              //             _buildBenefitItem(
+              //               Icons.attach_money,
+              //               'Best Price Guaranteed',
+              //             ),
+              //             _buildBenefitItem(
+              //               Icons.local_offer,
+              //               'Transparent Deals',
+              //             ),
+              //             _buildBenefitItem(Icons.bolt, 'Instant Payments'),
+              //             _buildBenefitItem(Icons.visibility, 'Secure Process'),
+              //           ],
+              //         ),
+              //       ),
+
+              //       // Info Icon
+              //       Container(
+              //         width: 40,
+              //         height: 40,
+              //         decoration: BoxDecoration(
+              //           color: AppColors.green,
+              //           shape: BoxShape.circle,
+              //           boxShadow: [
+              //             BoxShadow(
+              //               color: AppColors.green.withOpacity(0.3),
+              //               blurRadius: 8,
+              //               offset: const Offset(0, 4),
+              //             ),
+              //           ],
+              //         ),
+              //         child: const Icon(
+              //           Icons.info_outline_rounded,
+              //           size: 22,
+              //           color: Colors.white,
+              //         ),
+              //       ),
+              //     ],
+              //   ),
+              // ),
+
+  // // Helper method for benefit items
+  // Widget _buildBenefitItem(IconData icon, String text) {
+  //   return Padding(
+  //     padding: const EdgeInsets.symmetric(vertical: 2),
+  //     child: Row(
+  //       children: [
+  //         Container(
+  //           width: 32,
+  //           height: 32,
+  //           decoration: BoxDecoration(
+  //             color: AppColors.green.withOpacity(0.1),
+  //             shape: BoxShape.circle,
+  //           ),
+  //           child: Icon(icon, size: 18, color: AppColors.green),
+  //         ),
+  //         const SizedBox(width: 12),
+  //         Expanded(
+  //           child: Text(
+  //             text,
+  //             style: const TextStyle(
+  //               fontSize: 14,
+  //               fontWeight: FontWeight.w500,
+  //               color: Colors.black87,
+  //             ),
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }

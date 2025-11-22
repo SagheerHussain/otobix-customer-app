@@ -1,8 +1,13 @@
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/Models/cars_list_model.dart';
 
 class ManagerMyCarsController extends GetxController {
   final RxBool isPageLoading = true.obs;
+
+  final TextEditingController searchController = TextEditingController();
+
+  final RxString searchQuery = ''.obs;
 
   // main list for this screen
   final RxList<CarsListModel> myCars = <CarsListModel>[].obs;

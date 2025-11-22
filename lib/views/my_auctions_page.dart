@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:otobix_customer_app/Models/cars_list_model.dart';
-import 'package:otobix_customer_app/controllers/manager_my_cars_controller.dart';
+import 'package:otobix_customer_app/controllers/my_auctions_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/utils/global_functions.dart';
@@ -11,43 +11,31 @@ import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 import 'package:otobix_customer_app/widgets/empty_data_widget.dart';
 import 'package:otobix_customer_app/widgets/shimmer_widget.dart';
+import 'package:otobix_customer_app/widgets/toast_widget.dart';
 
-class ManageMyCarsPage extends StatelessWidget {
-  ManageMyCarsPage({super.key});
+class MyAuctionsPage extends StatelessWidget {
+  MyAuctionsPage({super.key});
 
-  final ManagerMyCarsController getxController = Get.put(
-    ManagerMyCarsController(),
-  );
+  final MyAuctionsController getxController = Get.put(MyAuctionsController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBarWidget(title: 'Manage My Cars'),
+      appBar: AppBarWidget(title: 'My Auctions'),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
           child: Column(
             children: [
-              const SizedBox(height: 10),
+              const SizedBox(height: 15),
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 5),
                 child: Row(
-                  children: [
-                    Flexible(child: _buildSearchBar(context)),
-                    const SizedBox(width: 10),
-                    ButtonWidget(
-                      text: 'Add Car',
-                      height: 35,
-                      width: 80,
-                      fontSize: 12,
-                      isLoading: false.obs,
-                      onTap: () {},
-                    ),
-                  ],
+                  children: [Flexible(child: _buildSearchBar(context))],
                 ),
               ),
-
-              const SizedBox(height: 10),
+              const SizedBox(height: 15),
 
               Obx(() {
                 // Final filtered cars list
@@ -373,48 +361,28 @@ class ManageMyCarsPage extends StatelessWidget {
   Widget _buildCarCardFooter(CarsListModel car) {
     return Column(
       children: [
-        const Divider(),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            // Only this needs Obx because it uses car.highestBid.value
-            Obx(
-              () => Row(
-                children: [
-                  const Text(
-                    'Highest Bid: ',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: AppColors.grey,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    'Rs. ${NumberFormat.decimalPattern('en_IN').format(GlobalFunctions.roundToNearestThousand<int>(car.highestBid.value))}/-',
-                    key: ValueKey(car.highestBid.value),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.green,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(width: 10),
-
-            // This is static text → no Obx needed
-            const Text(
-              '34:39',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.red,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
+        // const Divider(),
+        const SizedBox(height: 10),
+        Align(
+          alignment: Alignment.center,
+          child: ButtonWidget(
+            text: 'Interested',
+            height: 30,
+            width: 150,
+            fontSize: 12,
+            isLoading: false.obs,
+            onTap: () {
+              ToastWidget.show(
+                context: Get.context!,
+                title:
+                    'Thank you for your interest. Our team will contact you shortly.',
+                toastDuration: 5,
+                type: ToastType.success,
+              );
+            },
+          ),
         ),
+        const SizedBox(height: 5),
       ],
     );
   }

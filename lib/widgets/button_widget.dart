@@ -64,6 +64,7 @@ class ButtonWidget extends StatelessWidget {
                     )
                   : Text(
                       text,
+                      textAlign: TextAlign.center,
                       style:
                           textStyle ??
                           TextStyle(

@@ -7,7 +7,7 @@ import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 import 'package:otobix_customer_app/services/socket_service.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
-import 'package:otobix_customer_app/views/bottom_navigation_bar_page.dart';
+import 'package:otobix_customer_app/views/home_page.dart.dart';
 import 'package:otobix_customer_app/views/login_page.dart';
 
 void main() async {
@@ -72,7 +72,7 @@ Future<Widget> init() async {
   // Decide first screen BEFORE runApp
   Widget start;
   if (token != null && token.isNotEmpty) {
-    start = BottomNavigationBarPage();
+    start = HomePage();
   } else {
     start = LoginPage();
   }
