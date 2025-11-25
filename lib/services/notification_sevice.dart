@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
-import 'package:otobix_customer_app/Utils/app_constants.dart';
+import 'package:otobix_customer_app/utils/app_constants.dart';
 
 class NotificationService {
   NotificationService._();

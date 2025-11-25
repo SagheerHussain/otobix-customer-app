@@ -1,4 +1,4 @@
-import 'package:otobix_customer_app/Utils/socket_events.dart';
+import 'package:otobix_customer_app/utils/socket_events.dart';
 import 'package:socket_io_client/socket_io_client.dart' as socket_io_client;
 import 'package:flutter/foundation.dart';
 

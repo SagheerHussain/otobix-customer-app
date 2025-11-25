@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:otobix_customer_app/Utils/app_colors.dart';
+import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/controllers/home_page_controller.dart';
 import 'package:otobix_customer_app/views/manage_my_cars_page.dart';
 import 'package:otobix_customer_app/views/my_auctions_page.dart';
