@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/controllers/sell_my_car_controller.dart';
@@ -23,7 +25,9 @@ class SellMyCarPage extends StatelessWidget {
             children: [
               const SizedBox(height: 20),
               ImagesScrollWidget(
-                imageUrls: [AppImages.appLogo, AppImages.carNotFound],
+                imageUrls: [AppImages.topBanner1, AppImages.carNotFound],
+                width: 200,
+                height: 100,
                 onTaps: [() {}, () {}],
               ),
               const SizedBox(height: 20),
@@ -67,7 +71,7 @@ class SellMyCarPage extends StatelessWidget {
                           children: [
                             // 1. Car Number
                             _buildCustomTextField(
-                              label: 'Car Number',
+                              label: 'Car Registration Number',
                               icon: Icons.directions_car,
                               controller: getxController.carNumberController,
                               hintText: 'e.g. MH 12 AB 1234',
@@ -105,14 +109,14 @@ class SellMyCarPage extends StatelessWidget {
 
                       // 3. Model
                       DropdownTextfieldWidget<String>(
-                        label: 'Car Model',
+                        label: 'Car Make-Model-Variant',
                         controller: getxController.modelController,
-                        hintText: 'Select Car Model',
+                        hintText: 'Select Make Model Variant...',
                         icon: Icons.business,
                         isRequired: true,
                         allowCustomEntries: false,
                         customEntryValidationMessage:
-                            'Please select a valid Car Model from the list',
+                            'Please select a valid Car Make Model Variant from the list',
                         items: getxController.carModels.map((model) {
                           return DropdownMenuItem(
                             value: model,
@@ -135,19 +139,19 @@ class SellMyCarPage extends StatelessWidget {
                       //   isRequired: true,
                       // ),
 
-                      // 4. Variant
-                      _buildCustomTextField(
-                        label: 'Variant',
-                        icon: Icons.tune,
-                        controller: getxController.variantController,
-                        hintText: 'e.g. Petrol, AMT',
-                        keyboardType: TextInputType.text,
-                        isRequired: true,
-                      ),
+                      // // 4. Variant
+                      // _buildCustomTextField(
+                      //   label: 'Variant',
+                      //   icon: Icons.tune,
+                      //   controller: getxController.variantController,
+                      //   hintText: 'e.g. Petrol, AMT',
+                      //   keyboardType: TextInputType.text,
+                      //   isRequired: true,
+                      // ),
 
-                      // 5. Year Of Mfg
+                      // 5. Year Of Registration
                       _buildCustomTextField(
-                        label: 'Year Of Manufacturing',
+                        label: 'Year Of Registration',
                         icon: Icons.calendar_today,
                         controller: getxController.yearOfMfgController,
                         hintText: 'e.g. 2019',
@@ -156,24 +160,48 @@ class SellMyCarPage extends StatelessWidget {
                       ),
 
                       // 6. Ownership Serial No
-                      _buildCustomTextField(
+                      DropdownTextfieldWidget<String>(
                         label: 'Ownership Serial Number',
-                        icon: Icons.confirmation_number_outlined,
                         controller: getxController.ownershipSerialNoController,
-                        hintText: 'e.g. 1st / 2nd owner',
-                        keyboardType: TextInputType.text,
+                        hintText: 'Select Ownership Serial No...',
+                        icon: Icons.business,
                         isRequired: true,
+                        allowCustomEntries: false,
+                        customEntryValidationMessage:
+                            'Please select a valid Ownership Serial No from the list',
+                        items: getxController.ownershipSerialNos.map((
+                          serialNo,
+                        ) {
+                          return DropdownMenuItem(
+                            value: serialNo,
+                            child: Text(serialNo),
+                          );
+                        }).toList(),
+                        validator: (value) {
+                          if (value == 'invalid') {
+                            return 'This Ownership Serial No is not available';
+                          }
+                          return null;
+                        },
                       ),
+                      // _buildCustomTextField(
+                      //   label: 'Ownership Serial Number',
+                      //   icon: Icons.confirmation_number_outlined,
+                      //   controller: getxController.ownershipSerialNoController,
+                      //   hintText: 'e.g. 1st / 2nd owner',
+                      //   keyboardType: TextInputType.text,
+                      //   isRequired: true,
+                      // ),
 
-                      // 7. Color
-                      _buildCustomTextField(
-                        label: 'Car Color',
-                        icon: Icons.color_lens_outlined,
-                        controller: getxController.colorController,
-                        hintText: 'e.g. White, Black, Red',
-                        keyboardType: TextInputType.text,
-                        isRequired: true,
-                      ),
+                      // // 7. Color
+                      // _buildCustomTextField(
+                      //   label: 'Car Color',
+                      //   icon: Icons.color_lens_outlined,
+                      //   controller: getxController.colorController,
+                      //   hintText: 'e.g. White, Black, Red',
+                      //   keyboardType: TextInputType.text,
+                      //   isRequired: true,
+                      // ),
 
                       // 8. Odometer Reading
                       _buildCustomTextField(
@@ -182,7 +210,6 @@ class SellMyCarPage extends StatelessWidget {
                         controller: getxController.odometerController,
                         hintText: 'e.g. 45,000',
                         keyboardType: TextInputType.number,
-                        isRequired: true,
                       ),
 
                       // 9. Notes (multi-line)
@@ -191,48 +218,7 @@ class SellMyCarPage extends StatelessWidget {
                       const SizedBox(height: 16),
 
                       // Upload Images button
-                      Container(
-                        width: double.infinity,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: AppColors.grey.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppColors.grey.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(12),
-                            onTap: () {
-                              //  open image picker
-                            },
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.camera_alt_outlined,
-                                  color: AppColors.grey.withValues(alpha: 0.7),
-                                  size: 20,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  'Upload Car Images',
-                                  style: TextStyle(
-                                    color: AppColors.grey.withValues(
-                                      alpha: 0.8,
-                                    ),
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-
+                      _buildImageUploadSection(),
                       const SizedBox(height: 20),
 
                       // Bottom two green buttons
@@ -391,98 +377,205 @@ class SellMyCarPage extends StatelessWidget {
       ],
     );
   }
+
+  // Image upload section
+  Widget _buildImageUploadSection() {
+    return Obx(
+      () => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          RichText(
+            text: TextSpan(
+              text: 'Car Images',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: Colors.black87,
+              ),
+              children: [
+                TextSpan(
+                  text: ' *',
+                  style: TextStyle(
+                    color: AppColors.red,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                TextSpan(
+                  text:
+                      ' (${getxController.selectedImages.length}/${getxController.maxImageCount})',
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontWeight: FontWeight.normal,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Upload clear images of your car (max 5)',
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          ),
+          const SizedBox(height: 12),
+
+          // Selected images grid
+          if (getxController.selectedImages.isNotEmpty) ...[
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 1,
+              ),
+              itemCount: getxController.selectedImages.length,
+              itemBuilder: (context, index) {
+                return _buildImageItem(index);
+              },
+            ),
+            const SizedBox(height: 12),
+          ],
+
+          // Upload button
+          Container(
+            width: double.infinity,
+            height: 50,
+            decoration: BoxDecoration(
+              color:
+                  getxController.selectedImages.length >=
+                      getxController.maxImageCount
+                  ? AppColors.grey.withValues(alpha: 0.1)
+                  : AppColors.green.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color:
+                    getxController.selectedImages.length >=
+                        getxController.maxImageCount
+                    ? AppColors.grey.withValues(alpha: 0.3)
+                    : AppColors.green.withValues(alpha: 0.5),
+              ),
+            ),
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap:
+                    getxController.selectedImages.length >=
+                        getxController.maxImageCount
+                    ? null
+                    : getxController.pickImages,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.camera_alt_outlined,
+                      color:
+                          getxController.selectedImages.length >=
+                              getxController.maxImageCount
+                          ? AppColors.grey.withValues(alpha: 0.5)
+                          : AppColors.green,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      getxController.selectedImages.isEmpty
+                          ? 'Upload Car Images'
+                          : 'Add More Images (${getxController.remainingImageCount} remaining)',
+                      style: TextStyle(
+                        color:
+                            getxController.selectedImages.length >=
+                                getxController.maxImageCount
+                            ? AppColors.grey.withValues(alpha: 0.5)
+                            : AppColors.green,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Clear all button
+          if (getxController.selectedImages.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: GestureDetector(
+                onTap: getxController.clearAllImages,
+                child: Text(
+                  'Clear All',
+                  style: TextStyle(
+                    color: AppColors.red,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildImageItem(int index) {
+    return Obx(() {
+      if (index >= getxController.selectedImages.length) {
+        return const SizedBox();
+      }
+
+      final imageFile = getxController.selectedImages[index];
+      return Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: AppColors.grey.withValues(alpha: 0.3)),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(
+                File(imageFile.path),
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: AppColors.grey.withValues(alpha: 0.1),
+                    child: Icon(
+                      Icons.error_outline,
+                      color: AppColors.grey,
+                      size: 24,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 4,
+            child: GestureDetector(
+              onTap: () {
+                getxController.removeImage(index);
+              },
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: AppColors.red.withOpacity(0.9),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.close, color: AppColors.white, size: 14),
+              ),
+            ),
+          ),
+        ],
+      );
+    });
+  }
 }
-
-
-
-              /// TOP – “Why Us?”
-              // Container(
-              //   width: double.infinity,
-              //   margin: const EdgeInsets.symmetric(horizontal: 15),
-
-              //   child: Row(
-              //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //     children: [
-              //       Expanded(
-              //         child: Column(
-              //           crossAxisAlignment: CrossAxisAlignment.start,
-              //           children: [
-              //             const Text(
-              //               'Why Choose Us?',
-              //               style: TextStyle(
-              //                 fontSize: 18,
-              //                 fontWeight: FontWeight.bold,
-              //                 color: Colors.black87,
-              //               ),
-              //             ),
-
-              //             // Benefits in a beautiful list
-              //             _buildBenefitItem(
-              //               Icons.attach_money,
-              //               'Best Price Guaranteed',
-              //             ),
-              //             _buildBenefitItem(
-              //               Icons.local_offer,
-              //               'Transparent Deals',
-              //             ),
-              //             _buildBenefitItem(Icons.bolt, 'Instant Payments'),
-              //             _buildBenefitItem(Icons.visibility, 'Secure Process'),
-              //           ],
-              //         ),
-              //       ),
-
-              //       // Info Icon
-              //       Container(
-              //         width: 40,
-              //         height: 40,
-              //         decoration: BoxDecoration(
-              //           color: AppColors.green,
-              //           shape: BoxShape.circle,
-              //           boxShadow: [
-              //             BoxShadow(
-              //               color: AppColors.green.withOpacity(0.3),
-              //               blurRadius: 8,
-              //               offset: const Offset(0, 4),
-              //             ),
-              //           ],
-              //         ),
-              //         child: const Icon(
-              //           Icons.info_outline_rounded,
-              //           size: 22,
-              //           color: Colors.white,
-              //         ),
-              //       ),
-              //     ],
-              //   ),
-              // ),
-
-  // // Helper method for benefit items
-  // Widget _buildBenefitItem(IconData icon, String text) {
-  //   return Padding(
-  //     padding: const EdgeInsets.symmetric(vertical: 2),
-  //     child: Row(
-  //       children: [
-  //         Container(
-  //           width: 32,
-  //           height: 32,
-  //           decoration: BoxDecoration(
-  //             color: AppColors.green.withOpacity(0.1),
-  //             shape: BoxShape.circle,
-  //           ),
-  //           child: Icon(icon, size: 18, color: AppColors.green),
-  //         ),
-  //         const SizedBox(width: 12),
-  //         Expanded(
-  //           child: Text(
-  //             text,
-  //             style: const TextStyle(
-  //               fontSize: 14,
-  //               fontWeight: FontWeight.w500,
-  //               color: Colors.black87,
-  //             ),
-  //           ),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }

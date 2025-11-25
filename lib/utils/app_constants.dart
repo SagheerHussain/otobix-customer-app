@@ -3,7 +3,7 @@ enum DeploymentEnvironment { local, dev, prod }
 class AppConstants {
   // ---- Deploy on Production or Development by changing this ----
   static const DeploymentEnvironment deploymentEnvironment =
-      DeploymentEnvironment.dev;
+      DeploymentEnvironment.prod;
 
   // Other constant classes
   static final Roles roles = Roles();
@@ -24,7 +24,7 @@ class AppConstants {
 
   static const _prodConfiguration = _EnvConfig(
     deploymentEnvironmentName: 'prod',
-    renderBaseUrl: 'https://otobix-app-backend-rq8m.onrender.com/api/',
+    renderBaseUrl: 'https://ob-dealerapp-kong.onrender.com/api/',
     oneSignalAppId: 'a0e49af5-e4b3-4c25-9661-942110d82981',
   );
 

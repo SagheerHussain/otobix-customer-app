@@ -13,4 +13,7 @@ class AppImages {
       'lib/assets/images/forgetPassword2.png';
   static const String forgetPasswordPageThreeImage =
       'lib/assets/images/forgetPassword3.png';
+
+  // Sell My Car Screen Top Banners
+  static const String topBanner1 = 'lib/assets/images/bannerImage.jpg';
 }

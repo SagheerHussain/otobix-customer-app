@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
@@ -28,6 +29,7 @@ class SellMyCarController extends GetxController {
   final isRequestCallbackLoading = false.obs;
   final isScheduleInspectionLoading = false.obs;
 
+  // Car models list
   List<String> carModels = [
     'Toyota Camry',
     'Honda Civic',
@@ -45,6 +47,22 @@ class SellMyCarController extends GetxController {
     'Kia Sportage',
     'Lexus RX',
   ];
+
+  List<String> ownershipSerialNos = [
+    '1st',
+    '2nd',
+    '3rd',
+    '4th',
+    '5th',
+    'above',
+  ];
+
+  // Image related properties
+  final selectedImages = <XFile>[].obs;
+  final maxImageCount = 5;
+
+  // Image picker
+  final ImagePicker _imagePicker = ImagePicker();
 
   @override
   void onInit() {
@@ -113,7 +131,7 @@ class SellMyCarController extends GetxController {
           final String ownerName = result['rc_owner_name']?.toString() ?? '';
           final String makerModel = result['rc_maker_model']?.toString() ?? '';
           final String manuMonthYear =
-              result['rc_manu_month_yr']?.toString() ?? ''; // e.g. "12-2006"
+              result['rc_regn_dt']?.toString() ?? ''; // e.g. "12-2006"
           final String ownerSr = result['rc_owner_sr']?.toString() ?? '';
           final String color = result['rc_color']?.toString() ?? '';
 
@@ -189,6 +207,59 @@ class SellMyCarController extends GetxController {
       isFetchCarDetailsLoading.value = false;
     }
   }
+
+  // Pick images from gallery
+  Future<void> pickImages() async {
+    try {
+      final List<XFile>? pickedFiles = await _imagePicker.pickMultiImage(
+        imageQuality: 80,
+      );
+
+      if (pickedFiles != null && pickedFiles.isNotEmpty) {
+        final int remainingSlots = maxImageCount - selectedImages.length;
+        final List<XFile> filesToAdd = pickedFiles
+            .take(remainingSlots)
+            .toList();
+
+        if (filesToAdd.isNotEmpty) {
+          selectedImages.addAll(filesToAdd);
+        }
+
+        // Show warning if user selected more than available slots
+        if (pickedFiles.length > remainingSlots) {
+          ToastWidget.show(
+            context: Get.context!,
+            title: "Limit Exceeded",
+            subtitle:
+                "Only $remainingSlots images were added. Maximum $maxImageCount images allowed.",
+            type: ToastType.warning,
+          );
+        }
+      }
+    } catch (e) {
+      ToastWidget.show(
+        context: Get.context!,
+        title: "Error",
+        subtitle: "Failed to pick images: ${e.toString()}",
+        type: ToastType.error,
+      );
+    }
+  }
+
+  // Remove image
+  void removeImage(int index) {
+    if (index >= 0 && index < selectedImages.length) {
+      selectedImages.removeAt(index);
+    }
+  }
+
+  // Clear all images
+  void clearAllImages() {
+    selectedImages.clear();
+  }
+
+  // Get remaining image count
+  int get remainingImageCount => maxImageCount - selectedImages.length;
 
   @override
   void onClose() {
