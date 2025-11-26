@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -29,24 +30,9 @@ class SellMyCarController extends GetxController {
   final isRequestCallbackLoading = false.obs;
   final isScheduleInspectionLoading = false.obs;
 
-  // Car models list
-  List<String> carModels = [
-    'Toyota Camry',
-    'Honda Civic',
-    'Ford Mustang',
-    'BMW X5',
-    'Mercedes-Benz C-Class',
-    'Audi A4',
-    'Hyundai Elantra',
-    'Tesla Model 3',
-    'Nissan Altima',
-    'Chevrolet Malibu',
-    'Volkswagen Golf',
-    'Subaru Outback',
-    'Mazda CX-5',
-    'Kia Sportage',
-    'Lexus RX',
-  ];
+  // Car models list (for dropdown suggestions)
+  final RxList<String> carModels = <String>[].obs;
+  Timer? _modelSearchDebounce;
 
   List<String> ownershipSerialNos = [
     '1st',
@@ -76,6 +62,11 @@ class SellMyCarController extends GetxController {
     colorController = TextEditingController();
     odometerController = TextEditingController();
     notesController = TextEditingController();
+
+    _setupModelSearchListener();
+
+    // Optional: load initial popular list (no search term)
+    _fetchCarModelSuggestions('');
   }
 
   // Fetch car details
@@ -293,5 +284,55 @@ class SellMyCarController extends GetxController {
     // isScheduleInspectionLoading.value = true;
     // call API
     // isScheduleInspectionLoading.value = false;
+  }
+
+  void _setupModelSearchListener() {
+    modelController.addListener(() {
+      final text = modelController.text.trim();
+
+      // If user clears field, clear dropdown options
+      if (text.isEmpty) {
+        carModels.clear();
+        return;
+      }
+
+      // Debounce – so we don't fire API on every keystroke
+      _modelSearchDebounce?.cancel();
+      _modelSearchDebounce = Timer(const Duration(milliseconds: 400), () {
+        _fetchCarModelSuggestions(text);
+      });
+    });
+  }
+
+  Future<void> _fetchCarModelSuggestions(String query) async {
+    try {
+      final encoded = Uri.encodeQueryComponent(query);
+      // final endpoint =
+      //     '${AppUrls.searchCarMakeModelVariant}?q=$encoded&limit=20';
+
+      final response = await ApiService.post(
+        endpoint: AppUrls.searchCarMakeModelVariant,
+        body: {'q': encoded, 'limit': 20},
+      );
+
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        final bool success = body['success'] == true;
+        if (!success) {
+          debugPrint('Search car models failed: ${body['message']}');
+          return;
+        }
+
+        final List<dynamic> data = body['data'] ?? [];
+        final List<String> models = data.map((e) => e.toString()).toList();
+        debugPrint(models.toString());
+
+        carModels.assignAll(models); // this will rebuild Obx dropdown
+      } else {
+        debugPrint('Search car models failed: status ${response.statusCode}');
+      }
+    } catch (e) {
+      debugPrint('Search car models error: $e');
+    }
   }
 }

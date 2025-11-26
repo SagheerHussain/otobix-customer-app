@@ -68,7 +68,7 @@ Future<Widget> init() async {
 
   final token = await SharedPrefsHelper.getString(SharedPrefsHelper.tokenKey);
 
-  debugPrint('PlayerID: ${await OneSignal.User.pushSubscription.id}');
+  // debugPrint('PlayerID: ${await OneSignal.User.pushSubscription.id}');
   // Decide first screen BEFORE runApp
   Widget start;
   if (token != null && token.isNotEmpty) {

@@ -129,7 +129,9 @@ class SellMyCarPage extends StatelessWidget {
                           }
                           return null;
                         },
+                        controllerTag: 'car_model',
                       ),
+
                       // _buildCustomTextField(
                       //   label: 'Car Model',
                       //   icon: Icons.directions_car_filled,
@@ -183,6 +185,7 @@ class SellMyCarPage extends StatelessWidget {
                           }
                           return null;
                         },
+                        controllerTag: 'ownership_serial',
                       ),
                       // _buildCustomTextField(
                       //   label: 'Ownership Serial Number',
