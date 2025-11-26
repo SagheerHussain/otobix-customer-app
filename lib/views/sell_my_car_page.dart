@@ -25,10 +25,15 @@ class SellMyCarPage extends StatelessWidget {
             children: [
               const SizedBox(height: 20),
               ImagesScrollWidget(
-                imageUrls: [AppImages.topBanner1, AppImages.carNotFound],
                 width: 200,
                 height: 100,
-                onTaps: [() {}, () {}],
+                imageUrls: [
+                  AppImages.topBanner1,
+                  AppImages.topBanner2,
+                  AppImages.topBanner3,
+                  AppImages.topBanner4,
+                ],
+                onTaps: [() {}, () {}, () {}, () {}],
               ),
               const SizedBox(height: 20),
 
@@ -117,12 +122,8 @@ class SellMyCarPage extends StatelessWidget {
                         allowCustomEntries: false,
                         customEntryValidationMessage:
                             'Please select a valid Car Make Model Variant from the list',
-                        items: getxController.carModels.map((model) {
-                          return DropdownMenuItem(
-                            value: model,
-                            child: Text(model),
-                          );
-                        }).toList(),
+                        // We won't use this items list reactively; internal controller will be updated manually
+                        items: const [], // or null, both are fine
                         validator: (value) {
                           if (value == 'invalid') {
                             return 'This Car Model is not available';
@@ -256,8 +257,15 @@ class SellMyCarPage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               ImagesScrollWidget(
-                imageUrls: [AppImages.appLogo, AppImages.carNotFound],
-                onTaps: [() {}, () {}],
+                width: 200,
+                height: 100,
+                imageUrls: [
+                  AppImages.topBanner1,
+                  AppImages.topBanner2,
+                  AppImages.topBanner3,
+                  AppImages.topBanner4,
+                ],
+                onTaps: [() {}, () {}, () {}, () {}],
               ),
               const SizedBox(height: 30),
             ],

@@ -15,5 +15,8 @@ class AppImages {
       'lib/assets/images/forgetPassword3.png';
 
   // Sell My Car Screen Top Banners
-  static const String topBanner1 = 'lib/assets/images/bannerImage.jpg';
+  static const String topBanner1 = 'lib/assets/images/bannerImage1.png';
+  static const String topBanner2 = 'lib/assets/images/bannerImage2.png';
+  static const String topBanner3 = 'lib/assets/images/bannerImage3.png';
+  static const String topBanner4 = 'lib/assets/images/bannerImage4.png';
 }

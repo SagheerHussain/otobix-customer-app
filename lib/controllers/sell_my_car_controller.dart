@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:otobix_customer_app/controllers/dropdown_textfield_widget_controller.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
@@ -123,15 +124,15 @@ class SellMyCarController extends GetxController {
           final String makerModel = result['rc_maker_model']?.toString() ?? '';
           final String manuMonthYear =
               result['rc_regn_dt']?.toString() ?? ''; // e.g. "12-2006"
-          final String ownerSr = result['rc_owner_sr']?.toString() ?? '';
-          final String color = result['rc_color']?.toString() ?? '';
+          // final String ownerSr = result['rc_owner_sr']?.toString() ?? '';
+          // final String color = result['rc_color']?.toString() ?? '';
 
-          // Optionally extract year from "mm-yyyy"
+          // Optionally extract year from formats like "12-2006" or "15-04-2015"
           String yearOnly = '';
-          if (manuMonthYear.isNotEmpty && manuMonthYear.contains('-')) {
-            final parts = manuMonthYear.split('-');
-            if (parts.length == 2) {
-              yearOnly = parts[1]; // "2006"
+          if (manuMonthYear.isNotEmpty) {
+            final match = RegExp(r'(\d{4})$').firstMatch(manuMonthYear.trim());
+            if (match != null) {
+              yearOnly = match.group(1)!; // e.g. "2015"
             }
           }
 
@@ -142,8 +143,8 @@ class SellMyCarController extends GetxController {
           ownerNameController.text = ownerName;
           modelController.text = makerModel;
           yearOfMfgController.text = yearOnly;
-          ownershipSerialNoController.text = ownerSr;
-          colorController.text = color;
+          // ownershipSerialNoController.text = ownerSr;
+          // colorController.text = color;
 
           // If you later add odometer & notes from API, set them here too.
 
@@ -290,14 +291,16 @@ class SellMyCarController extends GetxController {
     modelController.addListener(() {
       final text = modelController.text.trim();
 
-      // If user clears field, clear dropdown options
+      // Cancel previous debounce
+      _modelSearchDebounce?.cancel();
+
+      // If field is empty → fetch first 20 from API
       if (text.isEmpty) {
-        carModels.clear();
+        _fetchCarModelSuggestions('');
         return;
       }
 
-      // Debounce – so we don't fire API on every keystroke
-      _modelSearchDebounce?.cancel();
+      // Debounce – so we don't hit the API on every keystroke
       _modelSearchDebounce = Timer(const Duration(milliseconds: 400), () {
         _fetchCarModelSuggestions(text);
       });
@@ -306,13 +309,12 @@ class SellMyCarController extends GetxController {
 
   Future<void> _fetchCarModelSuggestions(String query) async {
     try {
-      final encoded = Uri.encodeQueryComponent(query);
-      // final endpoint =
-      //     '${AppUrls.searchCarMakeModelVariant}?q=$encoded&limit=20';
-
       final response = await ApiService.post(
         endpoint: AppUrls.searchCarMakeModelVariant,
-        body: {'q': encoded, 'limit': 20},
+        body: {
+          'q': query, // no manual encoding here
+          'limit': 20,
+        },
       );
 
       if (response.statusCode == 200) {
@@ -325,9 +327,22 @@ class SellMyCarController extends GetxController {
 
         final List<dynamic> data = body['data'] ?? [];
         final List<String> models = data.map((e) => e.toString()).toList();
-        debugPrint(models.toString());
 
-        carModels.assignAll(models); // this will rebuild Obx dropdown
+        // Keep your list if you need it elsewhere
+        carModels.assignAll(models);
+
+        // 🔥 Update the dropdown's internal controller, if it exists
+        if (Get.isRegistered<DropdownController<String>>(tag: 'car_model')) {
+          final dropdownCtrl = Get.find<DropdownController<String>>(
+            tag: 'car_model',
+          );
+
+          final dropdownItems = models
+              .map((m) => DropdownMenuItem<String>(value: m, child: Text(m)))
+              .toList();
+
+          dropdownCtrl.updateItems(dropdownItems);
+        }
       } else {
         debugPrint('Search car models failed: status ${response.statusCode}');
       }
