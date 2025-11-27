@@ -4,9 +4,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:otobix_customer_app/Models/sell_my_car_banners_model.dart';
 import 'package:otobix_customer_app/controllers/dropdown_textfield_widget_controller.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
+import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
 
@@ -26,10 +28,15 @@ class SellMyCarController extends GetxController {
   late TextEditingController notesController;
 
   // Button loading states (use in ButtonWidget if you want)
+  final isBannersLoading = false.obs;
   final isFetchCarDetailsLoading = false.obs;
   final isUploadImagesLoading = false.obs;
   final isRequestCallbackLoading = false.obs;
   final isScheduleInspectionLoading = false.obs;
+
+  // Banners
+  final headerBannersList = <SellMyCarBannersModel>[].obs;
+  final footerBannersList = <SellMyCarBannersModel>[].obs;
 
   // Car models list (for dropdown suggestions)
   final RxList<String> carModels = <String>[].obs;
@@ -63,6 +70,8 @@ class SellMyCarController extends GetxController {
     colorController = TextEditingController();
     odometerController = TextEditingController();
     notesController = TextEditingController();
+
+    _fetchBannersList();
 
     _setupModelSearchListener();
 
@@ -348,6 +357,61 @@ class SellMyCarController extends GetxController {
       }
     } catch (e) {
       debugPrint('Search car models error: $e');
+    }
+  }
+
+  // Load Banners list
+  Future<void> _fetchBannersList() async {
+    isBannersLoading.value = true;
+    try {
+      final response = await ApiService.get(
+        endpoint: AppUrls.fetchCarBannersList,
+      );
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+        final List<dynamic> dataList = decoded['data'] as List<dynamic>;
+
+        // If the backend sends { type: 'Header' | 'Footer' }
+        final headerBannerMaps = dataList
+            .where((banner) => banner['type'] == AppConstants.banners.header)
+            .cast<Map<String, dynamic>>()
+            .toList();
+
+        final footerBannerMaps = dataList
+            .where((banner) => banner['type'] == AppConstants.banners.footer)
+            .cast<Map<String, dynamic>>()
+            .toList();
+
+        // Map to your model and assign to RxLists
+        headerBannersList.assignAll(
+          headerBannerMaps
+              .map(
+                (banner) => SellMyCarBannersModel.fromJson(
+                  documentId: banner['_id'],
+                  json: banner,
+                ),
+              )
+              .toList(),
+        );
+
+        footerBannersList.assignAll(
+          footerBannerMaps
+              .map(
+                (banner) => SellMyCarBannersModel.fromJson(
+                  documentId: banner['_id'],
+                  json: banner,
+                ),
+              )
+              .toList(),
+        );
+      } else {
+        debugPrint('Failed to load banners: ${response.statusCode}');
+      }
+    } catch (error) {
+      debugPrint('Error loading banners: $error');
+    } finally {
+      isBannersLoading.value = false;
     }
   }
 }

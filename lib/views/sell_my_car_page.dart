@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/controllers/sell_my_car_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
-import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 import 'package:otobix_customer_app/widgets/dropdown_textfield_widget.dart';
@@ -24,17 +23,34 @@ class SellMyCarPage extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 20),
-              ImagesScrollWidget(
-                width: 200,
-                height: 100,
-                imageUrls: [
-                  AppImages.topBanner1,
-                  AppImages.topBanner2,
-                  AppImages.topBanner3,
-                  AppImages.topBanner4,
-                ],
-                onTaps: [() {}, () {}, () {}, () {}],
-              ),
+              // TOP header banners (replace your first ImagesScrollWidget with this)
+              Obx(() {
+                final banners = getxController.headerBannersList;
+
+                // If list is empty => don't show banners at all
+                if (banners.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                final imageUrls = banners.map((b) => b.imageUrl).toList();
+
+                // Each tap prints (or shows) its screenName
+                final onTaps = banners.map<VoidCallback>((b) {
+                  return () {
+                    debugPrint('Banner tapped: ${b.screenName}');
+                    // or show a toast/snackbar / navigate etc.
+                    // Get.snackbar('Banner', b.screenName);
+                  };
+                }).toList();
+
+                return ImagesScrollWidget(
+                  width: 200,
+                  height: 100,
+                  imageUrls: imageUrls,
+                  onTaps: onTaps,
+                );
+              }),
+
               const SizedBox(height: 20),
 
               // Car details form
@@ -234,7 +250,9 @@ class SellMyCarPage extends StatelessWidget {
                               isLoading: false.obs,
                               fontSize: 11,
                               elevation: 5,
-                              onTap: () {},
+                              onTap: () {
+                                getxController.requestCallback();
+                              },
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -244,7 +262,9 @@ class SellMyCarPage extends StatelessWidget {
                               isLoading: false.obs,
                               fontSize: 11,
                               elevation: 5,
-                              onTap: () {},
+                              onTap: () {
+                                getxController.scheduleInspection();
+                              },
                             ),
                           ),
                         ],
@@ -256,17 +276,33 @@ class SellMyCarPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              ImagesScrollWidget(
-                width: 200,
-                height: 100,
-                imageUrls: [
-                  AppImages.topBanner1,
-                  AppImages.topBanner2,
-                  AppImages.topBanner3,
-                  AppImages.topBanner4,
-                ],
-                onTaps: [() {}, () {}, () {}, () {}],
-              ),
+              // TOP footer banners (replace your first ImagesScrollWidget with this)
+              Obx(() {
+                final banners = getxController.footerBannersList;
+
+                // If list is empty => don't show banners at all
+                if (banners.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                final imageUrls = banners.map((b) => b.imageUrl).toList();
+
+                // Each tap prints (or shows) its screenName
+                final onTaps = banners.map<VoidCallback>((b) {
+                  return () {
+                    debugPrint('Banner tapped: ${b.screenName}');
+                    // or show a toast/snackbar / navigate etc.
+                    // Get.snackbar('Banner', b.screenName);
+                  };
+                }).toList();
+
+                return ImagesScrollWidget(
+                  width: 200,
+                  height: 100,
+                  imageUrls: imageUrls,
+                  onTaps: onTaps,
+                );
+              }),
               const SizedBox(height: 30),
             ],
           ),
@@ -397,30 +433,34 @@ class SellMyCarPage extends StatelessWidget {
         children: [
           RichText(
             text: TextSpan(
-              text: 'Car Images',
+              text: 'Car Images ',
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
                 color: Colors.black87,
               ),
               children: [
-                TextSpan(
-                  text: ' *',
-                  style: TextStyle(
-                    color: AppColors.red,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                ),
+                // TextSpan(
+                //   text: ' *',
+                //   style: TextStyle(
+                //     color: AppColors.red,
+                //     fontWeight: FontWeight.bold,
+                //     fontSize: 14,
+                //   ),
+                // ),
                 TextSpan(
                   text:
-                      ' (${getxController.selectedImages.length}/${getxController.maxImageCount})',
+                      '(${getxController.selectedImages.length}/${getxController.maxImageCount}) ',
                   style: TextStyle(
                     color: Colors.grey,
                     fontWeight: FontWeight.normal,
                     fontSize: 12,
                   ),
                 ),
+                // TextSpan(
+                //   text: '(Optional)',
+                //   style: TextStyle(color: AppColors.grey, fontSize: 14),
+                // ),
               ],
             ),
           ),

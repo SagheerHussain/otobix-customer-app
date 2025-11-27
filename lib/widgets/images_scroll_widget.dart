@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 
@@ -18,7 +19,7 @@ class ImagesScrollWidget extends StatefulWidget {
     this.height = 120,
     this.width = 160,
     this.fit = BoxFit.cover,
-    this.spacing = 12,
+    this.spacing = 10,
     this.scrollDuration = const Duration(
       milliseconds: 15000,
     ), // 15 seconds for full loop
@@ -86,17 +87,25 @@ class _ImagesScrollWidgetState extends State<ImagesScrollWidget> {
         scrollDirection: Axis.horizontal,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: extendedUrls.length,
-        separatorBuilder: (context, index) =>
-            VerticalDivider(color: AppColors.grey, width: 1),
+        separatorBuilder: (context, index) => SizedBox(width: widget.spacing),
         itemBuilder: (context, index) {
           return GestureDetector(
             onTap: extendedTaps[index],
             child: SizedBox(
               width: widget.width,
-              child: Image.asset(
-                extendedUrls[index],
+              child: CachedNetworkImage(
+                imageUrl: extendedUrls[index],
                 fit: widget.fit,
-                errorBuilder: (context, error, stackTrace) {
+                placeholder: (context, url) => Container(
+                  color: Colors.grey[300],
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.green,
+                      strokeWidth: 1,
+                    ),
+                  ),
+                ),
+                errorWidget: (context, error, stackTrace) {
                   return Container(
                     color: Colors.grey[300],
                     child: const Icon(Icons.error),
