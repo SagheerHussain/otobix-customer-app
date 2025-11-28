@@ -3,6 +3,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:otobix_customer_app/Models/sell_my_car_banners_model.dart';
 import 'package:otobix_customer_app/controllers/dropdown_textfield_widget_controller.dart';
@@ -10,6 +12,7 @@ import 'package:otobix_customer_app/services/api_service.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
+import 'package:otobix_customer_app/views/sell_my_car_page.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
 
 class SellMyCarController extends GetxController {
@@ -26,6 +29,9 @@ class SellMyCarController extends GetxController {
   late TextEditingController colorController;
   late TextEditingController odometerController;
   late TextEditingController notesController;
+  final TextEditingController inspectionDateTimeController =
+      TextEditingController();
+  final TextEditingController addressController = TextEditingController();
 
   // Button loading states (use in ButtonWidget if you want)
   final isBannersLoading = false.obs;
@@ -57,6 +63,8 @@ class SellMyCarController extends GetxController {
 
   // Image picker
   final ImagePicker _imagePicker = ImagePicker();
+
+  String? inspectionDateTimeUtcForApi;
 
   @override
   void onInit() {
@@ -412,6 +420,171 @@ class SellMyCarController extends GetxController {
       debugPrint('Error loading banners: $error');
     } finally {
       isBannersLoading.value = false;
+    }
+  }
+
+  // Submit inspection request
+
+  Future<bool> submitInspectionRequest() async {
+    if (!(formKey.currentState?.validate() ?? false)) return false;
+    isScheduleInspectionLoading.value = true;
+
+    try {
+      final uri = Uri.parse(AppUrls.addInspetionRequest);
+      final request = http.MultipartRequest('POST', uri);
+
+      final token =
+          await SharedPrefsHelper.getString(SharedPrefsHelper.tokenKey) ?? '';
+
+      if (token.isNotEmpty) {
+        request.headers.addAll({
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        });
+      }
+
+      // required fields
+      request.fields['carRegistrationNumber'] = carNumberController.text.trim();
+      request.fields['ownerName'] = ownerNameController.text.trim();
+      request.fields['carMakeModelVariant'] = modelController.text.trim();
+      request.fields['yearOfRegistration'] = yearOfMfgController.text.trim();
+      request.fields['ownershipSerialNumber'] = ownershipSerialNoController.text
+          .trim();
+
+      // optional fields
+      if (odometerController.text.trim().isNotEmpty) {
+        request.fields['odometerReadingInKms'] = odometerController.text.trim();
+      }
+      if (notesController.text.trim().isNotEmpty) {
+        request.fields['additionalNotes'] = notesController.text.trim();
+      }
+      if (inspectionDateTimeUtcForApi != null &&
+          inspectionDateTimeUtcForApi!.isNotEmpty) {
+        request.fields['inspectionDateTime'] = inspectionDateTimeUtcForApi!;
+      }
+      if (addressController.text.trim().isNotEmpty) {
+        request.fields['inspectionAddress'] = addressController.text.trim();
+      }
+
+      // images
+      for (final image in selectedImages) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'carImages',
+            image.path,
+            contentType: MediaType('image', 'jpeg'),
+          ),
+        );
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      debugPrint('Inspection API status: ${response.statusCode}');
+      debugPrint('Inspection API body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        ToastWidget.show(
+          context: Get.context!,
+          title: 'Error',
+          subtitle: 'Failed to submit request: ${response.statusCode}',
+          type: ToastType.error,
+        );
+        return false;
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      ToastWidget.show(
+        context: Get.context!,
+        title: 'Error',
+        subtitle: 'Error submitting request',
+        type: ToastType.error,
+      );
+      return false;
+    } finally {
+      isScheduleInspectionLoading.value = false;
+    }
+  }
+
+  Future<void> submitInspectionRequest1() async {
+    if (!(formKey.currentState?.validate() ?? false)) return;
+    isScheduleInspectionLoading.value = true;
+    try {
+      final uri = Uri.parse(AppUrls.addInspetionRequest);
+
+      final request = http.MultipartRequest('POST', uri);
+
+      // 🔹 Add headers here
+      final token =
+          await SharedPrefsHelper.getString(SharedPrefsHelper.tokenKey) ?? '';
+
+      if (token.isNotEmpty) {
+        request.headers.addAll({
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+          // DON'T set Content-Type here, http.MultipartRequest will handle boundary
+        });
+      }
+
+      // required fields
+      request.fields['carRegistrationNumber'] = carNumberController.text.trim();
+      request.fields['ownerName'] = ownerNameController.text.trim();
+      request.fields['carMakeModelVariant'] = modelController.text.trim();
+      request.fields['yearOfRegistration'] = yearOfMfgController.text.trim();
+      request.fields['ownershipSerialNumber'] = ownershipSerialNoController.text
+          .trim();
+
+      // optional fields
+      if (odometerController.text.trim().isNotEmpty) {
+        request.fields['odometerReadingInKms'] = odometerController.text.trim();
+      }
+      if (notesController.text.trim().isNotEmpty) {
+        request.fields['additionalNotes'] = notesController.text.trim();
+      }
+      if (inspectionDateTimeUtcForApi != null &&
+          inspectionDateTimeUtcForApi!.isNotEmpty) {
+        request.fields['inspectionDateTime'] = inspectionDateTimeUtcForApi!;
+      }
+      if (addressController.text.trim().isNotEmpty) {
+        request.fields['inspectionAddress'] = addressController.text.trim();
+      }
+
+      // images: key must match upload.array("carImages", 5) on backend
+      for (final image in selectedImages) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'carImages',
+            image.path,
+            contentType: MediaType('image', 'jpeg'), // or detect type
+          ),
+        );
+      }
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        SellMyCarPage.showCallbackConfirmationDialog();
+      } else {
+        ToastWidget.show(
+          context: Get.context!,
+          title: 'Error',
+          subtitle: 'Failed to submit request: ${response.statusCode}',
+          type: ToastType.error,
+        );
+      }
+    } catch (e) {
+      debugPrint(e.toString());
+      ToastWidget.show(
+        context: Get.context!,
+        title: 'Error',
+        subtitle: 'Error submiting request',
+        type: ToastType.error,
+      );
+    } finally {
+      isScheduleInspectionLoading.value = false;
     }
   }
 }

@@ -8,6 +8,7 @@ import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 import 'package:otobix_customer_app/widgets/dropdown_textfield_widget.dart';
 import 'package:otobix_customer_app/widgets/images_scroll_widget.dart';
+import 'package:otobix_customer_app/widgets/toast_widget.dart';
 
 class SellMyCarPage extends StatelessWidget {
   SellMyCarPage({super.key});
@@ -135,7 +136,7 @@ class SellMyCarPage extends StatelessWidget {
                         hintText: 'Select Make Model Variant...',
                         icon: Icons.business,
                         isRequired: true,
-                        allowCustomEntries: false,
+                        allowCustomEntries: true,
                         customEntryValidationMessage:
                             'Please select a valid Car Make Model Variant from the list',
                         // We won't use this items list reactively; internal controller will be updated manually
@@ -247,11 +248,37 @@ class SellMyCarPage extends StatelessWidget {
                           Expanded(
                             child: ButtonWidget(
                               text: 'Request a Callback',
-                              isLoading: false.obs,
+                              isLoading:
+                                  getxController.isScheduleInspectionLoading,
                               fontSize: 11,
                               elevation: 5,
-                              onTap: () {
-                                getxController.requestCallback();
+                              onTap: () async {
+                                // validate main form if you want to require car details
+                                if (!(getxController.formKey.currentState
+                                        ?.validate() ??
+                                    false)) {
+                                  ToastWidget.show(
+                                    context: Get.context!,
+                                    title: 'Error',
+                                    subtitle:
+                                        'Please fill all required car details',
+                                    type: ToastType.error,
+                                  );
+                                  return;
+                                }
+
+                                // optional: clear inspection date/address so it's just a callback
+                                getxController.inspectionDateTimeUtcForApi =
+                                    null;
+                                getxController.inspectionDateTimeController
+                                    .clear();
+                                getxController.addressController.clear();
+
+                                final ok = await getxController
+                                    .submitInspectionRequest();
+                                if (ok) {
+                                  SellMyCarPage.showCallbackConfirmationDialog();
+                                }
                               },
                             ),
                           ),
@@ -263,7 +290,7 @@ class SellMyCarPage extends StatelessWidget {
                               fontSize: 11,
                               elevation: 5,
                               onTap: () {
-                                getxController.scheduleInspection();
+                                showScheduleInspectionDialog();
                               },
                             ),
                           ),
@@ -628,5 +655,228 @@ class SellMyCarPage extends StatelessWidget {
         ],
       );
     });
+  }
+
+  // Show Request Callback Confirmation Dialog
+  static showCallbackConfirmationDialog() {
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.phone_callback, color: AppColors.green),
+            const SizedBox(width: 10),
+            Text(
+              'Thank You!',
+              style: TextStyle(
+                color: AppColors.green,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Thank you for your interest, our team will contact you shortly.',
+          style: TextStyle(fontSize: 16, color: Colors.grey[700]),
+        ),
+        actions: [
+          ButtonWidget(
+            text: 'Close',
+            isLoading: false.obs,
+            fontSize: 11,
+            height: 35,
+            width: 100,
+            elevation: 5,
+            onTap: () {
+              Get.back();
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Show Schedule Inspection Dialog
+  void showScheduleInspectionDialog() {
+    // Clear previous values
+    getxController.inspectionDateTimeController.clear();
+    getxController.addressController.clear();
+
+    Get.dialog(
+      AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.calendar_today, color: AppColors.green, size: 25),
+            const SizedBox(width: 10),
+            Text(
+              'Schedule Inspection',
+              style: TextStyle(
+                color: AppColors.green,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // DateTime Field
+            TextFormField(
+              controller: getxController.inspectionDateTimeController,
+              readOnly: true,
+              decoration: InputDecoration(
+                labelText: 'Inspection Date & Time',
+                hintText: 'Select date and time',
+                prefixIcon: Icon(
+                  Icons.calendar_today,
+                  color: AppColors.green,
+                  size: 20,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                labelStyle: TextStyle(fontSize: 14),
+                hintStyle: TextStyle(fontSize: 14),
+              ),
+              style: TextStyle(fontSize: 14),
+              onTap: () async {
+                // First pick date
+                final DateTime? pickedDate = await showDatePicker(
+                  context: Get.context!,
+                  initialDate: DateTime.now().add(const Duration(days: 1)),
+                  firstDate: DateTime.now().add(const Duration(days: 1)),
+                  lastDate: DateTime.now().add(const Duration(days: 365)),
+                );
+
+                if (pickedDate != null) {
+                  // Then pick time
+                  final TimeOfDay? pickedTime = await showTimePicker(
+                    context: Get.context!,
+                    initialTime: TimeOfDay.now(),
+                  );
+
+                  if (pickedTime != null) {
+                    // Combine date and time
+                    final DateTime finalDateTime = DateTime(
+                      pickedDate.year,
+                      pickedDate.month,
+                      pickedDate.day,
+                      pickedTime.hour,
+                      pickedTime.minute,
+                    );
+
+                    // Convert to UTC for API
+                    final utcDateTime = finalDateTime.toUtc();
+
+                    // store ISO for API
+                    getxController.inspectionDateTimeUtcForApi = utcDateTime
+                        .toIso8601String();
+
+                    // show formatted local time to user
+                    final String displayText =
+                        "${finalDateTime.day.toString().padLeft(2, '0')}/${finalDateTime.month.toString().padLeft(2, '0')}/${finalDateTime.year} at ${pickedTime.format(Get.context!)}";
+
+                    getxController.inspectionDateTimeController.text =
+                        displayText;
+
+                    // If you need to keep UTC for API, store it separately
+                    // getxController.utcDateTimeForApi = utcDateTime;
+                  }
+                }
+              },
+            ),
+            const SizedBox(height: 15),
+
+            // Address Field
+            TextFormField(
+              controller: getxController.addressController,
+              maxLines: 3,
+              textAlignVertical:
+                  TextAlignVertical.top, // This makes text start from top
+
+              decoration: InputDecoration(
+                labelText: 'Address',
+                hintText: 'Enter inspection address',
+
+                prefixIcon: Icon(
+                  Icons.location_on,
+                  color: AppColors.green,
+                  size: 20,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                labelStyle: TextStyle(fontSize: 14),
+                hintStyle: TextStyle(fontSize: 14),
+                alignLabelWithHint: true, // This helps with multi-line fields
+                contentPadding: EdgeInsets.fromLTRB(
+                  12,
+                  16,
+                  12,
+                  12,
+                ), // Adjust padding for top alignment
+              ),
+              style: TextStyle(fontSize: 14),
+            ),
+            const SizedBox(height: 15),
+            Row(
+              spacing: 10,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Expanded(
+                  child: ButtonWidget(
+                    text: 'Cancel',
+                    isLoading: false.obs,
+                    fontSize: 12,
+                    height: 35,
+                    elevation: 5,
+                    backgroundColor: AppColors.red,
+                    onTap: () {
+                      Get.back();
+                    },
+                  ),
+                ),
+                Expanded(
+                  child: ButtonWidget(
+                    text: 'Submit',
+                    isLoading: getxController.isScheduleInspectionLoading,
+                    fontSize: 12,
+                    height: 35,
+                    elevation: 5,
+                    onTap: () async {
+                      // if (getxController
+                      //         .inspectionDateTimeController
+                      //         .text
+                      //         .isEmpty ||
+                      //     getxController.addressController.text.isEmpty) {
+                      //   ToastWidget.show(
+                      //     context: Get.context!,
+                      //     title: 'Error',
+                      //     subtitle: 'Please fill all fields',
+                      //     type: ToastType.error,
+                      //   );
+                      //   return;
+                      // }
+
+                      final ok = await getxController.submitInspectionRequest();
+                      if (ok) {
+                        Get.back(); // close schedule dialog
+                        SellMyCarPage.showCallbackConfirmationDialog();
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

@@ -7,7 +7,6 @@ import 'package:otobix_customer_app/controllers/manager_my_cars_controller.dart'
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/utils/global_functions.dart';
-import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 import 'package:otobix_customer_app/widgets/empty_data_widget.dart';
 import 'package:otobix_customer_app/widgets/shimmer_widget.dart';
@@ -22,7 +21,7 @@ class ManageMyCarsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBarWidget(title: 'Manage My Cars'),
+      // appBar: AppBarWidget(title: 'Manage My Cars'),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),
