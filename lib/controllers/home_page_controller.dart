@@ -124,6 +124,7 @@ class HomePageController extends GetxController {
         await SharedPrefsHelper.remove(SharedPrefsHelper.userKey);
         await SharedPrefsHelper.remove(SharedPrefsHelper.userTypeKey);
         await SharedPrefsHelper.remove(SharedPrefsHelper.userIdKey);
+        await SharedPrefsHelper.remove(SharedPrefsHelper.userContactNumberKey);
 
         ToastWidget.show(
           context: Get.context!,

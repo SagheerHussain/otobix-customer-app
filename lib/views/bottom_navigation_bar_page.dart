@@ -32,14 +32,14 @@ class BottomNavigationBarPage extends StatelessWidget {
             SalomonBottomBarItem(
               icon: const Icon(CupertinoIcons.home, size: 20),
               title: const Text("Home", style: TextStyle(fontSize: 11)),
-              selectedColor: AppColors.green,
+              selectedColor: AppColors.blue,
             ),
 
             /// My Cars
             SalomonBottomBarItem(
               icon: const Icon(CupertinoIcons.car_detailed, size: 20),
               title: const Text("My Cars", style: TextStyle(fontSize: 11)),
-              selectedColor: AppColors.blue,
+              selectedColor: AppColors.green,
             ),
 
             /// Cart

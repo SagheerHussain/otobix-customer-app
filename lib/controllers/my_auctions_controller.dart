@@ -36,7 +36,7 @@ class MyAuctionsController extends GetxController {
           await SharedPrefsHelper.getString(
             SharedPrefsHelper.userContactNumberKey,
           ) ??
-          '6666666666';
+          '';
 
       final response = await ApiService.post(
         endpoint: AppUrls.fetchMyAuctionCarsList,

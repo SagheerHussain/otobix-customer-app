@@ -9,7 +9,6 @@ import 'package:otobix_customer_app/views/my_auctions_page.dart';
 import 'package:otobix_customer_app/views/sell_my_car_page.dart';
 import 'package:otobix_customer_app/views/under_development_page.dart';
 import 'package:otobix_customer_app/widgets/home_banners_widgets.dart';
-import 'package:otobix_customer_app/widgets/images_scroll_widget.dart';
 
 class HomePage extends StatelessWidget {
   HomePage({super.key});

@@ -48,6 +48,7 @@ class LoginController extends GetxController {
         final userType = user['userType'];
         final userId = user['id'];
         final userName = user['userName'];
+        final contactNumber = user['contactNumber'];
         final approvalStatus = user['approvalStatus'];
         final entityType = user['entityType'] ?? "";
         // debugPrint("userType: $userType");
@@ -74,6 +75,10 @@ class LoginController extends GetxController {
         await SharedPrefsHelper.saveString(
           SharedPrefsHelper.userNameKey,
           userName,
+        );
+        await SharedPrefsHelper.saveString(
+          SharedPrefsHelper.userContactNumberKey,
+          contactNumber,
         );
         await SharedPrefsHelper.saveString(
           SharedPrefsHelper.entityTypeKey,
