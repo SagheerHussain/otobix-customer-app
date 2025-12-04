@@ -38,14 +38,12 @@ class MyAuctionsPage extends StatelessWidget {
               const SizedBox(height: 15),
 
               Obx(() {
-                // Final filtered cars list
-                final filteredCarsList = getxController.sortFilteredCarsList;
+                // Use filteredCarsList instead of myAuctionCarsList
+                final filteredCarsList = getxController.filteredCarsList;
 
-                // Check if cars list is loading
                 if (getxController.isPageLoading.value) {
                   return _buildLoadingWidget();
                 } else if (filteredCarsList.isEmpty) {
-                  // Check if cars list is empty
                   return Expanded(
                     child: Center(
                       child: const EmptyDataWidget(
@@ -55,7 +53,6 @@ class MyAuctionsPage extends StatelessWidget {
                     ),
                   );
                 } else {
-                  // Show fetched and filtered cars list
                   return _buildCarsList(filteredCarsList);
                 }
               }),

@@ -372,8 +372,9 @@ class SellMyCarController extends GetxController {
   Future<void> _fetchBannersList() async {
     isBannersLoading.value = true;
     try {
-      final response = await ApiService.get(
+      final response = await ApiService.post(
         endpoint: AppUrls.fetchCarBannersList,
+        body: {'view': AppConstants.bannerViews.sellMyCar},
       );
 
       if (response.statusCode == 200) {
@@ -382,12 +383,16 @@ class SellMyCarController extends GetxController {
 
         // If the backend sends { type: 'Header' | 'Footer' }
         final headerBannerMaps = dataList
-            .where((banner) => banner['type'] == AppConstants.banners.header)
+            .where(
+              (banner) => banner['type'] == AppConstants.bannerTypes.header,
+            )
             .cast<Map<String, dynamic>>()
             .toList();
 
         final footerBannerMaps = dataList
-            .where((banner) => banner['type'] == AppConstants.banners.footer)
+            .where(
+              (banner) => banner['type'] == AppConstants.bannerTypes.footer,
+            )
             .cast<Map<String, dynamic>>()
             .toList();
 
@@ -424,7 +429,6 @@ class SellMyCarController extends GetxController {
   }
 
   // Submit inspection request
-
   Future<bool> submitInspectionRequest() async {
     if (!(formKey.currentState?.validate() ?? false)) return false;
     isScheduleInspectionLoading.value = true;

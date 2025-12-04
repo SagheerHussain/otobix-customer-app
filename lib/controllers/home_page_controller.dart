@@ -42,8 +42,9 @@ class HomePageController extends GetxController {
   Future<void> _fetchBannersList() async {
     isBannersLoading.value = true;
     try {
-      final response = await ApiService.get(
+      final response = await ApiService.post(
         endpoint: AppUrls.fetchCarBannersList,
+        body: {'view': AppConstants.bannerViews.home},
       );
 
       if (response.statusCode == 200) {
@@ -52,12 +53,16 @@ class HomePageController extends GetxController {
 
         // If the backend sends { type: 'Header' | 'Footer' }
         final headerBannerMaps = dataList
-            .where((banner) => banner['type'] == AppConstants.banners.header)
+            .where(
+              (banner) => banner['type'] == AppConstants.bannerTypes.header,
+            )
             .cast<Map<String, dynamic>>()
             .toList();
 
         final footerBannerMaps = dataList
-            .where((banner) => banner['type'] == AppConstants.banners.footer)
+            .where(
+              (banner) => banner['type'] == AppConstants.bannerTypes.footer,
+            )
             .cast<Map<String, dynamic>>()
             .toList();
 

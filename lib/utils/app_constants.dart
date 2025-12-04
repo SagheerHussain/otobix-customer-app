@@ -8,7 +8,9 @@ class AppConstants {
   // Other constant classes
   static final Roles roles = Roles();
   static final AuctionStatuses auctionStatuses = AuctionStatuses();
-  static final Banners banners = Banners();
+  static final BannerStatus bannerStatus = BannerStatus();
+  static final BannerTypes bannerTypes = BannerTypes();
+  static final BannerViews bannerViews = BannerViews();
 
   // ---- configuration per environment ----
   static const _localConfiguration = _EnvConfig(
@@ -91,4 +93,22 @@ class _EnvConfig {
     required this.renderBaseUrl,
     required this.oneSignalAppId,
   });
+}
+
+// Banners class
+class BannerStatus {
+  final String active = 'Active';
+  final String inactive = 'Inactive';
+}
+
+// Banners class
+class BannerTypes {
+  final String header = 'Header';
+  final String footer = 'Footer';
+}
+
+// Banners class
+class BannerViews {
+  final String home = 'Home';
+  final String sellMyCar = 'Sell My Car';
 }
