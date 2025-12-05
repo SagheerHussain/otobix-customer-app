@@ -32,23 +32,21 @@ class MyAuctionsController extends GetxController {
   Future<void> _fetchCarsList() async {
     isPageLoading.value = true;
     try {
-      final String contactNumber =
+      final String phoneNumber =
           await SharedPrefsHelper.getString(
-            SharedPrefsHelper.userContactNumberKey,
+            SharedPrefsHelper.userPhoneNumberKey,
           ) ??
           '';
 
       final response = await ApiService.post(
         endpoint: AppUrls.fetchMyAuctionCarsList,
         // ⚠ make sure this key matches your backend: phoneNumber vs contactNumber
-        body: {'contactNumber': contactNumber},
+        body: {'phoneNumber': phoneNumber},
       );
 
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body) as Map<String, dynamic>;
         final List<dynamic> dataList = decoded['data'] as List<dynamic>;
-
-        debugPrint('cars loaded: ${dataList.toString()}');
 
         final fetchedCarsList = dataList
             .map<CarsListModel>(
