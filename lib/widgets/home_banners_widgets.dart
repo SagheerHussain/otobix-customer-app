@@ -7,14 +7,14 @@ class HomeBannersWidget extends StatefulWidget {
   const HomeBannersWidget({
     super.key,
     required this.imageUrls,
-    this.height = 180,
+    this.height,
     this.displayDuration = const Duration(seconds: 2),
-    this.borderRadius = const BorderRadius.all(Radius.circular(12)),
+    this.borderRadius = const BorderRadius.all(Radius.circular(0)),
     this.onTap,
   });
 
   final List<String> imageUrls;
-  final double height;
+  final double? height;
   final Duration displayDuration;
   final BorderRadius borderRadius;
   final void Function(int index)? onTap;
@@ -83,7 +83,7 @@ class _HomeBannersWidgetState extends State<HomeBannersWidget> {
   @override
   Widget build(BuildContext context) {
     if (widget.imageUrls.isEmpty) {
-      return const SizedBox.shrink();
+      return SizedBox(height: widget.height);
     }
 
     return SizedBox(

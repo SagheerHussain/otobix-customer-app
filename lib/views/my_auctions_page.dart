@@ -1,17 +1,14 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:otobix_customer_app/Models/cars_list_model.dart';
 import 'package:otobix_customer_app/controllers/my_auctions_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
-import 'package:otobix_customer_app/utils/global_functions.dart';
+import 'package:otobix_customer_app/views/auction_details_page.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
-import 'package:otobix_customer_app/widgets/button_widget.dart';
 import 'package:otobix_customer_app/widgets/empty_data_widget.dart';
 import 'package:otobix_customer_app/widgets/shimmer_widget.dart';
-import 'package:otobix_customer_app/widgets/toast_widget.dart';
 
 class MyAuctionsPage extends StatelessWidget {
   MyAuctionsPage({super.key});
@@ -63,6 +60,7 @@ class MyAuctionsPage extends StatelessWidget {
     );
   }
 
+  // Cars List
   Widget _buildCarsList(List<CarsListModel> carsList) {
     return Expanded(
       child: ListView.separated(
@@ -71,25 +69,24 @@ class MyAuctionsPage extends StatelessWidget {
         itemBuilder: (context, index) {
           final car = carsList[index];
 
-          final String yearofManufacture =
-              '${GlobalFunctions.getFormattedDate(date: car.yearMonthOfManufacture, type: GlobalFunctions.year)} ';
+          // final String yearofManufacture =
+          //     '${GlobalFunctions.getFormattedDate(date: car.yearMonthOfManufacture, type: GlobalFunctions.year)} ';
+
+          final double screenWidth = MediaQuery.of(context).size.width;
 
           return InkWell(
             onTap: () {
-              // Get.to(
-              //   () => CarDetailsPage(
-              //     carId: car.id,
-              //     car: car,
-              //     currentOpenSection: homeController.liveBidsSectionScreen,
-              //     remainingAuctionTime: getxController
-              //         .getCarRemainingTimeForNextScreen(car.id),
-              //   ),
-              // );
+              Get.to(
+                () => AuctionDetailsPage(
+                  appointmentId: car.appointmentId,
+                  auctionStatus: car.auctionStatus,
+                ),
+              );
             },
             child: Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
+                borderRadius: BorderRadius.circular(15),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,16 +96,19 @@ class MyAuctionsPage extends StatelessWidget {
                     children: [
                       ClipRRect(
                         borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(5),
+                          top: Radius.circular(15),
+                          bottom: Radius.circular(15),
                         ),
 
                         child: CachedNetworkImage(
                           imageUrl: car.imageUrl,
-                          height: 160,
+
+                          height: screenWidth * 0.7,
                           width: double.infinity,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
-                            height: 160,
+                            // height: 160,
+                            height: screenWidth * 0.7,
                             width: double.infinity,
                             color: Colors.grey[300],
                             child: const Center(
@@ -121,38 +121,113 @@ class MyAuctionsPage extends StatelessWidget {
                           errorWidget: (context, error, stackTrace) {
                             return Image.asset(
                               AppImages.carNotFound,
-                              height: 160,
+                              // height: 160,
+                              height: screenWidth * 0.7,
                               width: double.infinity,
                               fit: BoxFit.cover,
                             );
                           },
                         ),
                       ),
+                      // Gradient overlay at bottom
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 40,
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.only(
+                              bottomLeft: Radius.circular(15),
+                              bottomRight: Radius.circular(15),
+                            ),
+                            gradient: LinearGradient(
+                              begin: Alignment.bottomCenter,
+                              end: Alignment.topCenter,
+                              colors: [
+                                Colors.black.withValues(alpha: .8),
+                                Colors.transparent,
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Appointment ID badge
+                      Positioned(
+                        bottom: 8,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.grey.withValues(alpha: .6),
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: .2),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              car.appointmentId,
+
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            // child: Obx(() {
+                            //   final countdown =
+                            //       getxController.countdownTextById[car
+                            //           .appointmentId] ??
+                            //       '-- : -- : --';
+
+                            //   return Text(
+                            //     countdown,
+                            //     style: const TextStyle(
+                            //       color: Colors.white,
+                            //       fontSize: 15,
+                            //       fontWeight: FontWeight.w600,
+                            //       letterSpacing: 0.5,
+                            //     ),
+                            //   );
+                            // }),
+                          ),
+                        ),
+                      ),
                     ],
                   ),
 
                   // Car details
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '$yearofManufacture${car.make} ${car.model} ${car.variant}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                  // Padding(
+                  //   padding: const EdgeInsets.all(12),
+                  //   child: Column(
+                  //     crossAxisAlignment: CrossAxisAlignment.start,
+                  //     children: [
+                  //       Text(
+                  //         '$yearofManufacture${car.make} ${car.model} ${car.variant}',
+                  //         style: const TextStyle(
+                  //           fontSize: 14,
+                  //           fontWeight: FontWeight.bold,
+                  //         ),
+                  //       ),
 
-                        const SizedBox(height: 6),
-                        _buildOtherDetails(car),
+                  //       // const SizedBox(height: 6),
+                  //       // _buildOtherDetails(car),
 
-                        // const SizedBox(height: 5),
-                        // _buildCarCardFooter(car),
-                      ],
-                    ),
-                  ),
+                  //       // const SizedBox(height: 5),
+                  //       // _buildCarCardFooter(car),
+                  //     ],
+                  //   ),
+                  // ),
                 ],
               ),
             ),
@@ -225,164 +300,164 @@ class MyAuctionsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildOtherDetails(CarsListModel car) {
-    Widget iconDetail(IconData icon, String label, String value) {
-      return Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Icon(icon, size: 15, color: AppColors.grey),
-          const SizedBox(width: 4),
-          Flexible(
-            child: Text(
-              value,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.grey,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          // Divider(),
-          // Text(
-          //   label,
-          //   style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-          // ),
-        ],
-      );
-    }
+  // Widget _buildOtherDetails(CarsListModel car) {
+  //   Widget iconDetail(IconData icon, String label, String value) {
+  //     return Row(
+  //       mainAxisSize: MainAxisSize.min,
+  //       crossAxisAlignment: CrossAxisAlignment.center,
+  //       children: [
+  //         Icon(icon, size: 15, color: AppColors.grey),
+  //         const SizedBox(width: 4),
+  //         Flexible(
+  //           child: Text(
+  //             value,
+  //             overflow: TextOverflow.ellipsis,
+  //             style: TextStyle(
+  //               fontSize: 12,
+  //               color: AppColors.grey,
+  //               fontWeight: FontWeight.w500,
+  //             ),
+  //           ),
+  //         ),
+  //         // Divider(),
+  //         // Text(
+  //         //   label,
+  //         //   style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+  //         // ),
+  //       ],
+  //     );
+  //   }
 
-    String maskRegistrationNumber(String? input) {
-      if (input == null || input.length <= 5) return '*****';
-      final visible = input.substring(0, input.length - 5);
-      return '$visible*****';
-    }
+  //   String maskRegistrationNumber(String? input) {
+  //     if (input == null || input.length <= 5) return '*****';
+  //     final visible = input.substring(0, input.length - 5);
+  //     return '$visible*****';
+  //   }
 
-    final items = [
-      // iconDetail(Icons.factory, 'Make', 'Mahindra'),
-      // iconDetail(Icons.directions_car, 'Model', 'Scorpio'),
-      // iconDetail(Icons.confirmation_number, 'Variant', '[2014–2017]'),
-      iconDetail(
-        Icons.calendar_month,
-        'Registration Date',
-        GlobalFunctions.getFormattedDate(
-              date: car.registrationDate,
-              type: GlobalFunctions.monthYear,
-            ) ??
-            'N/A',
-      ),
-      iconDetail(
-        Icons.speed,
-        'Odometer Reading in Kms',
-        '${NumberFormat.decimalPattern('en_IN').format(car.odometerReadingInKms)} km',
-      ),
-      iconDetail(Icons.local_gas_station, 'Fuel Type', car.fuelType),
+  //   final items = [
+  //     // iconDetail(Icons.factory, 'Make', 'Mahindra'),
+  //     // iconDetail(Icons.directions_car, 'Model', 'Scorpio'),
+  //     // iconDetail(Icons.confirmation_number, 'Variant', '[2014–2017]'),
+  //     iconDetail(
+  //       Icons.calendar_month,
+  //       'Registration Date',
+  //       GlobalFunctions.getFormattedDate(
+  //             date: car.registrationDate,
+  //             type: GlobalFunctions.monthYear,
+  //           ) ??
+  //           'N/A',
+  //     ),
+  //     iconDetail(
+  //       Icons.speed,
+  //       'Odometer Reading in Kms',
+  //       '${NumberFormat.decimalPattern('en_IN').format(car.odometerReadingInKms)} km',
+  //     ),
+  //     iconDetail(Icons.local_gas_station, 'Fuel Type', car.fuelType),
 
-      // iconDetail(
-      //   Icons.calendar_month,
-      //   'Year of Manufacture',
-      //   GlobalFunctions.getFormattedDate(
-      //         date: carDetails.yearMonthOfManufacture,
-      //         type: GlobalFunctions.year,
-      //       ) ??
-      //       'N/A',
-      // ),
-      iconDetail(Icons.settings, 'Transmission', car.commentsOnTransmission),
-      iconDetail(
-        Icons.person,
-        'Owner Serial Number',
-        car.ownerSerialNumber == 1
-            ? 'First Owner'
-            : '${car.ownerSerialNumber} Owners',
-      ),
-      iconDetail(
-        Icons.receipt_long,
-        'Tax Validity',
-        car.roadTaxValidity == 'LTT' || car.roadTaxValidity == 'OTT'
-            ? car.roadTaxValidity
-            : GlobalFunctions.getFormattedDate(
-                    date: car.taxValidTill,
-                    type: GlobalFunctions.monthYear,
-                  ) ??
-                  'N/A',
-      ),
+  //     // iconDetail(
+  //     //   Icons.calendar_month,
+  //     //   'Year of Manufacture',
+  //     //   GlobalFunctions.getFormattedDate(
+  //     //         date: carDetails.yearMonthOfManufacture,
+  //     //         type: GlobalFunctions.year,
+  //     //       ) ??
+  //     //       'N/A',
+  //     // ),
+  //     iconDetail(Icons.settings, 'Transmission', car.commentsOnTransmission),
+  //     iconDetail(
+  //       Icons.person,
+  //       'Owner Serial Number',
+  //       car.ownerSerialNumber == 1
+  //           ? 'First Owner'
+  //           : '${car.ownerSerialNumber} Owners',
+  //     ),
+  //     iconDetail(
+  //       Icons.receipt_long,
+  //       'Tax Validity',
+  //       car.roadTaxValidity == 'LTT' || car.roadTaxValidity == 'OTT'
+  //           ? car.roadTaxValidity
+  //           : GlobalFunctions.getFormattedDate(
+  //                   date: car.taxValidTill,
+  //                   type: GlobalFunctions.monthYear,
+  //                 ) ??
+  //                 'N/A',
+  //     ),
 
-      // iconDetail(
-      //   Icons.science,
-      //   'Cubic Capacity',
-      //   car.cubicCapacity != 0 ? '${car.cubicCapacity} cc' : 'N/A',
-      // ),
-      iconDetail(
-        Icons.location_on,
-        'Inspection Location',
-        car.inspectionLocation,
-      ),
-      iconDetail(
-        Icons.directions_car_filled,
-        'Registration No.',
-        maskRegistrationNumber(car.registrationNumber),
-      ),
-      iconDetail(Icons.apartment, 'Registered RTO', car.registeredRto),
-    ];
+  //     // iconDetail(
+  //     //   Icons.science,
+  //     //   'Cubic Capacity',
+  //     //   car.cubicCapacity != 0 ? '${car.cubicCapacity} cc' : 'N/A',
+  //     // ),
+  //     iconDetail(
+  //       Icons.location_on,
+  //       'Inspection Location',
+  //       car.inspectionLocation,
+  //     ),
+  //     iconDetail(
+  //       Icons.directions_car_filled,
+  //       'Registration No.',
+  //       maskRegistrationNumber(car.registrationNumber),
+  //     ),
+  //     iconDetail(Icons.apartment, 'Registered RTO', car.registeredRto),
+  //   ];
 
-    return Container(
-      // padding: const EdgeInsets.all(12),
-      // margin: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Wrap(
-          //   spacing: 10,
-          //   runSpacing: 5,
-          //   alignment: WrapAlignment.start,
-          //   children: items,
-          // ),
-          GridView.count(
-            padding: EdgeInsets.zero,
-            crossAxisCount: 3,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 5, // controls vertical space
-            crossAxisSpacing: 10, // controls horizontal space
-            childAspectRatio: 4, // width / height ratio — adjust as needed
-            children: items,
-          ),
-        ],
-      ),
-    );
-  }
+  //   return Container(
+  //     // padding: const EdgeInsets.all(12),
+  //     // margin: const EdgeInsets.symmetric(horizontal: 12),
+  //     decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+  //     child: Column(
+  //       mainAxisSize: MainAxisSize.min,
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         // Wrap(
+  //         //   spacing: 10,
+  //         //   runSpacing: 5,
+  //         //   alignment: WrapAlignment.start,
+  //         //   children: items,
+  //         // ),
+  //         GridView.count(
+  //           padding: EdgeInsets.zero,
+  //           crossAxisCount: 3,
+  //           shrinkWrap: true,
+  //           physics: const NeverScrollableScrollPhysics(),
+  //           mainAxisSpacing: 5, // controls vertical space
+  //           crossAxisSpacing: 10, // controls horizontal space
+  //           childAspectRatio: 4, // width / height ratio — adjust as needed
+  //           children: items,
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
-  Widget _buildCarCardFooter(CarsListModel car) {
-    return Column(
-      children: [
-        // const Divider(),
-        const SizedBox(height: 10),
-        Align(
-          alignment: Alignment.center,
-          child: ButtonWidget(
-            text: 'Interested',
-            height: 30,
-            width: 150,
-            fontSize: 12,
-            isLoading: false.obs,
-            onTap: () {
-              ToastWidget.show(
-                context: Get.context!,
-                title:
-                    'Thank you for your interest. Our team will contact you shortly.',
-                toastDuration: 5,
-                type: ToastType.success,
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 5),
-      ],
-    );
-  }
+  // Widget _buildCarCardFooter(CarsListModel car) {
+  //   return Column(
+  //     children: [
+  //       // const Divider(),
+  //       const SizedBox(height: 10),
+  //       Align(
+  //         alignment: Alignment.center,
+  //         child: ButtonWidget(
+  //           text: 'Interested',
+  //           height: 30,
+  //           width: 150,
+  //           fontSize: 12,
+  //           isLoading: false.obs,
+  //           onTap: () {
+  //             ToastWidget.show(
+  //               context: Get.context!,
+  //               title:
+  //                   'Thank you for your interest. Our team will contact you shortly.',
+  //               toastDuration: 5,
+  //               type: ToastType.success,
+  //             );
+  //           },
+  //         ),
+  //       ),
+  //       const SizedBox(height: 5),
+  //     ],
+  //   );
+  // }
 
   // Search Bar
   Widget _buildSearchBar(BuildContext context) {
@@ -394,7 +469,7 @@ class MyAuctionsPage extends StatelessWidget {
         style: TextStyle(fontSize: 12),
         decoration: InputDecoration(
           isDense: true,
-          hintText: 'Search cars...',
+          hintText: 'Search cars by appointment id...',
           hintStyle: TextStyle(
             color: AppColors.grey.withValues(alpha: .5),
             fontSize: 12,

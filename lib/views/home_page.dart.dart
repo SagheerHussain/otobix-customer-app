@@ -46,8 +46,8 @@ class HomePage extends StatelessWidget {
               return HomeBannersWidget(
                 imageUrls: imageUrls,
                 height:
-                    MediaQuery.of(context).size.width /
-                    2, // whatever height you like
+                    MediaQuery.of(context).size.width *
+                    0.563, // whatever height you like
                 displayDuration: const Duration(seconds: 2),
                 onTap: (index) {
                   final banner = banners[index];
