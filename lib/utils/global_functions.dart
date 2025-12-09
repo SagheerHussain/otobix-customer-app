@@ -86,6 +86,7 @@ class GlobalFunctions {
   static const String weekday = 'weekday';
   static const String time = 'time';
   static const String dateTime = 'datetime';
+  static const String clearDateTime = 'cleardatetime';
   static const String fullDate = 'fulldate';
   static const String date = 'date';
   static const String monthYear = 'monthyear';
@@ -118,6 +119,8 @@ class GlobalFunctions {
         return DateFormat('hh:mm a').format(indiaDate);
       case dateTime:
         return DateFormat('dd-MM-yyyy hh:mm a').format(indiaDate);
+      case clearDateTime:
+        return DateFormat('dd MMM yyyy hh:mm a').format(indiaDate);
       case fullDate:
         return DateFormat('dd-MM-yyyy').format(indiaDate);
       case monthYear:

@@ -2,20 +2,27 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:otobix_customer_app/controllers/auction_details_controller.dart';
 import 'package:otobix_customer_app/controllers/my_auctions_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
+import 'package:otobix_customer_app/utils/global_functions.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 
 class AuctionDetailsLiveSection extends StatelessWidget {
   final String appointmentId;
-  const AuctionDetailsLiveSection({super.key, required this.appointmentId});
+  AuctionDetailsLiveSection({super.key, required this.appointmentId});
+
+  // My Auctions Controller
+  final MyAuctionsController myAuctionsController =
+      Get.find<MyAuctionsController>();
+
+  // Auction Details Controller
+  final AuctionDetailsController auctionDetailsController =
+      Get.find<AuctionDetailsController>();
 
   @override
   Widget build(BuildContext context) {
-    final MyAuctionsController myAuctionsController =
-        Get.find<MyAuctionsController>();
-
     return Expanded(
       child: SingleChildScrollView(
         child: Padding(
@@ -29,7 +36,6 @@ class AuctionDetailsLiveSection extends StatelessWidget {
               _buildCarImage(),
               _buildCarName(),
               _buildSetExpectedPriceButton(),
-              // _buildReviseButton(),
               _buildBidsList(),
               const SizedBox(height: 10),
             ],
@@ -68,9 +74,7 @@ class AuctionDetailsLiveSection extends StatelessWidget {
       ),
 
       child: CachedNetworkImage(
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/1/13/Mahindra_Thar_Photoshoot_At_Perupalem_Beach_%28West_Godavari_District%2CAP%2CIndia_%29_Djdavid.jpg',
-
+        imageUrl: auctionDetailsController.auctionDetails.value.frontMainImage,
         height: screenWidth * 0.7,
         width: double.infinity,
         fit: BoxFit.cover,
@@ -99,8 +103,19 @@ class AuctionDetailsLiveSection extends StatelessWidget {
 
   // Car Name
   Widget _buildCarName() {
+    final String registrationNumber =
+        auctionDetailsController.auctionDetails.value.registrationNumber;
+
+    // Masking the last five characters
+    final maskedRegistrationNumber = registrationNumber.length > 5
+        ? '${registrationNumber.substring(0, registrationNumber.length - 5)}*****'
+        : registrationNumber;
+
+    final String carName =
+        '${auctionDetailsController.auctionDetails.value.make} ${auctionDetailsController.auctionDetails.value.model} ${auctionDetailsController.auctionDetails.value.variant}';
+
     return Text(
-      'WB********, Mahindra Scorpio [2014 - 2015]',
+      '$maskedRegistrationNumber, $carName',
       textAlign: TextAlign.center,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
@@ -121,19 +136,6 @@ class AuctionDetailsLiveSection extends StatelessWidget {
     );
   }
 
-  // // Revise Button
-  // Widget _buildReviseButton() {
-  //   return ButtonWidget(
-  //     text: 'Revise',
-  //     isLoading: false.obs,
-  //     width: double.infinity,
-  //     borderRadius: 5,
-  //     backgroundColor: AppColors.green,
-  //     fontSize: 12,
-  //     onTap: () {},
-  //   );
-  // }
-
   // Bids List
   Widget _buildBidsList() {
     return Container(
@@ -152,17 +154,46 @@ class AuctionDetailsLiveSection extends StatelessWidget {
       child: Column(
         children: [
           _buildBidsHeader(),
-          _buildBidRow(
-            timestamp: '04 Nov 2025 11:05 AM',
-            offer: '950000',
-            showActions: true,
-          ),
-          const Divider(height: 1, color: AppColors.grayWithOpacity1),
-          _buildBidRow(timestamp: '04 Nov 2025 10:55 AM', offer: '940000'),
-          const Divider(height: 1, color: AppColors.grayWithOpacity1),
-          _buildBidRow(timestamp: '04 Nov 2025 10:53 AM', offer: '935000'),
-          const Divider(height: 1, color: AppColors.grayWithOpacity1),
-          _buildBidRow(timestamp: '04 Nov 2025 10:45 AM', offer: '920000'),
+          Obx(() {
+            final liveBids =
+                auctionDetailsController.auctionDetails.value.liveBids;
+
+            // Check if there are any bids
+            if (liveBids.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text('No bids yet.'),
+                ),
+              );
+            }
+
+            // Return a list of bid rows dynamically
+            return Column(
+              children: liveBids.asMap().entries.map((entry) {
+                int index = entry.key;
+                var bid = entry.value;
+
+                // Check if it's the first bid and show actions accordingly
+                bool showActions = index == 0;
+
+                return Column(
+                  children: [
+                    _buildBidRow(
+                      timestamp: GlobalFunctions.getFormattedDate(
+                        date: bid.date,
+                        type: GlobalFunctions.clearDateTime,
+                      ).toString(),
+                      offer: bid.amount.toString(),
+                      showActions:
+                          showActions, // Show actions only on the first bid
+                    ),
+                    const Divider(height: 1, color: AppColors.grayWithOpacity1),
+                  ],
+                );
+              }).toList(),
+            );
+          }),
         ],
       ),
     );
@@ -222,7 +253,7 @@ class AuctionDetailsLiveSection extends StatelessWidget {
           Row(
             children: [
               Text(
-                NumberFormat.decimalPattern().format(int.parse(offer)),
+                NumberFormat.decimalPattern('en_IN').format(int.parse(offer)),
                 style: const TextStyle(
                   fontSize: 14,
                   color: AppColors.green,

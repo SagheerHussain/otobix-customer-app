@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:otobix_customer_app/controllers/auction_details_controller.dart';
 import 'package:otobix_customer_app/controllers/my_auctions_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
@@ -8,16 +9,21 @@ import 'package:otobix_customer_app/widgets/button_widget.dart';
 
 class AuctionDetailsAuctionCompletedSection extends StatelessWidget {
   final String appointmentId;
-  const AuctionDetailsAuctionCompletedSection({
+  AuctionDetailsAuctionCompletedSection({
     super.key,
     required this.appointmentId,
   });
 
+  // My Auctions Controller
+  final MyAuctionsController myAuctionsController =
+      Get.find<MyAuctionsController>();
+
+  // Auction Details Controller
+  final AuctionDetailsController auctionDetailsController =
+      Get.find<AuctionDetailsController>();
+
   @override
   Widget build(BuildContext context) {
-    final MyAuctionsController myAuctionsController =
-        Get.find<MyAuctionsController>();
-
     return Expanded(
       child: SingleChildScrollView(
         child: Padding(
@@ -29,7 +35,7 @@ class AuctionDetailsAuctionCompletedSection extends StatelessWidget {
               const SizedBox(height: 10),
               _buildCarImage(),
               _buildCarName(),
-              _buildInfoText(controller: myAuctionsController),
+              _buildInfoText(),
               _buildRunOtobuyAndRemoveCarButtons(),
               const SizedBox(height: 10),
             ],
@@ -40,7 +46,7 @@ class AuctionDetailsAuctionCompletedSection extends StatelessWidget {
   }
 
   // Info Text
-  Widget _buildInfoText({required MyAuctionsController controller}) {
+  Widget _buildInfoText() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -69,9 +75,7 @@ class AuctionDetailsAuctionCompletedSection extends StatelessWidget {
       ),
 
       child: CachedNetworkImage(
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/1/13/Mahindra_Thar_Photoshoot_At_Perupalem_Beach_%28West_Godavari_District%2CAP%2CIndia_%29_Djdavid.jpg',
-
+        imageUrl: auctionDetailsController.auctionDetails.value.frontMainImage,
         height: screenWidth * 0.7,
         width: double.infinity,
         fit: BoxFit.cover,
@@ -100,8 +104,19 @@ class AuctionDetailsAuctionCompletedSection extends StatelessWidget {
 
   // Car Name
   Widget _buildCarName() {
+    final String registrationNumber =
+        auctionDetailsController.auctionDetails.value.registrationNumber;
+
+    // Masking the last five characters
+    final maskedRegistrationNumber = registrationNumber.length > 5
+        ? '${registrationNumber.substring(0, registrationNumber.length - 5)}*****'
+        : registrationNumber;
+
+    final String carName =
+        '${auctionDetailsController.auctionDetails.value.make} ${auctionDetailsController.auctionDetails.value.model} ${auctionDetailsController.auctionDetails.value.variant}';
+
     return Text(
-      'WB********, Mahindra Scorpio [2014 - 2015]',
+      '$maskedRegistrationNumber, $carName',
       textAlign: TextAlign.center,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,

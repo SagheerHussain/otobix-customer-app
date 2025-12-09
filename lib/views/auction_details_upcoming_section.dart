@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:otobix_customer_app/controllers/auction_details_controller.dart';
 import 'package:otobix_customer_app/controllers/my_auctions_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
@@ -8,13 +9,18 @@ import 'package:otobix_customer_app/widgets/button_widget.dart';
 
 class AuctionDetailsUpcomingSection extends StatelessWidget {
   final String appointmentId;
-  const AuctionDetailsUpcomingSection({super.key, required this.appointmentId});
+  AuctionDetailsUpcomingSection({super.key, required this.appointmentId});
+
+  // My Auctions Controller
+  final MyAuctionsController myAuctionsController =
+      Get.find<MyAuctionsController>();
+
+  // Auction Details Controller
+  final AuctionDetailsController auctionDetailsController =
+      Get.find<AuctionDetailsController>();
 
   @override
   Widget build(BuildContext context) {
-    final MyAuctionsController myAuctionsController =
-        Get.find<MyAuctionsController>();
-
     return Expanded(
       child: SingleChildScrollView(
         child: Padding(
@@ -85,8 +91,7 @@ class AuctionDetailsUpcomingSection extends StatelessWidget {
       ),
 
       child: CachedNetworkImage(
-        imageUrl:
-            'https://upload.wikimedia.org/wikipedia/commons/1/13/Mahindra_Thar_Photoshoot_At_Perupalem_Beach_%28West_Godavari_District%2CAP%2CIndia_%29_Djdavid.jpg',
+        imageUrl: auctionDetailsController.auctionDetails.value.frontMainImage,
 
         height: screenWidth * 0.7,
         width: double.infinity,
@@ -116,8 +121,18 @@ class AuctionDetailsUpcomingSection extends StatelessWidget {
 
   // Car Name
   Widget _buildCarName() {
+    final String registrationNumber =
+        auctionDetailsController.auctionDetails.value.registrationNumber;
+
+    // Masking the last five characters
+    final maskedRegistrationNumber = registrationNumber.length > 5
+        ? '${registrationNumber.substring(0, registrationNumber.length - 5)}*****'
+        : registrationNumber;
+
+    final String carName =
+        '${auctionDetailsController.auctionDetails.value.make} ${auctionDetailsController.auctionDetails.value.model} ${auctionDetailsController.auctionDetails.value.variant}';
     return Text(
-      'WB********, Mahindra Scorpio [2014 - 2015]',
+      '$maskedRegistrationNumber, $carName',
       textAlign: TextAlign.center,
       maxLines: 2,
       overflow: TextOverflow.ellipsis,

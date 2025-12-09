@@ -81,6 +81,7 @@ class MyAuctionsPage extends StatelessWidget {
                   appointmentId: car.appointmentId,
                   auctionStatus: car.auctionStatus,
                 ),
+                arguments: {'appointmentId': car.appointmentId},
               );
             },
             child: Card(
@@ -176,6 +177,59 @@ class MyAuctionsPage extends StatelessWidget {
                             ),
                             child: Text(
                               car.appointmentId,
+
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                            // child: Obx(() {
+                            //   final countdown =
+                            //       getxController.countdownTextById[car
+                            //           .appointmentId] ??
+                            //       '-- : -- : --';
+
+                            //   return Text(
+                            //     countdown,
+                            //     style: const TextStyle(
+                            //       color: Colors.white,
+                            //       fontSize: 15,
+                            //       fontWeight: FontWeight.w600,
+                            //       letterSpacing: 0.5,
+                            //     ),
+                            //   );
+                            // }),
+                          ),
+                        ),
+                      ),
+
+                      // Screen Tag
+                      Positioned(
+                        top: 10,
+                        left: 10,
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.black.withValues(alpha: .6),
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: .2),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              getxController.getAuctionStatus(
+                                auctionStatus: car.auctionStatus,
+                              ),
 
                               style: const TextStyle(
                                 color: Colors.white,

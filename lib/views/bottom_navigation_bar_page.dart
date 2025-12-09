@@ -15,7 +15,11 @@ class BottomNavigationBarPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Obx(() => getxController.pages[getxController.currentIndex.value]),
+      body: SafeArea(
+        child: Obx(
+          () => getxController.pages[getxController.currentIndex.value],
+        ),
+      ),
       bottomNavigationBar: Obx(
         () => SalomonBottomBar(
           currentIndex: getxController.currentIndex.value,
@@ -30,29 +34,29 @@ class BottomNavigationBarPage extends StatelessWidget {
           items: [
             /// Home
             SalomonBottomBarItem(
-              icon: const Icon(CupertinoIcons.home, size: 20),
-              title: const Text("Home", style: TextStyle(fontSize: 11)),
+              icon: const Icon(CupertinoIcons.home, size: 22),
+              title: const Text("Home", style: TextStyle(fontSize: 13)),
               selectedColor: AppColors.blue,
             ),
 
             /// My Cars
             SalomonBottomBarItem(
-              icon: const Icon(CupertinoIcons.car_detailed, size: 20),
-              title: const Text("My Cars", style: TextStyle(fontSize: 11)),
+              icon: const Icon(CupertinoIcons.car_detailed, size: 22),
+              title: const Text("My Cars", style: TextStyle(fontSize: 13)),
               selectedColor: AppColors.green,
             ),
 
             /// Cart
             SalomonBottomBarItem(
-              icon: const Icon(CupertinoIcons.cart_fill, size: 20),
-              title: const Text("Cart", style: TextStyle(fontSize: 11)),
+              icon: const Icon(CupertinoIcons.cart_fill, size: 22),
+              title: const Text("Cart", style: TextStyle(fontSize: 13)),
               selectedColor: AppColors.red,
             ),
 
             /// Profile
             SalomonBottomBarItem(
-              icon: const Icon(CupertinoIcons.person_crop_circle, size: 20),
-              title: const Text("Profile", style: TextStyle(fontSize: 11)),
+              icon: const Icon(CupertinoIcons.person_crop_circle, size: 22),
+              title: const Text("Profile", style: TextStyle(fontSize: 13)),
               selectedColor: AppColors.deepOrange,
             ),
           ],

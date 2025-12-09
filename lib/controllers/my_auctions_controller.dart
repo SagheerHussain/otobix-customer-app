@@ -106,6 +106,25 @@ class MyAuctionsController extends GetxController {
     filteredCarsList.assignAll(filtered);
   }
 
+  // Get auction status text
+  String getAuctionStatus({required String auctionStatus}) {
+    final String auctionStatusText =
+        auctionStatus == AppConstants.auctionStatuses.upcoming
+        ? 'Upcoming'
+        : auctionStatus == AppConstants.auctionStatuses.live
+        ? 'Live'
+        : auctionStatus == AppConstants.auctionStatuses.liveAuctionEnded
+        ? 'Auction Completed'
+        : auctionStatus == AppConstants.auctionStatuses.otobuy
+        ? 'OtoBuy'
+        : auctionStatus == AppConstants.auctionStatuses.otobuyEnded
+        ? 'Completed OtoBuy'
+        : auctionStatus == AppConstants.auctionStatuses.sold
+        ? 'Sold'
+        : 'Removed';
+    return auctionStatusText;
+  }
+
   // ----------------- COUNTDOWN LOGIC -----------------
 
   void _initCountdowns() {
