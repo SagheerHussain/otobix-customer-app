@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/Models/auction_details_model.dart';
-import 'package:otobix_customer_app/Utils/app_urls.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
 import 'package:otobix_customer_app/utils/app_constants.dart';
+import 'package:otobix_customer_app/utils/app_urls.dart';
 
 enum ScreenType { upcoming, live, auctionCompleted, otobuy, defaultScreen }
 
