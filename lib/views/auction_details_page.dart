@@ -5,6 +5,7 @@ import 'package:otobix_customer_app/views/auction_details_auction_completed_sect
 import 'package:otobix_customer_app/views/auction_details_default_section.dart';
 import 'package:otobix_customer_app/views/auction_details_live_section.dart';
 import 'package:otobix_customer_app/views/auction_details_otobuy_section.dart';
+import 'package:otobix_customer_app/views/auction_details_removed_section.dart';
 import 'package:otobix_customer_app/views/auction_details_upcoming_section.dart';
 import 'package:otobix_customer_app/widgets/access_inspection_report_widget.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
@@ -85,8 +86,10 @@ class AuctionDetailsPage extends StatelessWidget {
           );
         case ScreenType.otobuy:
           return AuctionDetailsOtobuySection(appointmentId: appointmentId);
+        case ScreenType.removed:
+          return AuctionDetailsRemovedSection(appointmentId: appointmentId);
         case ScreenType.defaultScreen:
-          return AuctionDetailsDefaultSection();
+          return AuctionDetailsDefaultSection(appointmentId: appointmentId);
       }
     });
   }

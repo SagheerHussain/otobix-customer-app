@@ -1,4 +1,5 @@
 class AuctionDetailsModel {
+  final String carId;
   final String frontMainImage;
   final String registrationNumber;
   final String make;
@@ -11,8 +12,10 @@ class AuctionDetailsModel {
   final List<AuctionDetailsBidModel> liveBids;
   final List<AuctionDetailsOtobuyOfferModel> otobuyOffers;
   final int oneClickPrice;
+  final int customerExpectedPrice;
 
   AuctionDetailsModel({
+    required this.carId,
     required this.frontMainImage,
     required this.registrationNumber,
     required this.make,
@@ -25,11 +28,13 @@ class AuctionDetailsModel {
     required this.liveBids,
     required this.otobuyOffers,
     required this.oneClickPrice,
+    required this.customerExpectedPrice,
   });
 
   // Factory method to create AuctionDetails from JSON
   factory AuctionDetailsModel.fromJson(Map<String, dynamic> json) {
     return AuctionDetailsModel(
+      carId: json['carId'] ?? '',
       frontMainImage: json['frontMainImage'] ?? '',
       registrationNumber: json['registrationNumber'] ?? '',
       make: json['make'] ?? '',
@@ -50,6 +55,7 @@ class AuctionDetailsModel {
               .toList() ??
           [],
       oneClickPrice: json['oneClickPrice'] ?? 0,
+      customerExpectedPrice: json['customerExpectedPrice'] ?? 0,
     );
   }
 
@@ -68,12 +74,50 @@ class AuctionDetailsModel {
       'liveBids': liveBids.map((e) => e.toJson()).toList(),
       'otobuyOffers': otobuyOffers.map((e) => e.toJson()).toList(),
       'oneClickPrice': oneClickPrice,
+      'customerExpectedPrice': customerExpectedPrice,
     };
+  }
+
+  // Add copyWith method
+  AuctionDetailsModel copyWith({
+    String? carId,
+    String? frontMainImage,
+    String? registrationNumber,
+    String? make,
+    String? model,
+    String? variant,
+    DateTime? registrationDate,
+    DateTime? yearOfManufacture,
+    DateTime? upcomingUntil,
+    DateTime? auctionEndTime,
+    List<AuctionDetailsBidModel>? liveBids,
+    List<AuctionDetailsOtobuyOfferModel>? otobuyOffers,
+    int? oneClickPrice,
+    int? customerExpectedPrice,
+  }) {
+    return AuctionDetailsModel(
+      carId: carId ?? this.carId,
+      frontMainImage: frontMainImage ?? this.frontMainImage,
+      registrationNumber: registrationNumber ?? this.registrationNumber,
+      make: make ?? this.make,
+      model: model ?? this.model,
+      variant: variant ?? this.variant,
+      registrationDate: registrationDate ?? this.registrationDate,
+      yearOfManufacture: yearOfManufacture ?? this.yearOfManufacture,
+      upcomingUntil: upcomingUntil ?? this.upcomingUntil,
+      auctionEndTime: auctionEndTime ?? this.auctionEndTime,
+      liveBids: liveBids ?? this.liveBids,
+      otobuyOffers: otobuyOffers ?? this.otobuyOffers,
+      oneClickPrice: oneClickPrice ?? this.oneClickPrice,
+      customerExpectedPrice:
+          customerExpectedPrice ?? this.customerExpectedPrice,
+    );
   }
 
   // Default values method (returns an empty/default instance)
   static AuctionDetailsModel empty() {
     return AuctionDetailsModel(
+      carId: '',
       frontMainImage: '',
       registrationNumber: '',
       make: '',
@@ -86,6 +130,7 @@ class AuctionDetailsModel {
       liveBids: [],
       otobuyOffers: [],
       oneClickPrice: 0,
+      customerExpectedPrice: 0,
     );
   }
 }

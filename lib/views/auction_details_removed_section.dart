@@ -6,9 +6,9 @@ import 'package:otobix_customer_app/controllers/my_auctions_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 
-class AuctionDetailsDefaultSection extends StatelessWidget {
+class AuctionDetailsRemovedSection extends StatelessWidget {
   final String appointmentId;
-  AuctionDetailsDefaultSection({super.key, required this.appointmentId});
+  AuctionDetailsRemovedSection({super.key, required this.appointmentId});
 
   // My Auctions Controller
   final MyAuctionsController myAuctionsController =
@@ -31,11 +31,40 @@ class AuctionDetailsDefaultSection extends StatelessWidget {
               const SizedBox(height: 10),
               _buildCarImage(),
               _buildCarName(),
+              _buildRemoveCarText(controller: myAuctionsController),
               const SizedBox(height: 10),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  // Remove car text
+  Widget _buildRemoveCarText({required MyAuctionsController controller}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const SizedBox(height: 30),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Divider(),
+        ),
+        Text(
+          'You have removed this car',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: AppColors.red,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          child: Divider(),
+        ),
+      ],
     );
   }
 

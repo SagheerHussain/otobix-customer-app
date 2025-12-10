@@ -41,7 +41,7 @@ class LoginController extends GetxController {
         body: requestBody,
       );
       final data = jsonDecode(response.body);
-      debugPrint("Status Code: ${response.statusCode}");
+      // debugPrint("Status Code: ${response.statusCode}");
       if (response.statusCode == 200) {
         final token = data['token'];
         final user = data['user'];
@@ -57,6 +57,15 @@ class LoginController extends GetxController {
 
         // Link current userid in OneSignal to receive push notifications
         await NotificationService.instance.login(userId);
+
+        if (userType != AppConstants.roles.customer) {
+          ToastWidget.show(
+            context: Get.context!,
+            title: "No account found for this user.",
+            type: ToastType.error,
+          );
+          return;
+        }
 
         if (approvalStatus == 'Approved') {
           await SharedPrefsHelper.saveString(SharedPrefsHelper.tokenKey, token);

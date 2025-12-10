@@ -30,7 +30,7 @@ class MyAuctionsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _fetchCarsList();
+    fetchCarsList();
 
     // Whenever searchQuery changes, re-apply filter
     ever<String>(searchQuery, (_) => filterCars());
@@ -44,7 +44,7 @@ class MyAuctionsController extends GetxController {
   }
 
   // Fetch My Auction Cars
-  Future<void> _fetchCarsList() async {
+  Future<void> fetchCarsList() async {
     isPageLoading.value = true;
     try {
       final String phoneNumber =

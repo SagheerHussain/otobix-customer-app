@@ -37,6 +37,13 @@ class AppUrls {
   static String get fetchAuctionDetails =>
       "${baseUrl}customer/fetch-auction-details";
 
+  static String get setCustomerExpectedPrice =>
+      "${baseUrl}customer/set-customer-expected-price";
+
+  static String get removeCar => "${baseUrl}car/remove-car";
+
+  static String get moveCarToOtobuy => "${baseUrl}otobuy/move-car-to-otobuy";
+
   // static String get allUsersList => "${baseUrl}user/all-users-list";
 
   // static String get approvedUsersList => "${baseUrl}user/approved-users-list";

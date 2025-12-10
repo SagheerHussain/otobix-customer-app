@@ -8,6 +8,7 @@ import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/utils/global_functions.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
+import 'package:otobix_customer_app/widgets/set_expected_price_dialog_widget.dart';
 
 class AuctionDetailsLiveSection extends StatelessWidget {
   final String appointmentId;
@@ -35,6 +36,7 @@ class AuctionDetailsLiveSection extends StatelessWidget {
               _buildRemainingTime(controller: myAuctionsController),
               _buildCarImage(),
               _buildCarName(),
+              _buildShowMyCurrentExpectedPrice(),
               _buildSetExpectedPriceButton(),
               _buildBidsList(),
               const SizedBox(height: 10),
@@ -123,6 +125,35 @@ class AuctionDetailsLiveSection extends StatelessWidget {
     );
   }
 
+  // Show My Expected Price
+  Widget _buildShowMyCurrentExpectedPrice() {
+    return Column(
+      children: [
+        Text(
+          'My Expected Price',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        Obx(() {
+          return Text(
+            'Rs. ${NumberFormat.decimalPattern('en_IN').format(auctionDetailsController.auctionDetails.value.customerExpectedPrice)}/-',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 15,
+              color: AppColors.green,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
   // Set Expected Price Button
   Widget _buildSetExpectedPriceButton() {
     return ButtonWidget(
@@ -132,7 +163,22 @@ class AuctionDetailsLiveSection extends StatelessWidget {
       backgroundColor: AppColors.green,
       elevation: 5,
       fontSize: 12,
-      onTap: () => _showSetExpectedPriceDialog(),
+      onTap: () => showSetExpectedPriceDialog(
+        context: Get.context!,
+        title: 'Set Expected Price',
+        isSetPriceLoading: auctionDetailsController.isSetExpectedPriceLoading,
+        initialValue: auctionDetailsController
+            .auctionDetails
+            .value
+            .customerExpectedPrice
+            .toDouble(),
+        onPriceSelected: (selectedPrice) {
+          auctionDetailsController.setCustomerExpectedPrice(
+            carId: auctionDetailsController.auctionDetails.value.carId,
+            customerExpectedPrice: selectedPrice.toInt(),
+          );
+        },
+      ),
     );
   }
 
@@ -272,7 +318,24 @@ class AuctionDetailsLiveSection extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 InkWell(
-                  onTap: () => _showSetExpectedPriceDialog(),
+                  onTap: () => showSetExpectedPriceDialog(
+                    context: Get.context!,
+                    title: 'Set Expected Price',
+                    isSetPriceLoading:
+                        auctionDetailsController.isSetExpectedPriceLoading,
+                    initialValue: auctionDetailsController
+                        .auctionDetails
+                        .value
+                        .customerExpectedPrice
+                        .toDouble(),
+                    onPriceSelected: (selectedPrice) {
+                      auctionDetailsController.setCustomerExpectedPrice(
+                        carId:
+                            auctionDetailsController.auctionDetails.value.carId,
+                        customerExpectedPrice: selectedPrice.toInt(),
+                      );
+                    },
+                  ),
                   child: const Icon(
                     Icons.refresh,
                     color: AppColors.blue,
@@ -384,76 +447,6 @@ class AuctionDetailsLiveSection extends StatelessWidget {
                 onTap: () {
                   Get.back();
                 },
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showSetExpectedPriceDialog() {
-    final TextEditingController priceController = TextEditingController();
-    Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Set Expected Price',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.blue,
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: priceController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Enter Price',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: ButtonWidget(
-                      text: 'Cancel',
-                      isLoading: false.obs,
-                      width: double.infinity,
-                      height: 35,
-                      backgroundColor: AppColors.grey,
-                      fontSize: 14,
-                      onTap: () => Get.back(),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: ButtonWidget(
-                      text: 'Set',
-                      isLoading: false.obs,
-                      width: double.infinity,
-                      height: 35,
-                      backgroundColor: AppColors.green,
-                      fontSize: 14,
-                      onTap: () {
-                        Get.back();
-                      },
-                    ),
-                  ),
-                ],
               ),
             ],
           ),

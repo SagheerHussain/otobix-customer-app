@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:otobix_customer_app/services/notification_sevice.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 import 'package:otobix_customer_app/services/socket_service.dart';
+import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/views/bottom_navigation_bar_page.dart';
@@ -66,10 +67,15 @@ Future<Widget> init() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
 
   final token = await SharedPrefsHelper.getString(SharedPrefsHelper.tokenKey);
+  final userRole = await SharedPrefsHelper.getString(
+    SharedPrefsHelper.userTypeKey,
+  );
   // debugPrint('PlayerID: ${await OneSignal.User.pushSubscription.id}');
   // Decide first screen BEFORE runApp
   Widget start;
-  if (token != null && token.isNotEmpty) {
+  if (userRole != AppConstants.roles.customer) {
+    start = LoginPage();
+  } else if (token != null && token.isNotEmpty) {
     start = BottomNavigationBarPage();
   } else {
     start = LoginPage();

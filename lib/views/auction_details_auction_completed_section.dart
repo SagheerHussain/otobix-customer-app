@@ -6,6 +6,7 @@ import 'package:otobix_customer_app/controllers/my_auctions_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
+import 'package:otobix_customer_app/widgets/set_expected_price_dialog_widget.dart';
 
 class AuctionDetailsAuctionCompletedSection extends StatelessWidget {
   final String appointmentId;
@@ -138,7 +139,25 @@ class AuctionDetailsAuctionCompletedSection extends StatelessWidget {
             backgroundColor: AppColors.green,
             elevation: 5,
             fontSize: 12,
-            onTap: () => _showSetOtobuyPriceDialog(),
+            onTap: () => showSetExpectedPriceDialog(
+              context: Get.context!,
+              title: 'Set OtoBuy Price',
+              isSetPriceLoading:
+                  auctionDetailsController.isMoveCarToOtobuyLoading,
+              initialValue: auctionDetailsController
+                  .auctionDetails
+                  .value
+                  .oneClickPrice
+                  .toDouble(),
+              onPriceSelected: (selectedPrice) {
+                auctionDetailsController.moveCarToOtobuy(
+                  carId: auctionDetailsController.auctionDetails.value.carId,
+                  oneClickPrice: selectedPrice,
+                );
+                Get.back();
+                myAuctionsController.fetchCarsList();
+              },
+            ),
           ),
         ),
         Expanded(
@@ -153,76 +172,6 @@ class AuctionDetailsAuctionCompletedSection extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-
-  void _showSetOtobuyPriceDialog() {
-    final TextEditingController priceController = TextEditingController();
-    Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Set OtoBuy Price',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.blue,
-                ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: priceController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: 'Enter Price',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(
-                    child: ButtonWidget(
-                      text: 'Cancel',
-                      isLoading: false.obs,
-                      width: double.infinity,
-                      height: 35,
-                      backgroundColor: AppColors.grey,
-                      fontSize: 14,
-                      onTap: () => Get.back(),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: ButtonWidget(
-                      text: 'Set',
-                      isLoading: false.obs,
-                      width: double.infinity,
-                      height: 35,
-                      backgroundColor: AppColors.green,
-                      fontSize: 14,
-                      onTap: () {
-                        Get.back();
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -290,7 +239,7 @@ class AuctionDetailsAuctionCompletedSection extends StatelessWidget {
 
   // Reason of Car Removal Dialog
   void _showResonOfCarRemovalDialog() {
-    final RxString selectedReason = "reason1".obs;
+    final RxString selectedReason = "Already Sold".obs;
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -313,7 +262,7 @@ class AuctionDetailsAuctionCompletedSection extends StatelessWidget {
               Obx(() {
                 return RadioListTile<String>(
                   title: const Text("Already Sold"),
-                  value: "reason1",
+                  value: "Already Sold",
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 0,
                     vertical: 0,
@@ -329,7 +278,7 @@ class AuctionDetailsAuctionCompletedSection extends StatelessWidget {
               Obx(() {
                 return RadioListTile<String>(
                   title: const Text("Price Not Acceptable"),
-                  value: "reason2",
+                  value: "Price Not Acceptable",
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 0,
                     vertical: 0,
@@ -345,7 +294,7 @@ class AuctionDetailsAuctionCompletedSection extends StatelessWidget {
               Obx(() {
                 return RadioListTile<String>(
                   title: const Text("Sell Later"),
-                  value: "reason3",
+                  value: "Sell Later",
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 0,
                     vertical: 0,
@@ -362,14 +311,20 @@ class AuctionDetailsAuctionCompletedSection extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: ButtonWidget(
                   text: 'Submit',
-                  isLoading: false.obs,
+                  isLoading: auctionDetailsController.isRemoveCarLoading,
                   width: double.infinity,
                   height: 35,
                   backgroundColor: AppColors.green,
                   fontSize: 14,
                   onTap: () {
-                    // You can access selectedReason.value here if you want to handle the selected reason.
+                    auctionDetailsController.removeCar(
+                      carId:
+                          auctionDetailsController.auctionDetails.value.carId,
+                      reasonOfRemoval: selectedReason.value,
+                    );
                     Get.back();
+                    Get.back();
+                    myAuctionsController.fetchCarsList();
                   },
                 ),
               ),
