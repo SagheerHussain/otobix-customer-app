@@ -7,6 +7,7 @@ import 'package:otobix_customer_app/controllers/my_auctions_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/utils/global_functions.dart';
+import 'package:otobix_customer_app/views/my_auctions_page.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 import 'package:otobix_customer_app/widgets/set_expected_price_dialog_widget.dart';
 
@@ -175,7 +176,7 @@ class AuctionDetailsLiveSection extends StatelessWidget {
         onPriceSelected: (selectedPrice) {
           auctionDetailsController.setCustomerExpectedPrice(
             carId: auctionDetailsController.auctionDetails.value.carId,
-            customerExpectedPrice: selectedPrice.toInt(),
+            customerExpectedPrice: selectedPrice.toDouble(),
           );
         },
       ),
@@ -200,46 +201,45 @@ class AuctionDetailsLiveSection extends StatelessWidget {
       child: Column(
         children: [
           _buildBidsHeader(),
-          Obx(() {
-            final liveBids =
-                auctionDetailsController.auctionDetails.value.liveBids;
+          SizedBox(
+            height: 300, // 👈 fixed height for bids list area
+            child: Obx(() {
+              final liveBids =
+                  auctionDetailsController.auctionDetails.value.liveBids;
 
-            // Check if there are any bids
-            if (liveBids.isEmpty) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Text('No bids yet.'),
-                ),
-              );
-            }
-
-            // Return a list of bid rows dynamically
-            return Column(
-              children: liveBids.asMap().entries.map((entry) {
-                int index = entry.key;
-                var bid = entry.value;
-
-                // Check if it's the first bid and show actions accordingly
-                bool showActions = index == 0;
-
-                return Column(
-                  children: [
-                    _buildBidRow(
-                      timestamp: GlobalFunctions.getFormattedDate(
-                        date: bid.date,
-                        type: GlobalFunctions.clearDateTime,
-                      ).toString(),
-                      offer: bid.amount.toString(),
-                      showActions:
-                          showActions, // Show actions only on the first bid
-                    ),
-                    const Divider(height: 1, color: AppColors.grayWithOpacity1),
-                  ],
+              if (liveBids.isEmpty) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Text('No bids yet.'),
+                  ),
                 );
-              }).toList(),
-            );
-          }),
+              }
+
+              return ListView.separated(
+                padding: const EdgeInsets.only(top: 0),
+                itemCount: liveBids.length,
+                separatorBuilder: (_, __) =>
+                    const Divider(height: 1, color: AppColors.grayWithOpacity1),
+                itemBuilder: (context, index) {
+                  final bid = liveBids[index];
+                  final bool showActions = index == 0;
+
+                  return _buildBidRow(
+                    carId: auctionDetailsController.auctionDetails.value.carId,
+                    timestamp: GlobalFunctions.getFormattedDate(
+                      date: bid.date,
+                      type: GlobalFunctions.clearDateTime,
+                    ).toString(),
+                    offerAmmount: bid.amount.toDouble(),
+                    offerBy: bid.offerBy,
+                    showActions:
+                        showActions, // Show actions only on the first offer
+                  );
+                },
+              );
+            }),
+          ),
         ],
       ),
     );
@@ -279,8 +279,10 @@ class AuctionDetailsLiveSection extends StatelessWidget {
 
   // Bid Row
   Widget _buildBidRow({
+    required String carId,
     required String timestamp,
-    required String offer,
+    required double offerAmmount,
+    required String offerBy,
     bool showActions = false,
   }) {
     return Padding(
@@ -299,7 +301,7 @@ class AuctionDetailsLiveSection extends StatelessWidget {
           Row(
             children: [
               Text(
-                NumberFormat.decimalPattern('en_IN').format(int.parse(offer)),
+                NumberFormat.decimalPattern('en_IN').format(offerAmmount),
                 style: const TextStyle(
                   fontSize: 14,
                   color: AppColors.green,
@@ -309,7 +311,11 @@ class AuctionDetailsLiveSection extends StatelessWidget {
               if (showActions) ...[
                 const SizedBox(width: 10),
                 InkWell(
-                  onTap: () => _showAcceptOfferDialog(),
+                  onTap: () => _showAcceptOfferDialog(
+                    carId: carId,
+                    offerAmmount: offerAmmount,
+                    offerBy: offerBy,
+                  ),
                   child: const Icon(
                     Icons.check_circle,
                     color: AppColors.green,
@@ -332,7 +338,7 @@ class AuctionDetailsLiveSection extends StatelessWidget {
                       auctionDetailsController.setCustomerExpectedPrice(
                         carId:
                             auctionDetailsController.auctionDetails.value.carId,
-                        customerExpectedPrice: selectedPrice.toInt(),
+                        customerExpectedPrice: selectedPrice.toDouble(),
                       );
                     },
                   ),
@@ -350,7 +356,11 @@ class AuctionDetailsLiveSection extends StatelessWidget {
     );
   }
 
-  void _showAcceptOfferDialog() {
+  void _showAcceptOfferDialog({
+    required String carId,
+    required double offerAmmount,
+    required String offerBy,
+  }) {
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -368,8 +378,8 @@ class AuctionDetailsLiveSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 15),
-              const Text(
-                'You accept the offer of Rs. 3,000/-',
+              Text(
+                'You accept the offer of Rs. ${NumberFormat.decimalPattern('en_IN').format(offerAmmount)}/-',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: AppColors.black),
               ),
@@ -391,14 +401,23 @@ class AuctionDetailsLiveSection extends StatelessWidget {
                   Expanded(
                     child: ButtonWidget(
                       text: 'Yes',
-                      isLoading: false.obs,
+                      isLoading: auctionDetailsController.isAcceptOfferLoading,
                       width: double.infinity,
                       height: 35,
                       backgroundColor: AppColors.green,
                       fontSize: 14,
-                      onTap: () {
-                        Get.back();
-                        _showCongratulationsDialog();
+                      onTap: () async {
+                        final bool ok = await auctionDetailsController
+                            .acceptOffer(
+                              carId: carId,
+                              soldTo: offerBy,
+                              soldAt: offerAmmount,
+                            );
+                        if (ok) {
+                          Get.off(MyAuctionsPage());
+                          myAuctionsController.fetchCarsList();
+                          _showCongratulationsDialog();
+                        }
                       },
                     ),
                   ),

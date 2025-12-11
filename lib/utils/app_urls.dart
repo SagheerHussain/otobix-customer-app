@@ -44,6 +44,11 @@ class AppUrls {
 
   static String get moveCarToOtobuy => "${baseUrl}otobuy/move-car-to-otobuy";
 
+  static String get acceptOffer => "${baseUrl}customer/accept-offer";
+
+  static String get setOneClickPrice =>
+      "${baseUrl}customer/set-one-click-price";
+
   // static String get allUsersList => "${baseUrl}user/all-users-list";
 
   // static String get approvedUsersList => "${baseUrl}user/approved-users-list";

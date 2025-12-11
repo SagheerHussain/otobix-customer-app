@@ -1,5 +1,6 @@
 class AuctionDetailsModel {
   final String carId;
+  final String auctionStatus;
   final String frontMainImage;
   final String registrationNumber;
   final String make;
@@ -11,11 +12,12 @@ class AuctionDetailsModel {
   final DateTime auctionEndTime;
   final List<AuctionDetailsBidModel> liveBids;
   final List<AuctionDetailsOtobuyOfferModel> otobuyOffers;
-  final int oneClickPrice;
-  final int customerExpectedPrice;
+  final double oneClickPrice;
+  final double customerExpectedPrice;
 
   AuctionDetailsModel({
     required this.carId,
+    required this.auctionStatus,
     required this.frontMainImage,
     required this.registrationNumber,
     required this.make,
@@ -35,6 +37,7 @@ class AuctionDetailsModel {
   factory AuctionDetailsModel.fromJson(Map<String, dynamic> json) {
     return AuctionDetailsModel(
       carId: json['carId'] ?? '',
+      auctionStatus: json['auctionStatus'] ?? '',
       frontMainImage: json['frontMainImage'] ?? '',
       registrationNumber: json['registrationNumber'] ?? '',
       make: json['make'] ?? '',
@@ -54,14 +57,15 @@ class AuctionDetailsModel {
               ?.map((e) => AuctionDetailsOtobuyOfferModel.fromJson(e))
               .toList() ??
           [],
-      oneClickPrice: json['oneClickPrice'] ?? 0,
-      customerExpectedPrice: json['customerExpectedPrice'] ?? 0,
+      oneClickPrice: _toDouble(json['oneClickPrice']),
+      customerExpectedPrice: _toDouble(json['customerExpectedPrice']),
     );
   }
 
   // Method to convert AuctionDetails to JSON
   Map<String, dynamic> toJson() {
     return {
+      'auctionStatus': auctionStatus,
       'frontMainImage': frontMainImage,
       'registrationNumber': registrationNumber,
       'make': make,
@@ -81,6 +85,7 @@ class AuctionDetailsModel {
   // Add copyWith method
   AuctionDetailsModel copyWith({
     String? carId,
+    String? auctionStatus,
     String? frontMainImage,
     String? registrationNumber,
     String? make,
@@ -92,11 +97,12 @@ class AuctionDetailsModel {
     DateTime? auctionEndTime,
     List<AuctionDetailsBidModel>? liveBids,
     List<AuctionDetailsOtobuyOfferModel>? otobuyOffers,
-    int? oneClickPrice,
-    int? customerExpectedPrice,
+    double? oneClickPrice,
+    double? customerExpectedPrice,
   }) {
     return AuctionDetailsModel(
       carId: carId ?? this.carId,
+      auctionStatus: auctionStatus ?? this.auctionStatus,
       frontMainImage: frontMainImage ?? this.frontMainImage,
       registrationNumber: registrationNumber ?? this.registrationNumber,
       make: make ?? this.make,
@@ -118,6 +124,7 @@ class AuctionDetailsModel {
   static AuctionDetailsModel empty() {
     return AuctionDetailsModel(
       carId: '',
+      auctionStatus: '',
       frontMainImage: '',
       registrationNumber: '',
       make: '',
@@ -129,50 +136,76 @@ class AuctionDetailsModel {
       auctionEndTime: DateTime.now(),
       liveBids: [],
       otobuyOffers: [],
-      oneClickPrice: 0,
-      customerExpectedPrice: 0,
+      oneClickPrice: 0.0,
+      customerExpectedPrice: 0.0,
     );
   }
 }
 
 // Bid Model
 class AuctionDetailsBidModel {
+  final String offerBy;
   final DateTime date;
-  final int amount;
+  final double amount;
 
-  AuctionDetailsBidModel({required this.date, required this.amount});
+  AuctionDetailsBidModel({
+    required this.offerBy,
+    required this.date,
+    required this.amount,
+  });
 
   // Factory method to create Bid from JSON
   factory AuctionDetailsBidModel.fromJson(Map<String, dynamic> json) {
     return AuctionDetailsBidModel(
+      offerBy: json['offerBy'] ?? '',
       date: DateTime.parse(json['date']),
-      amount: json['amount'] ?? 0,
+      amount: _toDouble(json['amount']),
     );
   }
 
   // Method to convert Bid to JSON
   Map<String, dynamic> toJson() {
-    return {'date': date.toIso8601String(), 'amount': amount};
+    return {
+      'offerBy': offerBy,
+      'date': date.toIso8601String(),
+      'amount': amount,
+    };
   }
 }
 
 // Otobuy Offer Model
 class AuctionDetailsOtobuyOfferModel {
+  final String offerBy;
   final DateTime date;
-  final int amount;
+  final double amount;
 
-  AuctionDetailsOtobuyOfferModel({required this.date, required this.amount});
+  AuctionDetailsOtobuyOfferModel({
+    required this.offerBy,
+    required this.date,
+    required this.amount,
+  });
 
   // Factory method to create OtobuyOffer from JSON
   factory AuctionDetailsOtobuyOfferModel.fromJson(Map<String, dynamic> json) {
     return AuctionDetailsOtobuyOfferModel(
+      offerBy: json['offerBy'] ?? '',
       date: DateTime.parse(json['date']),
-      amount: json['amount'] ?? 0,
+      amount: _toDouble(json['amount']),
     );
   }
 
   // Method to convert OtobuyOffer to JSON
   Map<String, dynamic> toJson() {
-    return {'date': date.toIso8601String(), 'amount': amount};
+    return {
+      'offerBy': offerBy,
+      'date': date.toIso8601String(),
+      'amount': amount,
+    };
   }
+}
+
+double _toDouble(dynamic value) {
+  if (value == null) return 0.0;
+  if (value is num) return value.toDouble();
+  return double.tryParse(value.toString()) ?? 0.0;
 }

@@ -35,7 +35,7 @@ class LoginController extends GetxController {
         "phoneNumber": contactNumber,
         "password": passwordController.text.trim(),
       };
-      // debugPrint("Sending body: $requestBody");
+
       final response = await ApiService.post(
         endpoint: AppUrls.login,
         body: requestBody,
@@ -62,6 +62,24 @@ class LoginController extends GetxController {
           ToastWidget.show(
             context: Get.context!,
             title: "No account found for this user.",
+            type: ToastType.error,
+          );
+          return;
+        }
+
+        if (approvalStatus == 'Pending') {
+          ToastWidget.show(
+            context: Get.context!,
+            title: "Your Account is Pending Approval.",
+            type: ToastType.warning,
+          );
+          return;
+        }
+
+        if (approvalStatus == 'Rejected') {
+          ToastWidget.show(
+            context: Get.context!,
+            title: "Your Account did not get approved.",
             type: ToastType.error,
           );
           return;

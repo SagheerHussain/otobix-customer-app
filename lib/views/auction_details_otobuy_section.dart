@@ -7,6 +7,7 @@ import 'package:otobix_customer_app/controllers/my_auctions_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/utils/global_functions.dart';
+import 'package:otobix_customer_app/views/my_auctions_page.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 import 'package:otobix_customer_app/widgets/set_expected_price_dialog_widget.dart';
 
@@ -118,16 +119,18 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
             letterSpacing: 0.5,
           ),
         ),
-        Text(
-          'Rs. ${NumberFormat.decimalPattern('en_IN').format(auctionDetailsController.auctionDetails.value.oneClickPrice)}/-',
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 15,
-            color: AppColors.green,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
-          ),
-        ),
+        Obx(() {
+          return Text(
+            'Rs. ${NumberFormat.decimalPattern('en_IN').format(auctionDetailsController.auctionDetails.value.oneClickPrice)}/-',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 15,
+              color: AppColors.green,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          );
+        }),
       ],
     );
   }
@@ -152,10 +155,18 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
                 onTap: () => showSetExpectedPriceDialog(
                   context: Get.context!,
                   title: 'Set OtoBuy Price',
-                  isSetPriceLoading: false.obs,
+                  isSetPriceLoading:
+                      auctionDetailsController.isSetOneClickPriceLoading,
+                  initialValue: auctionDetailsController
+                      .auctionDetails
+                      .value
+                      .oneClickPrice,
                   onPriceSelected: (selectedPrice) {
-                    debugPrint('Selected Price: Rs. $selectedPrice');
-                    // Use the selectedPrice here as needed
+                    auctionDetailsController.setOneClickPrice(
+                      carId:
+                          auctionDetailsController.auctionDetails.value.carId,
+                      oneClickPrice: selectedPrice.toDouble(),
+                    );
                   },
                 ),
               ),
@@ -178,7 +189,8 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
     );
   }
 
-  // Bids List
+  // Otobuy Offers List
+  // Otobuy Offers List
   Widget _buildOtobuyOffersList() {
     return Container(
       decoration: BoxDecoration(
@@ -196,52 +208,50 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
       child: Column(
         children: [
           _buildOtobuyOffersHeader(),
-          Obx(() {
-            final otobuyOffers =
-                auctionDetailsController.auctionDetails.value.otobuyOffers;
+          SizedBox(
+            height: 300, // 👈 fixed height for the offers area
+            child: Obx(() {
+              final otobuyOffers =
+                  auctionDetailsController.auctionDetails.value.otobuyOffers;
 
-            // Check if there are any offers
-            if (otobuyOffers.isEmpty) {
-              return Center(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  child: Text('No offers yet.'),
-                ),
-              );
-            }
-
-            // Return a list of offer rows dynamically
-            return Column(
-              children: otobuyOffers.asMap().entries.map((entry) {
-                int index = entry.key;
-                var offer = entry.value;
-
-                // Check if it's the first offer and show actions accordingly
-                bool showActions = index == 0;
-
-                return Column(
-                  children: [
-                    _buildOfferRow(
-                      timestamp: GlobalFunctions.getFormattedDate(
-                        date: offer.date,
-                        type: GlobalFunctions.clearDateTime,
-                      ).toString(),
-                      offer: offer.amount.toString(),
-                      showActions:
-                          showActions, // Show actions only on the first offer
-                    ),
-                    const Divider(height: 1, color: AppColors.grayWithOpacity1),
-                  ],
+              if (otobuyOffers.isEmpty) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 20),
+                    child: Text('No offers yet.'),
+                  ),
                 );
-              }).toList(),
-            );
-          }),
+              }
+
+              return ListView.separated(
+                padding: const EdgeInsets.only(top: 0),
+                itemCount: otobuyOffers.length,
+                separatorBuilder: (_, __) =>
+                    const Divider(height: 1, color: AppColors.grayWithOpacity1),
+                itemBuilder: (context, index) {
+                  final offer = otobuyOffers[index];
+                  final bool showActions = index == 0; // first offer only
+
+                  return _buildOfferRow(
+                    carId: auctionDetailsController.auctionDetails.value.carId,
+                    timestamp: GlobalFunctions.getFormattedDate(
+                      date: offer.date,
+                      type: GlobalFunctions.clearDateTime,
+                    ).toString(),
+                    offerAmmount: offer.amount.toDouble(),
+                    offerBy: offer.offerBy,
+                    showActions: showActions,
+                  );
+                },
+              );
+            }),
+          ),
         ],
       ),
     );
   }
 
-  // Bids Header
+  // Otobuy Offers Header
   Widget _buildOtobuyOffersHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
@@ -273,10 +283,12 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
     );
   }
 
-  // Bid Row
+  // Otobuy Offer Row
   Widget _buildOfferRow({
+    required String carId,
     required String timestamp,
-    required String offer,
+    required double offerAmmount,
+    required String offerBy,
     bool showActions = false,
   }) {
     return Padding(
@@ -295,7 +307,7 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
           Row(
             children: [
               Text(
-                NumberFormat.decimalPattern('en_IN').format(int.parse(offer)),
+                NumberFormat.decimalPattern('en_IN').format(offerAmmount),
                 style: const TextStyle(
                   fontSize: 14,
                   color: AppColors.green,
@@ -305,7 +317,11 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
               if (showActions) ...[
                 const SizedBox(width: 10),
                 InkWell(
-                  onTap: () => _showAcceptOfferDialog(),
+                  onTap: () => _showAcceptOfferDialog(
+                    carId: carId,
+                    offerAmmount: offerAmmount,
+                    offerBy: offerBy,
+                  ),
                   child: const Icon(
                     Icons.check_circle,
                     color: AppColors.green,
@@ -317,10 +333,18 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
                   onTap: () => showSetExpectedPriceDialog(
                     context: Get.context!,
                     title: 'Set OtoBuy Price',
-                    isSetPriceLoading: false.obs,
+                    isSetPriceLoading:
+                        auctionDetailsController.isSetOneClickPriceLoading,
+                    initialValue: auctionDetailsController
+                        .auctionDetails
+                        .value
+                        .oneClickPrice,
                     onPriceSelected: (selectedPrice) {
-                      debugPrint('Selected Price: Rs. $selectedPrice');
-                      // Use the selectedPrice here as needed
+                      auctionDetailsController.setOneClickPrice(
+                        carId:
+                            auctionDetailsController.auctionDetails.value.carId,
+                        oneClickPrice: selectedPrice.toDouble(),
+                      );
                     },
                   ),
                   child: const Icon(
@@ -337,7 +361,11 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
     );
   }
 
-  void _showAcceptOfferDialog() {
+  void _showAcceptOfferDialog({
+    required String carId,
+    required double offerAmmount,
+    required String offerBy,
+  }) {
     Get.dialog(
       Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
@@ -355,8 +383,8 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 15),
-              const Text(
-                'You accept the offer of Rs. 3,000/-',
+              Text(
+                'You accept the offer of Rs. ${NumberFormat.decimalPattern('en_IN').format(offerAmmount)}/-',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: AppColors.black),
               ),
@@ -378,14 +406,23 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
                   Expanded(
                     child: ButtonWidget(
                       text: 'Yes',
-                      isLoading: false.obs,
+                      isLoading: auctionDetailsController.isAcceptOfferLoading,
                       width: double.infinity,
                       height: 35,
                       backgroundColor: AppColors.green,
                       fontSize: 14,
-                      onTap: () {
-                        Get.back();
-                        _showCongratulationsDialog();
+                      onTap: () async {
+                        final bool ok = await auctionDetailsController
+                            .acceptOffer(
+                              carId: carId,
+                              soldTo: offerBy,
+                              soldAt: offerAmmount,
+                            );
+                        if (ok) {
+                          Get.off(MyAuctionsPage());
+                          myAuctionsController.fetchCarsList();
+                          _showCongratulationsDialog();
+                        }
                       },
                     ),
                   ),

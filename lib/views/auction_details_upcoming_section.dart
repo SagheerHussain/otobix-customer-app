@@ -193,7 +193,7 @@ class AuctionDetailsUpcomingSection extends StatelessWidget {
         onPriceSelected: (selectedPrice) {
           auctionDetailsController.setCustomerExpectedPrice(
             carId: auctionDetailsController.auctionDetails.value.carId,
-            customerExpectedPrice: selectedPrice.toInt(),
+            customerExpectedPrice: selectedPrice.toDouble(),
           );
         },
       ),
