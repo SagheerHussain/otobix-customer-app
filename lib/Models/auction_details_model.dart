@@ -13,6 +13,7 @@ class AuctionDetailsModel {
   final List<AuctionDetailsBidModel> liveBids;
   final List<AuctionDetailsOtobuyOfferModel> otobuyOffers;
   final double oneClickPrice;
+  final double priceDiscovery;
   final double customerExpectedPrice;
 
   AuctionDetailsModel({
@@ -30,6 +31,7 @@ class AuctionDetailsModel {
     required this.liveBids,
     required this.otobuyOffers,
     required this.oneClickPrice,
+    required this.priceDiscovery,
     required this.customerExpectedPrice,
   });
 
@@ -58,6 +60,7 @@ class AuctionDetailsModel {
               .toList() ??
           [],
       oneClickPrice: _toDouble(json['oneClickPrice']),
+      priceDiscovery: _toDouble(json['priceDiscovery']),
       customerExpectedPrice: _toDouble(json['customerExpectedPrice']),
     );
   }
@@ -78,6 +81,7 @@ class AuctionDetailsModel {
       'liveBids': liveBids.map((e) => e.toJson()).toList(),
       'otobuyOffers': otobuyOffers.map((e) => e.toJson()).toList(),
       'oneClickPrice': oneClickPrice,
+      'priceDiscovery': priceDiscovery,
       'customerExpectedPrice': customerExpectedPrice,
     };
   }
@@ -98,6 +102,7 @@ class AuctionDetailsModel {
     List<AuctionDetailsBidModel>? liveBids,
     List<AuctionDetailsOtobuyOfferModel>? otobuyOffers,
     double? oneClickPrice,
+    double? priceDiscovery,
     double? customerExpectedPrice,
   }) {
     return AuctionDetailsModel(
@@ -115,6 +120,7 @@ class AuctionDetailsModel {
       liveBids: liveBids ?? this.liveBids,
       otobuyOffers: otobuyOffers ?? this.otobuyOffers,
       oneClickPrice: oneClickPrice ?? this.oneClickPrice,
+      priceDiscovery: priceDiscovery ?? this.priceDiscovery,
       customerExpectedPrice:
           customerExpectedPrice ?? this.customerExpectedPrice,
     );
@@ -137,6 +143,7 @@ class AuctionDetailsModel {
       liveBids: [],
       otobuyOffers: [],
       oneClickPrice: 0.0,
+      priceDiscovery: 0.0,
       customerExpectedPrice: 0.0,
     );
   }
@@ -147,11 +154,15 @@ class AuctionDetailsBidModel {
   final String offerBy;
   final DateTime date;
   final double amount;
+  final double? fixedMargin;
+  final double? variableMargin;
 
   AuctionDetailsBidModel({
     required this.offerBy,
     required this.date,
     required this.amount,
+    this.fixedMargin,
+    this.variableMargin,
   });
 
   // Factory method to create Bid from JSON
@@ -160,6 +171,8 @@ class AuctionDetailsBidModel {
       offerBy: json['offerBy'] ?? '',
       date: DateTime.parse(json['date']),
       amount: _toDouble(json['amount']),
+      fixedMargin: _toDouble(json['fixedMargin']),
+      variableMargin: _toDouble(json['variableMargin']),
     );
   }
 
@@ -178,11 +191,15 @@ class AuctionDetailsOtobuyOfferModel {
   final String offerBy;
   final DateTime date;
   final double amount;
+  final double? fixedMargin;
+  final double? variableMargin;
 
   AuctionDetailsOtobuyOfferModel({
     required this.offerBy,
     required this.date,
     required this.amount,
+    this.fixedMargin,
+    this.variableMargin,
   });
 
   // Factory method to create OtobuyOffer from JSON
@@ -191,6 +208,8 @@ class AuctionDetailsOtobuyOfferModel {
       offerBy: json['offerBy'] ?? '',
       date: DateTime.parse(json['date']),
       amount: _toDouble(json['amount']),
+      fixedMargin: _toDouble(json['fixedMargin']),
+      variableMargin: _toDouble(json['variableMargin']),
     );
   }
 

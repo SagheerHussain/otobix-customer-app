@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:otobix_customer_app/controllers/auction_details_controller.dart';
 import 'package:otobix_customer_app/controllers/my_auctions_controller.dart';
+import 'package:otobix_customer_app/services/car_margin_helpers.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/utils/global_functions.dart';
@@ -225,13 +226,24 @@ class AuctionDetailsLiveSection extends StatelessWidget {
                   final bid = liveBids[index];
                   final bool showActions = index == 0;
 
+                  final bidAmountAfterMarginAdjustment =
+                      CarMarginHelpers.netAfterMarginsFlexible(
+                        originalPrice: bid.amount,
+                        priceDiscovery: auctionDetailsController
+                            .auctionDetails
+                            .value
+                            .priceDiscovery,
+                        variableMargin: bid.variableMargin,
+                      );
+
                   return _buildBidRow(
                     carId: auctionDetailsController.auctionDetails.value.carId,
                     timestamp: GlobalFunctions.getFormattedDate(
                       date: bid.date,
                       type: GlobalFunctions.clearDateTime,
                     ).toString(),
-                    offerAmmount: bid.amount.toDouble(),
+                    originalOfferAmmount: bid.amount,
+                    marginAdjustedOfferAmmount: bidAmountAfterMarginAdjustment,
                     offerBy: bid.offerBy,
                     showActions:
                         showActions, // Show actions only on the first offer
@@ -281,7 +293,8 @@ class AuctionDetailsLiveSection extends StatelessWidget {
   Widget _buildBidRow({
     required String carId,
     required String timestamp,
-    required double offerAmmount,
+    required double originalOfferAmmount,
+    required double marginAdjustedOfferAmmount,
     required String offerBy,
     bool showActions = false,
   }) {
@@ -301,7 +314,9 @@ class AuctionDetailsLiveSection extends StatelessWidget {
           Row(
             children: [
               Text(
-                NumberFormat.decimalPattern('en_IN').format(offerAmmount),
+                NumberFormat.decimalPattern(
+                  'en_IN',
+                ).format(marginAdjustedOfferAmmount),
                 style: const TextStyle(
                   fontSize: 14,
                   color: AppColors.green,
@@ -313,7 +328,8 @@ class AuctionDetailsLiveSection extends StatelessWidget {
                 InkWell(
                   onTap: () => _showAcceptOfferDialog(
                     carId: carId,
-                    offerAmmount: offerAmmount,
+                    originalOfferAmmount: originalOfferAmmount,
+                    marginAdjustedOfferAmmount: marginAdjustedOfferAmmount,
                     offerBy: offerBy,
                   ),
                   child: const Icon(
@@ -358,7 +374,8 @@ class AuctionDetailsLiveSection extends StatelessWidget {
 
   void _showAcceptOfferDialog({
     required String carId,
-    required double offerAmmount,
+    required double originalOfferAmmount,
+    required double marginAdjustedOfferAmmount,
     required String offerBy,
   }) {
     Get.dialog(
@@ -379,7 +396,7 @@ class AuctionDetailsLiveSection extends StatelessWidget {
               ),
               const SizedBox(height: 15),
               Text(
-                'You accept the offer of Rs. ${NumberFormat.decimalPattern('en_IN').format(offerAmmount)}/-',
+                'You accept the offer of Rs. ${NumberFormat.decimalPattern('en_IN').format(marginAdjustedOfferAmmount)}/-',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: AppColors.black),
               ),
@@ -411,7 +428,7 @@ class AuctionDetailsLiveSection extends StatelessWidget {
                             .acceptOffer(
                               carId: carId,
                               soldTo: offerBy,
-                              soldAt: offerAmmount,
+                              soldAt: originalOfferAmmount,
                             );
                         if (ok) {
                           Get.off(MyAuctionsPage());

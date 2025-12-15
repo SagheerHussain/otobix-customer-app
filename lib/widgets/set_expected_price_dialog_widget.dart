@@ -32,28 +32,60 @@ class _SetExpectedPriceDialogWidgetState
   final double _stepAmount = 1000;
   double _currentPrice = 0;
 
+  double _basePrice = 0; // original initial value
+  double _maxPrice = double.infinity;
+  bool _isProgrammaticChange = false;
+
   @override
   void initState() {
     super.initState();
 
-    // If initialValue is provided, use it; otherwise, default to 0
-    if (widget.initialValue != null) {
-      _currentPrice = widget.initialValue!;
-      _priceController.text = _currentPrice.toStringAsFixed(0);
-    }
+    _basePrice = (widget.initialValue ?? 0);
+
+    // show 80% on open
+    final start = _roundToNearest1000(_basePrice * 0.8);
+
+    // cap at 150%
+    _maxPrice = _basePrice > 0 ? (_basePrice * 1.5) : double.infinity;
+
+    _currentPrice = start;
+    _priceController.text = _currentPrice.toStringAsFixed(0);
 
     _priceController.addListener(() {
+      if (_isProgrammaticChange) return;
+
       final text = _priceController.text;
-      if (text.isNotEmpty) {
-        final value = double.tryParse(text);
-        if (value != null) {
-          setState(() {
-            _currentPrice = value;
-          });
-        }
-      }
+      if (text.isEmpty) return;
+
+      final value = double.tryParse(text);
+      if (value == null) return;
+
+      _updatePrice(value);
     });
   }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+
+  //   // If initialValue is provided, use it; otherwise, default to 0
+  //   if (widget.initialValue != null) {
+  //     _currentPrice = widget.initialValue!;
+  //     _priceController.text = _currentPrice.toStringAsFixed(0);
+  //   }
+
+  //   _priceController.addListener(() {
+  //     final text = _priceController.text;
+  //     if (text.isNotEmpty) {
+  //       final value = double.tryParse(text);
+  //       if (value != null) {
+  //         setState(() {
+  //           _currentPrice = value;
+  //         });
+  //       }
+  //     }
+  //   });
+  // }
 
   @override
   void dispose() {
@@ -61,13 +93,37 @@ class _SetExpectedPriceDialogWidgetState
     super.dispose();
   }
 
+  // void _updatePrice(double newPrice) {
+  //   if (newPrice < 0) return; // Prevent negative prices
+  //   setState(() {
+  //     _currentPrice = newPrice;
+  //     _priceController.text = newPrice.toStringAsFixed(0);
+  //   });
+  // }
+
   void _updatePrice(double newPrice) {
-    if (newPrice < 0) return; // Prevent negative prices
+    if (newPrice < 0) return;
+
+    final clamped = newPrice > _maxPrice ? _maxPrice : newPrice;
+    final rounded = _roundToNearest1000(clamped);
+    final newText = rounded.toStringAsFixed(0);
+
+    // ✅ avoid re-setting if already same
+    if (_currentPrice == rounded && _priceController.text == newText) return;
+
     setState(() {
-      _currentPrice = newPrice;
-      _priceController.text = newPrice.toStringAsFixed(0);
+      _currentPrice = rounded;
+
+      _isProgrammaticChange = true;
+      _priceController.value = TextEditingValue(
+        text: newText,
+        selection: TextSelection.collapsed(offset: newText.length),
+      );
+      _isProgrammaticChange = false;
     });
   }
+
+  double _roundToNearest1000(double v) => (v / 1000).round() * 1000.0;
 
   void _incrementPrice() {
     _updatePrice(_currentPrice + _stepAmount);
@@ -178,16 +234,16 @@ class _SetExpectedPriceDialogWidgetState
                       hintStyle: TextStyle(color: AppColors.grey),
                       contentPadding: EdgeInsets.symmetric(horizontal: 10),
                     ),
-                    onChanged: (value) {
-                      if (value.isNotEmpty) {
-                        final parsed = double.tryParse(value);
-                        if (parsed != null) {
-                          setState(() {
-                            _currentPrice = parsed;
-                          });
-                        }
-                      }
-                    },
+                    // onChanged: (value) {
+                    //   if (value.isNotEmpty) {
+                    //     final parsed = double.tryParse(value);
+                    //     if (parsed != null) {
+                    //       setState(() {
+                    //         _currentPrice = parsed;
+                    //       });
+                    //     }
+                    //   }
+                    // },
                   ),
                 ),
 

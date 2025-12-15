@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:otobix_customer_app/controllers/auction_details_controller.dart';
 import 'package:otobix_customer_app/controllers/my_auctions_controller.dart';
+import 'package:otobix_customer_app/services/car_margin_helpers.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/utils/global_functions.dart';
@@ -190,7 +191,6 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
   }
 
   // Otobuy Offers List
-  // Otobuy Offers List
   Widget _buildOtobuyOffersList() {
     return Container(
       decoration: BoxDecoration(
@@ -232,13 +232,25 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
                   final offer = otobuyOffers[index];
                   final bool showActions = index == 0; // first offer only
 
+                  final offerAmountAfterMarginAdjustment =
+                      CarMarginHelpers.netAfterMarginsFlexible(
+                        originalPrice: offer.amount,
+                        priceDiscovery: auctionDetailsController
+                            .auctionDetails
+                            .value
+                            .priceDiscovery,
+                        variableMargin: offer.variableMargin,
+                      );
+
                   return _buildOfferRow(
                     carId: auctionDetailsController.auctionDetails.value.carId,
                     timestamp: GlobalFunctions.getFormattedDate(
                       date: offer.date,
                       type: GlobalFunctions.clearDateTime,
                     ).toString(),
-                    offerAmmount: offer.amount.toDouble(),
+                    originalOfferAmmount: offer.amount,
+                    marginAdjustedOfferAmmount:
+                        offerAmountAfterMarginAdjustment,
                     offerBy: offer.offerBy,
                     showActions: showActions,
                   );
@@ -287,7 +299,8 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
   Widget _buildOfferRow({
     required String carId,
     required String timestamp,
-    required double offerAmmount,
+    required double originalOfferAmmount,
+    required double marginAdjustedOfferAmmount,
     required String offerBy,
     bool showActions = false,
   }) {
@@ -307,7 +320,9 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
           Row(
             children: [
               Text(
-                NumberFormat.decimalPattern('en_IN').format(offerAmmount),
+                NumberFormat.decimalPattern(
+                  'en_IN',
+                ).format(marginAdjustedOfferAmmount),
                 style: const TextStyle(
                   fontSize: 14,
                   color: AppColors.green,
@@ -319,7 +334,8 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
                 InkWell(
                   onTap: () => _showAcceptOfferDialog(
                     carId: carId,
-                    offerAmmount: offerAmmount,
+                    originalOfferAmmount: originalOfferAmmount,
+                    marginAdjustedOfferAmmount: marginAdjustedOfferAmmount,
                     offerBy: offerBy,
                   ),
                   child: const Icon(
@@ -363,7 +379,8 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
 
   void _showAcceptOfferDialog({
     required String carId,
-    required double offerAmmount,
+    required double originalOfferAmmount,
+    required double marginAdjustedOfferAmmount,
     required String offerBy,
   }) {
     Get.dialog(
@@ -384,7 +401,7 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
               ),
               const SizedBox(height: 15),
               Text(
-                'You accept the offer of Rs. ${NumberFormat.decimalPattern('en_IN').format(offerAmmount)}/-',
+                'You accept the offer of Rs. ${NumberFormat.decimalPattern('en_IN').format(marginAdjustedOfferAmmount)}/-',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: AppColors.black),
               ),
@@ -416,7 +433,7 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
                             .acceptOffer(
                               carId: carId,
                               soldTo: offerBy,
-                              soldAt: offerAmmount,
+                              soldAt: originalOfferAmmount,
                             );
                         if (ok) {
                           Get.off(MyAuctionsPage());

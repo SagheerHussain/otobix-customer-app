@@ -323,6 +323,8 @@ class AuctionDetailsController extends GetxController {
       final double highestBid = (data['highestBid'] as num).toDouble();
       final String bidderId = data['userId'];
       final DateTime bidTime = DateTime.parse(data['time']);
+      final double fixedMargin = (data['fixedMargin'] as num).toDouble();
+      final double variableMargin = (data['variableMargin'] as num).toDouble();
 
       // ✅ Only update if this AuctionDetailsController is showing
       // the same car as the incoming bid
@@ -342,6 +344,8 @@ class AuctionDetailsController extends GetxController {
         amount: highestBid,
         offerBy: bidderId,
         date: bidTime,
+        fixedMargin: fixedMargin,
+        variableMargin: variableMargin,
       );
 
       // Insert at the top of the list in a reactive-safe way
@@ -384,6 +388,8 @@ class AuctionDetailsController extends GetxController {
       final double newOfferAmount = (data['newOfferAmmount'] as num).toDouble();
       final String offerBy = data['offerBy'];
       final DateTime offerTime = DateTime.parse(data['offerTime']);
+      final double fixedMargin = (data['fixedMargin'] as num).toDouble();
+      final double variableMargin = (data['variableMargin'] as num).toDouble();
 
       // ✅ Only update if this AuctionDetailsController is showing
       // the same car as the incoming offer
@@ -403,6 +409,8 @@ class AuctionDetailsController extends GetxController {
         amount: newOfferAmount,
         offerBy: offerBy,
         date: offerTime,
+        fixedMargin: fixedMargin,
+        variableMargin: variableMargin,
       );
 
       // Insert at the top of the list in a reactive-safe way
