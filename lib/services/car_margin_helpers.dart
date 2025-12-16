@@ -33,6 +33,17 @@ class CarMarginHelpers {
     return getMargins(priceDiscovery).variable;
   }
 
+  // static double netAfterMargins({
+  //   required num amount,
+  //   required double fixedPercent,
+  //   required double variablePercent,
+  // }) {
+  //   final a = amount.toDouble();
+  //   final totalPercent = fixedPercent + variablePercent;
+  //   final deduction = a * (totalPercent / 100.0);
+  //   return a - deduction;
+  // }
+
   static double netAfterMargins({
     required num amount,
     required double fixedPercent,
@@ -40,8 +51,12 @@ class CarMarginHelpers {
   }) {
     final a = amount.toDouble();
     final totalPercent = fixedPercent + variablePercent;
-    final deduction = a * (totalPercent / 100.0);
-    return a - deduction;
+
+    final factor = 1 + (totalPercent / 100.0);
+    if (factor <= 0) return 0; // safety
+
+    // inverse of dealer markup
+    return a / factor;
   }
 
   /// Rounds to nearest 1000 (e.g., 12450 -> 12000, 12550 -> 13000)

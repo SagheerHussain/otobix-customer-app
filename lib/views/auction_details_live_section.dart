@@ -269,21 +269,21 @@ class AuctionDetailsLiveSection extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: const [
           Text(
-            'Live Bids',
+            'Live Offers',
             style: TextStyle(
               fontSize: 14,
               color: AppColors.white,
               fontWeight: FontWeight.bold,
             ),
           ),
-          Text(
-            'Offers',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
+          // Text(
+          //   'Offers',
+          //   style: TextStyle(
+          //     fontSize: 14,
+          //     color: AppColors.white,
+          //     fontWeight: FontWeight.bold,
+          //   ),
+          // ),
         ],
       ),
     );
