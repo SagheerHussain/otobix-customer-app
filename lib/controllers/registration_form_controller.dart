@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/Models/user_model.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
-import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/views/login_page.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';

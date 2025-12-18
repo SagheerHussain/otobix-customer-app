@@ -162,6 +162,7 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
                       .auctionDetails
                       .value
                       .oneClickPrice,
+                  canIncreasePriceUpto150Percent: true,
                   onPriceSelected: (selectedPrice) {
                     auctionDetailsController.setOneClickPrice(
                       carId:
@@ -355,6 +356,7 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
                         .auctionDetails
                         .value
                         .oneClickPrice,
+                    canIncreasePriceUpto150Percent: true,
                     onPriceSelected: (selectedPrice) {
                       auctionDetailsController.setOneClickPrice(
                         carId:

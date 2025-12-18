@@ -149,6 +149,7 @@ class AuctionDetailsAuctionCompletedSection extends StatelessWidget {
                   .value
                   .oneClickPrice
                   .toDouble(),
+              canIncreasePriceUpto150Percent: true,
               onPriceSelected: (selectedPrice) {
                 auctionDetailsController.moveCarToOtobuy(
                   carId: auctionDetailsController.auctionDetails.value.carId,

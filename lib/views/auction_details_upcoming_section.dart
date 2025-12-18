@@ -186,10 +186,9 @@ class AuctionDetailsUpcomingSection extends StatelessWidget {
         title: 'Set Expected Price',
         isSetPriceLoading: auctionDetailsController.isSetExpectedPriceLoading,
         initialValue: auctionDetailsController
-            .auctionDetails
-            .value
-            .customerExpectedPrice
-            .toDouble(),
+            .getInitialPriceForExpectedPriceButton(),
+        canIncreasePriceUpto150Percent: auctionDetailsController
+            .canIncreasePriceUpto150Percent(),
         onPriceSelected: (selectedPrice) {
           auctionDetailsController.setCustomerExpectedPrice(
             carId: auctionDetailsController.auctionDetails.value.carId,

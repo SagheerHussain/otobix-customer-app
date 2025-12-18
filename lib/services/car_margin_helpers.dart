@@ -59,9 +59,14 @@ class CarMarginHelpers {
     return a / factor;
   }
 
-  /// Rounds to nearest 1000 (e.g., 12450 -> 12000, 12550 -> 13000)
-  static int roundToNearest1000(num value) {
-    return ((value.toDouble() / 1000).round() * 1000);
+  // /// Rounds to nearest 1000 (e.g., 12450 -> 12000, 12550 -> 13000)
+  // static int roundToNearest1000(num value) {
+  //   return ((value.toDouble() / 1000).round() * 1000);
+  // }
+
+  /// Rounds to the previous thousand (e.g., 12450 -> 12000, 12550 -> 12000)
+  static int roundDownToPrevious1000(num value) {
+    return ((value.toDouble() / 1000).floor() * 1000).toInt();
   }
 
   /// If [variableMargin] is null/0 => use PD slab; else use provided variableMargin.
@@ -83,6 +88,6 @@ class CarMarginHelpers {
       variablePercent: usedVariable,
     );
 
-    return roundTo1000 ? roundToNearest1000(net).toDouble() : net;
+    return roundTo1000 ? roundDownToPrevious1000(net).toDouble() : net;
   }
 }

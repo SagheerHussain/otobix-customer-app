@@ -11,6 +11,7 @@ class SetExpectedPriceDialogWidget extends StatefulWidget {
   final String title;
   final RxBool isSetPriceLoading;
   final double? initialValue;
+  final bool canIncreasePriceUpto150Percent;
   final Function(double) onPriceSelected;
 
   const SetExpectedPriceDialogWidget({
@@ -18,6 +19,7 @@ class SetExpectedPriceDialogWidget extends StatefulWidget {
     required this.title,
     required this.isSetPriceLoading,
     this.initialValue,
+    required this.canIncreasePriceUpto150Percent,
     required this.onPriceSelected,
   });
 
@@ -42,13 +44,17 @@ class _SetExpectedPriceDialogWidgetState
 
     _basePrice = (widget.initialValue ?? 0);
 
-    // show 80% on open
-    final start = _roundToNearest1000(_basePrice * 0.8);
+    if (widget.canIncreasePriceUpto150Percent) {
+      // For PD: start at 80%, max is 150%
+      final start = _roundToNearest1000(_basePrice * 0.8);
+      _maxPrice = _basePrice * 1.5;
+      _currentPrice = start;
+    } else {
+      // For non-PD: start at base price, can decrease but not increase
+      _maxPrice = _basePrice; // Can't go above base price
+      _currentPrice = _basePrice;
+    }
 
-    // cap at 150%
-    _maxPrice = _basePrice > 0 ? (_basePrice * 1.5) : double.infinity;
-
-    _currentPrice = start;
     _priceController.text = _currentPrice.toStringAsFixed(0);
 
     _priceController.addListener(() {
@@ -63,27 +69,31 @@ class _SetExpectedPriceDialogWidgetState
       _updatePrice(value);
     });
   }
-
   // @override
   // void initState() {
   //   super.initState();
 
-  //   // If initialValue is provided, use it; otherwise, default to 0
-  //   if (widget.initialValue != null) {
-  //     _currentPrice = widget.initialValue!;
-  //     _priceController.text = _currentPrice.toStringAsFixed(0);
-  //   }
+  //   _basePrice = (widget.initialValue ?? 0);
+
+  //   // show 80% on open
+  //   final start = _roundToNearest1000(_basePrice * 0.8);
+
+  //   // cap at 150%
+  //   _maxPrice = _basePrice > 0 ? (_basePrice * 1.5) : double.infinity;
+
+  //   _currentPrice = start;
+  //   _priceController.text = _currentPrice.toStringAsFixed(0);
 
   //   _priceController.addListener(() {
+  //     if (_isProgrammaticChange) return;
+
   //     final text = _priceController.text;
-  //     if (text.isNotEmpty) {
-  //       final value = double.tryParse(text);
-  //       if (value != null) {
-  //         setState(() {
-  //           _currentPrice = value;
-  //         });
-  //       }
-  //     }
+  //     if (text.isEmpty) return;
+
+  //     final value = double.tryParse(text);
+  //     if (value == null) return;
+
+  //     _updatePrice(value);
   //   });
   // }
 
@@ -93,18 +103,20 @@ class _SetExpectedPriceDialogWidgetState
     super.dispose();
   }
 
-  // void _updatePrice(double newPrice) {
-  //   if (newPrice < 0) return; // Prevent negative prices
-  //   setState(() {
-  //     _currentPrice = newPrice;
-  //     _priceController.text = newPrice.toStringAsFixed(0);
-  //   });
-  // }
-
   void _updatePrice(double newPrice) {
     if (newPrice < 0) return;
 
-    final clamped = newPrice > _maxPrice ? _maxPrice : newPrice;
+    // Clamping logic
+    double clamped;
+    if (widget.canIncreasePriceUpto150Percent) {
+      // For PD: can increase up to 150% of base
+      clamped = newPrice > _maxPrice ? _maxPrice : newPrice;
+    } else {
+      // For non-PD: can decrease freely, but cannot increase above base
+      clamped = newPrice > _maxPrice ? _maxPrice : newPrice;
+      // No lower limit - can go down to 0
+    }
+
     final rounded = _roundToNearest1000(clamped);
     final newText = rounded.toStringAsFixed(0);
 
@@ -122,6 +134,28 @@ class _SetExpectedPriceDialogWidgetState
       _isProgrammaticChange = false;
     });
   }
+
+  // void _updatePrice(double newPrice) {
+  //   if (newPrice < 0) return;
+
+  //   final clamped = newPrice > _maxPrice ? _maxPrice : newPrice;
+  //   final rounded = _roundToNearest1000(clamped);
+  //   final newText = rounded.toStringAsFixed(0);
+
+  //   // ✅ avoid re-setting if already same
+  //   if (_currentPrice == rounded && _priceController.text == newText) return;
+
+  //   setState(() {
+  //     _currentPrice = rounded;
+
+  //     _isProgrammaticChange = true;
+  //     _priceController.value = TextEditingValue(
+  //       text: newText,
+  //       selection: TextSelection.collapsed(offset: newText.length),
+  //     );
+  //     _isProgrammaticChange = false;
+  //   });
+  // }
 
   double _roundToNearest1000(double v) => (v / 1000).round() * 1000.0;
 
@@ -396,6 +430,7 @@ void showSetExpectedPriceDialog({
   required String title,
   required final RxBool isSetPriceLoading,
   double? initialValue,
+  required bool canIncreasePriceUpto150Percent,
   required Function(double) onPriceSelected,
 }) {
   showDialog(
@@ -405,6 +440,7 @@ void showSetExpectedPriceDialog({
         title: title,
         isSetPriceLoading: isSetPriceLoading,
         initialValue: initialValue,
+        canIncreasePriceUpto150Percent: canIncreasePriceUpto150Percent,
         onPriceSelected: onPriceSelected,
       );
     },

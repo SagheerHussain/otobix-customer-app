@@ -441,4 +441,20 @@ class AuctionDetailsController extends GetxController {
         : ScreenType.defaultScreen;
     return screenType;
   }
+
+  // Get initial price for expected price button
+  double getInitialPriceForExpectedPriceButton() {
+    final double finalPrice = auctionDetails.value.customerExpectedPrice != 0
+        ? auctionDetails.value.customerExpectedPrice
+        : auctionDetails.value.priceDiscovery;
+    return finalPrice;
+  }
+
+  // Check which (pd/expected) price is this for expected price button
+  bool canIncreasePriceUpto150Percent() {
+    final bool type = auctionDetails.value.customerExpectedPrice != 0
+        ? false
+        : true;
+    return type;
+  }
 }

@@ -489,6 +489,15 @@ class SellMyCarController extends GetxController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return true;
+      }
+      if (response.statusCode == 405) {
+        ToastWidget.show(
+          context: Get.context!,
+          title: 'Error',
+          subtitle: 'Inspection request for this car already exists',
+          type: ToastType.error,
+        );
+        return false;
       } else {
         ToastWidget.show(
           context: Get.context!,
