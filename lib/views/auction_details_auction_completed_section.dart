@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:otobix_customer_app/controllers/auction_details_controller.dart';
 import 'package:otobix_customer_app/controllers/my_auctions_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
@@ -36,33 +37,16 @@ class AuctionDetailsAuctionCompletedSection extends StatelessWidget {
               const SizedBox(height: 10),
               _buildCarImage(),
               _buildCarName(),
-              _buildInfoText(),
+              // _buildInfoText(),
+              _buildShowHighestBid(),
+              _buildShowMyCurrentExpectedPrice(),
+              const SizedBox(height: 10),
               _buildRunOtobuyAndRemoveCarButtons(),
               const SizedBox(height: 10),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  // Info Text
-  Widget _buildInfoText() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(height: 20),
-        Text(
-          'The Live Auction did not fetch your expected price',
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 0.5,
-          ),
-        ),
-        SizedBox(height: 20),
-      ],
     );
   }
 
@@ -122,6 +106,84 @@ class AuctionDetailsAuctionCompletedSection extends StatelessWidget {
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
       style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+    );
+  }
+
+  // // Info Text
+  // Widget _buildInfoText() {
+  //   return Column(
+  //     crossAxisAlignment: CrossAxisAlignment.center,
+  //     children: [
+  //       SizedBox(height: 20),
+  //       Text(
+  //         'The Live Auction did not fetch your expected price',
+  //         textAlign: TextAlign.center,
+  //         style: const TextStyle(
+  //           fontSize: 16,
+  //           fontWeight: FontWeight.w600,
+  //           letterSpacing: 0.5,
+  //         ),
+  //       ),
+  //       SizedBox(height: 20),
+  //     ],
+  //   );
+  // }
+
+  // Show Highest Bid
+  Widget _buildShowHighestBid() {
+    return Column(
+      children: [
+        Text(
+          'Highest Bid',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        Obx(() {
+          return Text(
+            'Rs. ${NumberFormat.decimalPattern('en_IN').format(auctionDetailsController.auctionDetails.value.liveBids.first.amount)}/-',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 15,
+              color: AppColors.green,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  // Show My Expected Price
+  Widget _buildShowMyCurrentExpectedPrice() {
+    return Column(
+      children: [
+        Text(
+          'My Expected Price',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        Obx(() {
+          return Text(
+            'Rs. ${NumberFormat.decimalPattern('en_IN').format(auctionDetailsController.auctionDetails.value.customerExpectedPrice)}/-',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 15,
+              color: AppColors.green,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          );
+        }),
+      ],
     );
   }
 

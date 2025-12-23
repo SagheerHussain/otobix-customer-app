@@ -6,7 +6,6 @@ import 'package:otobix_customer_app/controllers/my_auctions_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/views/auction_details_page.dart';
-import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/empty_data_widget.dart';
 import 'package:otobix_customer_app/widgets/shimmer_widget.dart';
 
@@ -18,7 +17,7 @@ class MyAuctionsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBarWidget(title: 'My Auctions'),
+      // appBar: AppBarWidget(title: 'My Auctions'),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),

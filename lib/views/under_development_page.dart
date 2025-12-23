@@ -7,6 +7,7 @@ class UnderDevelopmentPage extends StatelessWidget {
   final Color color;
   final int? completedPercentage;
   final Widget? actionButton;
+  final bool showAppBar;
 
   const UnderDevelopmentPage({
     super.key,
@@ -15,12 +16,13 @@ class UnderDevelopmentPage extends StatelessWidget {
     required this.color,
     this.completedPercentage,
     this.actionButton,
+    this.showAppBar = true,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBarWidget(title: screenName),
+      appBar: showAppBar ? AppBarWidget(title: screenName) : null,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),

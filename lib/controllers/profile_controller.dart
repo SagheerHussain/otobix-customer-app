@@ -1,53 +1,65 @@
 import 'dart:convert';
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/controllers/login_controller.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
+import 'package:otobix_customer_app/services/notification_sevice.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
-import 'package:otobix_customer_app/utils/app_urls.dart';
-import 'package:otobix_customer_app/views/profile_page.dart';
 import 'package:otobix_customer_app/views/login_page.dart';
-import 'package:otobix_customer_app/views/my_auctions_page.dart';
-import 'package:otobix_customer_app/views/sell_my_car_page.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
+import 'package:otobix_customer_app/utils/app_urls.dart';
 
-class BottomNavigationBarController extends GetxController {
-  RxInt currentIndex = 0.obs;
-  final RxBool isLoadingLogout = false.obs;
+class ProfileController extends GetxController {
+  RxString imageUrl = ''.obs;
+  RxString username = ''.obs;
+  RxString useremail = ''.obs;
+  RxBool isLoading = false.obs;
 
-  List<Widget> get pages => [
-    // HomePage(),
-    // ManageMyCarsPage(),
-    // const UnderDevelopmentPage(
-    //   screenName: "Cart",
-    //   icon: CupertinoIcons.cart_fill,
-    //   color: AppColors.grey,
-    // ),
-    //  UnderDevelopmentPage(
-    //   screenName: "Profile",
-    //   icon: CupertinoIcons.person_crop_circle,
-    //   color: AppColors.deepOrange,
-    //   completedPercentage: 10,
-    //   showAppBar: false,
-    //   actionButton: ButtonWidget(
-    //     text: 'Logout',
-    //     height: 30,
-    //     fontSize: 11,
-    //     isLoading: isLoadingLogout,
-    //     onTap: () {
-    //       logout();
-    //     },
-    //   ),
-    // ),
-    SellMyCarPage(),
-    MyAuctionsPage(),
-    ProfilePage(),
-  ];
+  @override
+  void onInit() {
+    super.onInit();
+    getUserProfile();
+  }
 
-  // Logut function
+  Future<void> getUserProfile() async {
+    try {
+      isLoading.value = true;
+
+      final token = await SharedPrefsHelper.getString(
+        SharedPrefsHelper.tokenKey,
+      );
+      // debugPrint('Token: $token');
+
+      if (token == null) {
+        debugPrint('User not logged in');
+        return;
+      }
+
+      final response = await ApiService.get(endpoint: AppUrls.getUserProfile);
+
+      // debugPrint('API response: ${response.body}');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body)['profile'];
+
+        username.value = data['name'] ?? '';
+        useremail.value = data['email'] ?? '';
+      } else {
+        debugPrint('Profile fetch failed: ${response.statusCode}');
+        debugPrint(response.body);
+      }
+    } catch (e) {
+      debugPrint('Error in getUserProfile: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // logout
   Future<void> logout() async {
     try {
-      isLoadingLogout.value = true;
+      isLoading.value = true;
+
       final userId = await SharedPrefsHelper.getString(
         SharedPrefsHelper.userIdKey,
       );
@@ -66,6 +78,8 @@ class BottomNavigationBarController extends GetxController {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200 && data['success'] == true) {
+        // unlink the device from the current user (call on sign-out)
+        NotificationService.instance.logout();
         await SharedPrefsHelper.remove(SharedPrefsHelper.tokenKey);
         await SharedPrefsHelper.remove(SharedPrefsHelper.userKey);
         await SharedPrefsHelper.remove(SharedPrefsHelper.userTypeKey);
@@ -95,7 +109,7 @@ class BottomNavigationBarController extends GetxController {
         type: ToastType.error,
       );
     } finally {
-      isLoadingLogout.value = false;
+      isLoading.value = false;
     }
   }
 }

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/controllers/sell_my_car_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
-import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 import 'package:otobix_customer_app/widgets/dropdown_textfield_widget.dart';
 import 'package:otobix_customer_app/widgets/images_scroll_widget.dart';
@@ -18,7 +17,7 @@ class SellMyCarPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBarWidget(title: 'Sell My Car'),
+      // appBar: AppBarWidget(title: 'Sell My Car'),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
