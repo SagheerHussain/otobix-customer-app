@@ -7,7 +7,9 @@ class SocketEvents {
 
   // Custom Events (match your backend)
   static const String bidUpdated = 'bid-updated';
+  static const String systemBidPlaced = 'system-bid-placed';
   static const String otobuyOfferUpdated = 'otobuy-offer-updated';
+  static const String systemOtobuyOfferPlaced = 'system-otobuy-offer-placed';
   static const String customerExpectedPriceUpdated =
       'customer-expected-price-updated';
   static const String customerOneClickPriceUpdated =

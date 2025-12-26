@@ -39,8 +39,10 @@ class AuctionDetailsController extends GetxController {
     fetchAuctionDetails();
     _listenToCustomerExpectedPriceRealtime();
     _listenToNewBidAndAddToLiveBidsList();
+    _listenToNewSystemBidAndAddToLiveBidsList(); // system bid placed
     _listenToCustomerOneClickPriceRealtime();
     _listenToNewOfferAndAddToOtobuyOffersList();
+    _listenToNewSystemOfferAndAddToOtobuyOffersList(); // system otobuy offer placed
   }
 
   // Fetching auction details from the API
@@ -422,6 +424,96 @@ class AuctionDetailsController extends GetxController {
 
       debugPrint(
         '📢 New offer added on otobuy screen for car $carId: $newOfferAmount',
+      );
+    });
+  }
+
+  // Listen to new system offer and add to otobuy offers list
+  void _listenToNewSystemOfferAndAddToOtobuyOffersList() {
+    SocketService.instance.on(SocketEvents.systemOtobuyOfferPlaced, (data) {
+      final String carId = data['carId'];
+      final double newOfferAmount = (data['newOfferAmmount'] as num).toDouble();
+      final String offerBy = data['offerBy'];
+      final DateTime offerTime = DateTime.parse(data['offerTime']);
+      final double fixedMargin = (data['fixedMargin'] as num).toDouble();
+      final double variableMargin = (data['variableMargin'] as num).toDouble();
+
+      // ✅ Only update if this AuctionDetailsController is showing
+      // the same car as the incoming offer
+      if (auctionDetails.value.carId != carId) {
+        return;
+      }
+
+      // ✅ Only when the current auction is in OTOBUY state
+      if (checkScreenType(auctionDetails.value.auctionStatus) !=
+          ScreenType.otobuy) {
+        return;
+      }
+
+      // Create your offer model. Replace `AuctionDetailsOtobuyOfferModel` with your
+      // actual type used in `auctionDetails.value.otobuyOffers`.
+      final newOffer = AuctionDetailsOtobuyOfferModel(
+        amount: newOfferAmount,
+        offerBy: offerBy,
+        date: offerTime,
+        fixedMargin: fixedMargin,
+        variableMargin: variableMargin,
+      );
+
+      // Insert at the top of the list in a reactive-safe way
+      final current = auctionDetails.value;
+
+      auctionDetails.value = current.copyWith(
+        otobuyOffers: [newOffer, ...current.otobuyOffers],
+      );
+
+      debugPrint(
+        '📢 New system otobuy offer added on otobuy screen for car $carId: $newOfferAmount',
+      );
+    });
+  }
+
+  // Listen to new system bid and add to live bids list
+  void _listenToNewSystemBidAndAddToLiveBidsList() {
+    SocketService.instance.on(SocketEvents.systemBidPlaced, (data) {
+      final String carId = data['carId'];
+      final double highestBid = (data['highestBid'] as num).toDouble();
+      final String bidderId = data['userId'];
+      final DateTime bidTime = DateTime.parse(data['time']);
+      final double fixedMargin = (data['fixedMargin'] as num).toDouble();
+      final double variableMargin = (data['variableMargin'] as num).toDouble();
+
+      // ✅ Only update if this AuctionDetailsController is showing
+      // the same car as the incoming bid
+      if (auctionDetails.value.carId != carId) {
+        return;
+      }
+
+      // ✅ Only when the current auction is in LIVE state
+      if (checkScreenType(auctionDetails.value.auctionStatus) !=
+          ScreenType.live) {
+        return;
+      }
+
+      // Create your bid model. Replace `LiveBidModel` with your
+      // actual type used in `auctionDetails.value.liveBids`.
+      final newBid = AuctionDetailsBidModel(
+        amount: highestBid,
+        offerBy: bidderId,
+        date: bidTime,
+        fixedMargin: fixedMargin,
+        variableMargin: variableMargin,
+      );
+
+      // Insert at the top of the list in a reactive-safe way
+      final current = auctionDetails.value;
+
+      auctionDetails.value = current.copyWith(
+        liveBids: [newBid, ...current.liveBids],
+      );
+
+      debugPrint(
+        '📢 New system bid added on live screen for car $carId: $highestBid',
       );
     });
   }
