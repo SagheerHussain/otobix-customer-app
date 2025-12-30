@@ -20,34 +20,42 @@ class AppUrls {
   static String get setNewPassword => "${baseUrl}user/set-new-password";
 
   static String get fetchVehicleRegistrationDetails =>
-      "${baseUrl}customer/fetch-vehicle-registration-details";
+      "${baseUrl}customer/sell-my-car/fetch-vehicle-registration-details";
 
-  static String get searchCarMakeModelVariant =>
-      "${baseUrl}customer/search-car-make-model-variant";
+  // static String get searchCarMakeModelVariant =>
+  //     "${baseUrl}customer/search-car-make-model-variant";
+
+  static String get searchCarMakes =>
+      "${baseUrl}customer/sell-my-car/search-car-makes";
+  static String get searchCarModelsByMake =>
+      "${baseUrl}customer/sell-my-car/search-car-models-by-make";
+  static String get searchCarVariantsByMakeModel =>
+      "${baseUrl}customer/sell-my-car/search-car-variants-by-make-model";
 
   static String get fetchCarBannersList =>
-      "${baseUrl}customer/fetch-car-banners-list";
-
-  static String get addInspetionRequest =>
-      "${baseUrl}customer/add-inspection-request";
+      "${baseUrl}customer/sell-my-car/fetch-car-banners-list";
 
   static String get fetchMyAuctionCarsList =>
-      "${baseUrl}customer/fetch-my-auction-cars-list";
+      "${baseUrl}customer/view-my-auctions/fetch-my-auction-cars-list";
 
   static String get fetchAuctionDetails =>
-      "${baseUrl}customer/fetch-auction-details";
+      "${baseUrl}customer/auction-details/fetch-auction-details";
 
   static String get setCustomerExpectedPrice =>
-      "${baseUrl}customer/set-customer-expected-price";
+      "${baseUrl}customer/auction-details/set-customer-expected-price";
+
+  static String get addTelecallingRequest =>
+      "${baseUrl}inspection/telecallings/add";
 
   static String get removeCar => "${baseUrl}car/remove-car";
 
   static String get moveCarToOtobuy => "${baseUrl}otobuy/move-car-to-otobuy";
 
-  static String get acceptOffer => "${baseUrl}customer/accept-offer";
+  static String get acceptOffer =>
+      "${baseUrl}customer/auction-details/accept-offer";
 
   static String get setOneClickPrice =>
-      "${baseUrl}customer/set-one-click-price";
+      "${baseUrl}customer/auction-details/set-one-click-price";
 
   // static String get allUsersList => "${baseUrl}user/all-users-list";
 

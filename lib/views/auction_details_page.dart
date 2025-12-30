@@ -7,11 +7,8 @@ import 'package:otobix_customer_app/views/auction_details_live_section.dart';
 import 'package:otobix_customer_app/views/auction_details_otobuy_section.dart';
 import 'package:otobix_customer_app/views/auction_details_removed_section.dart';
 import 'package:otobix_customer_app/views/auction_details_upcoming_section.dart';
-import 'package:otobix_customer_app/widgets/access_inspection_report_widget.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/shimmer_widget.dart';
-import 'package:otobix_customer_app/widgets/toast_widget.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class AuctionDetailsPage extends StatelessWidget {
   final String appointmentId;
@@ -34,30 +31,30 @@ class AuctionDetailsPage extends StatelessWidget {
         child: Column(
           children: [
             _buildScreen(),
-            const SizedBox(height: 20),
-            AccessInspectionReportWidget(
-              // onTap: () {
-              //   debugPrint('Access Inspection Report Tapped');
-              // },
-              onTap: () async {
-                final Uri url = Uri.parse('https://otobix.in/privacy-policy');
+            // const SizedBox(height: 20),
+            // AccessInspectionReportWidget(
+            //   // onTap: () {
+            //   //   debugPrint('Access Inspection Report Tapped');
+            //   // },
+            //   onTap: () async {
+            //     final Uri url = Uri.parse('https://otobix.in/privacy-policy');
 
-                if (await canLaunchUrl(url)) {
-                  // Checks if the URL can be launched
-                  await launchUrl(
-                    url,
-                    mode: LaunchMode.externalApplication,
-                  ); // Opens the URL in an external browser
-                } else {
-                  ToastWidget.show(
-                    context: Get.context!,
-                    title: 'Could not access the inspection report now',
-                    type: ToastType.error,
-                  );
-                }
-              },
-            ),
-            const SizedBox(height: 20),
+            //     if (await canLaunchUrl(url)) {
+            //       // Checks if the URL can be launched
+            //       await launchUrl(
+            //         url,
+            //         mode: LaunchMode.externalApplication,
+            //       ); // Opens the URL in an external browser
+            //     } else {
+            //       ToastWidget.show(
+            //         context: Get.context!,
+            //         title: 'Could not access the inspection report now',
+            //         type: ToastType.error,
+            //       );
+            //     }
+            //   },
+            // ),
+            // const SizedBox(height: 20),
           ],
         ),
       ),

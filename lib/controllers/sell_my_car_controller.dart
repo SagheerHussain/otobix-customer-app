@@ -12,26 +12,29 @@ import 'package:otobix_customer_app/services/api_service.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
-import 'package:otobix_customer_app/views/sell_my_car_page.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
 
 class SellMyCarController extends GetxController {
   // Form key
   final formKey = GlobalKey<FormState>();
 
-  // Text controllers (fields on the screen)
-  late TextEditingController carNumberController;
+  late TextEditingController carRegistrationNumberController;
   late TextEditingController ownerNameController;
+  late TextEditingController makeController;
   late TextEditingController modelController;
   late TextEditingController variantController;
-  late TextEditingController yearOfMfgController;
+  late TextEditingController yearOfRegController;
   late TextEditingController ownershipSerialNoController;
-  late TextEditingController colorController;
-  late TextEditingController odometerController;
-  late TextEditingController notesController;
-  final TextEditingController inspectionDateTimeController =
+  late TextEditingController odometerReadingInKmsController;
+  late TextEditingController additionalNotesController;
+  late TextEditingController inspectionDateTimeController =
       TextEditingController();
-  final TextEditingController addressController = TextEditingController();
+  late TextEditingController inspectionAddressController =
+      TextEditingController();
+
+  // API fetched data
+  RxString fetchedMakerDescStringToShow = ''.obs;
+  RxString fetchedMakerModelStringToShow = ''.obs;
 
   // Button loading states (use in ButtonWidget if you want)
   final isBannersLoading = false.obs;
@@ -46,7 +49,7 @@ class SellMyCarController extends GetxController {
 
   // Car models list (for dropdown suggestions)
   final RxList<String> carModels = <String>[].obs;
-  Timer? _modelSearchDebounce;
+  // Timer? _modelSearchDebounce;
 
   List<String> ownershipSerialNos = [
     '1st',
@@ -66,31 +69,52 @@ class SellMyCarController extends GetxController {
 
   String? inspectionDateTimeUtcForApi;
 
+  // Enable/disable fields
+  final isModelEnabled = false.obs;
+  final isVariantEnabled = false.obs;
+
+  // Debounces
+  Timer? _makeSearchDebounce;
+  Timer? _modelSearchDebounce;
+  Timer? _variantSearchDebounce;
+
+  // Keep last values to detect parent changes
+  String _lastMake = '';
+  String _lastModel = '';
+
   @override
   void onInit() {
     super.onInit();
-    carNumberController = TextEditingController();
+    carRegistrationNumberController = TextEditingController();
     ownerNameController = TextEditingController();
+    makeController = TextEditingController();
     modelController = TextEditingController();
     variantController = TextEditingController();
-    yearOfMfgController = TextEditingController();
+    yearOfRegController = TextEditingController();
     ownershipSerialNoController = TextEditingController();
-    colorController = TextEditingController();
-    odometerController = TextEditingController();
-    notesController = TextEditingController();
+    odometerReadingInKmsController = TextEditingController();
+    additionalNotesController = TextEditingController();
+    inspectionDateTimeController = TextEditingController();
+    inspectionAddressController = TextEditingController();
 
     _fetchBannersList();
 
+    _setupMakeSearchListener();
     _setupModelSearchListener();
+    _setupVariantSearchListener();
 
-    // Optional: load initial popular list (no search term)
-    _fetchCarModelSuggestions('');
+    // Start state
+    isModelEnabled.value = false;
+    isVariantEnabled.value = false;
+
+    // Optional: preload makes
+    _fetchMakeSuggestions('');
   }
 
   // Fetch car details
   Future<void> fetchCarDetails() async {
     // Basic validation: car number required
-    if (carNumberController.text.trim().isEmpty) {
+    if (carRegistrationNumberController.text.trim().isEmpty) {
       ToastWidget.show(
         context: Get.context!,
         title: "Car number required",
@@ -109,101 +133,157 @@ class SellMyCarController extends GetxController {
       final response = await ApiService.post(
         endpoint: AppUrls.fetchVehicleRegistrationDetails,
         body: {
-          'vehicleRegistrationNumber': carNumberController.text.trim(),
+          'vehicleRegistrationNumber': carRegistrationNumberController.text
+              .trim(),
           'userId': userId,
         },
       );
 
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-
-        final bool success = body['success'] == true;
-        final String message = body['message']?.toString() ?? '';
-        final data = body['data'] ?? {};
-        final result = data['result'] ?? {};
-        final String internalStatusCode =
-            data['internalStatusCode']?.toString() ?? '';
-
-        if (!success) {
-          ToastWidget.show(
-            context: Get.context!,
-            title: "Failed",
-            subtitle: message.isNotEmpty ? message : "Unable to fetch details.",
-            type: ToastType.error,
-          );
-          return;
-        }
-
-        if (internalStatusCode == "101") {
-          // ✅ Map API result → your form fields
-          final String regNo = result['rc_regn_no']?.toString() ?? '';
-          final String ownerName = result['rc_owner_name']?.toString() ?? '';
-          final String makerModel = result['rc_maker_model']?.toString() ?? '';
-          final String manuMonthYear =
-              result['rc_regn_dt']?.toString() ?? ''; // e.g. "12-2006"
-          // final String ownerSr = result['rc_owner_sr']?.toString() ?? '';
-          // final String color = result['rc_color']?.toString() ?? '';
-
-          // Optionally extract year from formats like "12-2006" or "15-04-2015"
-          String yearOnly = '';
-          if (manuMonthYear.isNotEmpty) {
-            final match = RegExp(r'(\d{4})$').firstMatch(manuMonthYear.trim());
-            if (match != null) {
-              yearOnly = match.group(1)!; // e.g. "2015"
-            }
-          }
-
-          // Fill controllers
-          carNumberController.text = regNo.isNotEmpty
-              ? regNo
-              : carNumberController.text.trim();
-          ownerNameController.text = ownerName;
-          modelController.text = makerModel;
-          yearOfMfgController.text = yearOnly;
-          // ownershipSerialNoController.text = ownerSr;
-          // colorController.text = color;
-
-          // If you later add odometer & notes from API, set them here too.
-
-          // For dropdown: ensure model appears in list
-          if (makerModel.isNotEmpty && !carModels.contains(makerModel)) {
-            carModels.insert(0, makerModel);
-          }
-
-          // ToastWidget.show(
-          //   context: Get.context!,
-          //   title: "Success",
-          //   subtitle: "Car details fetched.",
-          //   type: ToastType.success,
-          // );
-        } else if (internalStatusCode == "102") {
-          // ❌ Invalid details (based on your backend contract)
-          ToastWidget.show(
-            context: Get.context!,
-            title: "Invalid details",
-            subtitle: "Invalid registration number or no data found.",
-            type: ToastType.error,
-          );
-        } else {
-          // ❌ Unknown / unhandled status code
-          ToastWidget.show(
-            context: Get.context!,
-            title: "Failed to fetch car details",
-            subtitle: "Unexpected response code: $internalStatusCode",
-            type: ToastType.error,
-          );
-        }
-      } else {
-        debugPrint(
-          "Failed to fetch car details: status code ${response.statusCode}",
-        );
+      if (response.statusCode != 200) {
         ToastWidget.show(
           context: Get.context!,
           title: "Failed to fetch car details",
           subtitle: "Server error: ${response.statusCode}",
           type: ToastType.error,
         );
+        return;
       }
+
+      final body = jsonDecode(response.body);
+      final bool success = body['success'] == true;
+      final String message = body['message']?.toString() ?? '';
+      final data = body['data'] ?? {};
+      final result = data['result'];
+
+      if (!success) {
+        ToastWidget.show(
+          context: Get.context!,
+          title: "Failed",
+          subtitle: message.isNotEmpty ? message : "Unable to fetch details.",
+          type: ToastType.error,
+        );
+        return;
+      }
+
+      if (result == null || (result is Map && result.isEmpty)) {
+        ToastWidget.show(
+          context: Get.context!,
+          title: "Invalid details",
+          subtitle: "Invalid registration number or no data found.",
+          type: ToastType.error,
+        );
+        return;
+      }
+
+      final Map<String, dynamic> r = Map<String, dynamic>.from(result);
+
+      // ✅ Use your new API keys directly
+      final String fetchedOwnerName = r['owner']?.toString() ?? '';
+      fetchedMakerDescStringToShow.value =
+          r['makerDescription']?.toString() ?? '';
+      fetchedMakerModelStringToShow.value = r['makerModel']?.toString() ?? '';
+
+      final String registered =
+          r['registered']?.toString() ?? ''; // "31-01-2014"
+
+      // Extract year from "31-01-2014"
+      String yearOnly = '';
+      if (registered.isNotEmpty) {
+        final match = RegExp(r'(\d{4})$').firstMatch(registered.trim());
+        if (match != null) yearOnly = match.group(1)!;
+      }
+
+      // Fill controllers
+      ownerNameController.text = fetchedOwnerName;
+      yearOfRegController.text = yearOnly;
+
+      // Optional: you can show status somewhere if needed
+      // final status = r['status']?.toString(); // "ACTIVE"
+
+      // if (response.statusCode == 200) {
+      //   final body = jsonDecode(response.body);
+
+      //   final bool success = body['success'] == true;
+      //   final String message = body['message']?.toString() ?? '';
+      //   final data = body['data'] ?? {};
+      //   final result = data['result'] ?? {};
+      //   final String internalStatusCode =
+      //       data['internalStatusCode']?.toString() ?? '';
+
+      //   if (!success) {
+      //     ToastWidget.show(
+      //       context: Get.context!,
+      //       title: "Failed",
+      //       subtitle: message.isNotEmpty ? message : "Unable to fetch details.",
+      //       type: ToastType.error,
+      //     );
+      //     return;
+      //   }
+
+      //   if (internalStatusCode == "101") {
+      //     // ✅ Map API result → your form fields
+      //     final String fetchedRegistrationNumber =
+      //         // result['rc_regn_no']?.toString() ??
+      //         carRegistrationNumberController.text.trim();
+      //     final String fetchedOwnerName = result['owner']?.toString() ?? '';
+      //     fetchedMakerDescStringToShow.value =
+      //         result['makerDescription']?.toString() ?? '';
+      //     fetchedMakerModelStringToShow.value =
+      //         result['makerModel']?.toString() ?? '';
+      //     final String fetchedRegistrationMonthYear =
+      //         result['registered']?.toString() ?? ''; // e.g. "12-2006"
+
+      //     // Optionally extract year from formats like "12-2006" or "15-04-2015"
+      //     String yearOnly = '';
+      //     if (fetchedRegistrationMonthYear.isNotEmpty) {
+      //       final match = RegExp(
+      //         r'(\d{4})$',
+      //       ).firstMatch(fetchedRegistrationMonthYear.trim());
+      //       if (match != null) {
+      //         yearOnly = match.group(1)!; // e.g. "2015"
+      //       }
+      //     }
+
+      //     // Fill controllers
+      //     carRegistrationNumberController.text =
+      //         fetchedRegistrationNumber.isNotEmpty
+      //         ? fetchedRegistrationNumber
+      //         : carRegistrationNumberController.text.trim();
+      //     ownerNameController.text = fetchedOwnerName;
+      //     yearOfRegController.text = yearOnly;
+
+      //     // // For dropdown: ensure model appears in list
+      //     // if (makerModel.isNotEmpty && !carModels.contains(makerModel)) {
+      //     //   carModels.insert(0, makerModel);
+      //     // }
+      //   } else if (internalStatusCode == "102") {
+      //     // ❌ Invalid details (based on your backend contract)
+      //     ToastWidget.show(
+      //       context: Get.context!,
+      //       title: "Invalid details",
+      //       subtitle: "Invalid registration number or no data found.",
+      //       type: ToastType.error,
+      //     );
+      //   } else {
+      //     // ❌ Unknown / unhandled status code
+      //     ToastWidget.show(
+      //       context: Get.context!,
+      //       title: "Failed to fetch car details",
+      //       subtitle: "Unexpected response code: $internalStatusCode",
+      //       type: ToastType.error,
+      //     );
+      //   }
+      // } else {
+      //   debugPrint(
+      //     "Failed to fetch car details: status code ${response.statusCode}",
+      //   );
+      //   ToastWidget.show(
+      //     context: Get.context!,
+      //     title: "Failed to fetch car details",
+      //     subtitle: "Server error: ${response.statusCode}",
+      //     type: ToastType.error,
+      //   );
+      // }
     } catch (error) {
       debugPrint(error.toString());
       ToastWidget.show(
@@ -270,26 +350,6 @@ class SellMyCarController extends GetxController {
   // Get remaining image count
   int get remainingImageCount => maxImageCount - selectedImages.length;
 
-  @override
-  void onClose() {
-    carNumberController.dispose();
-    ownerNameController.dispose();
-    modelController.dispose();
-    variantController.dispose();
-    yearOfMfgController.dispose();
-    ownershipSerialNoController.dispose();
-    colorController.dispose();
-    odometerController.dispose();
-    notesController.dispose();
-    super.onClose();
-  }
-
-  void uploadImages() async {
-    // isUploadImagesLoading.value = true;
-    // pick images & upload
-    // isUploadImagesLoading.value = false;
-  }
-
   void requestCallback() async {
     if (!(formKey.currentState?.validate() ?? false)) return;
     // isRequestCallbackLoading.value = true;
@@ -304,69 +364,199 @@ class SellMyCarController extends GetxController {
     // isScheduleInspectionLoading.value = false;
   }
 
-  void _setupModelSearchListener() {
-    modelController.addListener(() {
-      final text = modelController.text.trim();
+  void _setupMakeSearchListener() {
+    makeController.addListener(() {
+      final make = makeController.text.trim();
 
-      // Cancel previous debounce
-      _modelSearchDebounce?.cancel();
+      // If make changed => reset model + variant (and their dropdown lists)
+      if (make != _lastMake) {
+        _lastMake = make;
 
-      // If field is empty → fetch first 20 from API
-      if (text.isEmpty) {
-        _fetchCarModelSuggestions('');
-        return;
+        modelController.clear();
+        variantController.clear();
+
+        isModelEnabled.value = make.isNotEmpty;
+        isVariantEnabled.value = false;
+
+        _clearDropdownItems('car_model');
+        _clearDropdownItems('car_variant');
+
+        // When make becomes selected, load models immediately
+        if (make.isNotEmpty) {
+          _fetchModelSuggestions(make, '');
+        }
       }
 
-      // Debounce – so we don't hit the API on every keystroke
-      _modelSearchDebounce = Timer(const Duration(milliseconds: 400), () {
-        _fetchCarModelSuggestions(text);
+      _makeSearchDebounce?.cancel();
+
+      // fetch makes (empty => top 20)
+      _makeSearchDebounce = Timer(const Duration(milliseconds: 350), () {
+        _fetchMakeSuggestions(make);
       });
     });
   }
 
-  Future<void> _fetchCarModelSuggestions(String query) async {
+  void _setupModelSearchListener() {
+    modelController.addListener(() {
+      final make = makeController.text.trim();
+      final model = modelController.text.trim();
+
+      // Don't search models until make selected
+      if (make.isEmpty) return;
+
+      // If model changed => reset variant
+      if (model != _lastModel) {
+        _lastModel = model;
+
+        variantController.clear();
+        isVariantEnabled.value = model.isNotEmpty;
+
+        _clearDropdownItems('car_variant');
+
+        // When model becomes selected, load variants immediately
+        if (model.isNotEmpty) {
+          _fetchVariantSuggestions(make, model, '');
+        }
+      }
+
+      _modelSearchDebounce?.cancel();
+
+      _modelSearchDebounce = Timer(const Duration(milliseconds: 350), () {
+        _fetchModelSuggestions(make, model);
+      });
+    });
+  }
+
+  void _setupVariantSearchListener() {
+    variantController.addListener(() {
+      final make = makeController.text.trim();
+      final model = modelController.text.trim();
+      final variantQ = variantController.text.trim();
+
+      // Don't search variants until make+model selected
+      if (make.isEmpty || model.isEmpty) return;
+
+      _variantSearchDebounce?.cancel();
+
+      _variantSearchDebounce = Timer(const Duration(milliseconds: 350), () {
+        _fetchVariantSuggestions(make, model, variantQ);
+      });
+    });
+  }
+
+  Future<void> _fetchMakeSuggestions(String query) async {
     try {
       final response = await ApiService.post(
-        endpoint: AppUrls.searchCarMakeModelVariant,
-        body: {
-          'q': query, // no manual encoding here
-          'limit': 20,
-        },
+        endpoint: AppUrls.searchCarMakes,
+        body: {'q': query, 'limit': 20},
       );
 
-      if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
-        final bool success = body['success'] == true;
-        if (!success) {
-          debugPrint('Search car models failed: ${body['message']}');
-          return;
-        }
+      if (response.statusCode != 200) return;
 
-        final List<dynamic> data = body['data'] ?? [];
-        final List<String> models = data.map((e) => e.toString()).toList();
+      final body = jsonDecode(response.body);
+      if (body['success'] != true) return;
 
-        // Keep your list if you need it elsewhere
-        carModels.assignAll(models);
+      final List<String> makes = (body['data'] as List<dynamic>)
+          .map((e) => e.toString())
+          .toList();
 
-        // 🔥 Update the dropdown's internal controller, if it exists
-        if (Get.isRegistered<DropdownController<String>>(tag: 'car_model')) {
-          final dropdownCtrl = Get.find<DropdownController<String>>(
-            tag: 'car_model',
-          );
-
-          final dropdownItems = models
-              .map((m) => DropdownMenuItem<String>(value: m, child: Text(m)))
-              .toList();
-
-          dropdownCtrl.updateItems(dropdownItems);
-        }
-      } else {
-        debugPrint('Search car models failed: status ${response.statusCode}');
-      }
+      _updateDropdownItems('car_make', makes);
     } catch (e) {
-      debugPrint('Search car models error: $e');
+      debugPrint('search makes error: $e');
     }
   }
+
+  Future<void> _fetchModelSuggestions(String make, String query) async {
+    try {
+      final response = await ApiService.post(
+        endpoint: AppUrls.searchCarModelsByMake,
+        body: {'make': make, 'q': query, 'limit': 20},
+      );
+
+      if (response.statusCode != 200) return;
+
+      final body = jsonDecode(response.body);
+      if (body['success'] != true) return;
+
+      final List<String> models = (body['data'] as List<dynamic>)
+          .map((e) => e.toString())
+          .toList();
+
+      _updateDropdownItems('car_model', models);
+    } catch (e) {
+      debugPrint('search models error: $e');
+    }
+  }
+
+  Future<void> _fetchVariantSuggestions(
+    String make,
+    String model,
+    String query,
+  ) async {
+    try {
+      final response = await ApiService.post(
+        endpoint: AppUrls.searchCarVariantsByMakeModel,
+        body: {'make': make, 'model': model, 'q': query, 'limit': 20},
+      );
+
+      if (response.statusCode != 200) return;
+
+      final body = jsonDecode(response.body);
+      if (body['success'] != true) return;
+
+      final List<String> variants = (body['data'] as List<dynamic>)
+          .map((e) => e.toString())
+          .toList();
+
+      _updateDropdownItems('car_variant', variants);
+    } catch (e) {
+      debugPrint('search variants error: $e');
+    }
+  }
+
+  // Future<void> _fetchCarModelSuggestions(String query) async {
+  //   try {
+  //     final response = await ApiService.post(
+  //       endpoint: AppUrls.searchCarMakeModelVariant,
+  //       body: {
+  //         'q': query, // no manual encoding here
+  //         'limit': 20,
+  //       },
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       final body = jsonDecode(response.body);
+  //       final bool success = body['success'] == true;
+  //       if (!success) {
+  //         debugPrint('Search car models failed: ${body['message']}');
+  //         return;
+  //       }
+
+  //       final List<dynamic> data = body['data'] ?? [];
+  //       final List<String> models = data.map((e) => e.toString()).toList();
+
+  //       // Keep your list if you need it elsewhere
+  //       carModels.assignAll(models);
+
+  //       // 🔥 Update the dropdown's internal controller, if it exists
+  //       if (Get.isRegistered<DropdownController<String>>(tag: 'car_model')) {
+  //         final dropdownCtrl = Get.find<DropdownController<String>>(
+  //           tag: 'car_model',
+  //         );
+
+  //         final dropdownItems = models
+  //             .map((m) => DropdownMenuItem<String>(value: m, child: Text(m)))
+  //             .toList();
+
+  //         dropdownCtrl.updateItems(dropdownItems);
+  //       }
+  //     } else {
+  //       debugPrint('Search car models failed: status ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     debugPrint('Search car models error: $e');
+  //   }
+  // }
 
   // Load Banners list
   Future<void> _fetchBannersList() async {
@@ -429,12 +619,15 @@ class SellMyCarController extends GetxController {
   }
 
   // Submit inspection request
-  Future<bool> submitInspectionRequest() async {
+  Future<bool> submitInspectionRequest({required bool isSchedule}) async {
     if (!(formKey.currentState?.validate() ?? false)) return false;
-    isScheduleInspectionLoading.value = true;
+    final loading = isSchedule
+        ? isScheduleInspectionLoading
+        : isRequestCallbackLoading;
+    loading.value = true;
 
     try {
-      final uri = Uri.parse(AppUrls.addInspetionRequest);
+      final uri = Uri.parse(AppUrls.addTelecallingRequest);
       final request = http.MultipartRequest('POST', uri);
 
       final token =
@@ -448,26 +641,35 @@ class SellMyCarController extends GetxController {
       }
 
       // required fields
-      request.fields['carRegistrationNumber'] = carNumberController.text.trim();
-      request.fields['ownerName'] = ownerNameController.text.trim();
-      request.fields['carMakeModelVariant'] = modelController.text.trim();
-      request.fields['yearOfRegistration'] = yearOfMfgController.text.trim();
-      request.fields['ownershipSerialNumber'] = ownershipSerialNoController.text
+      request.fields['carRegistrationNumber'] = carRegistrationNumberController
+          .text
           .trim();
+      request.fields['ownerName'] = ownerNameController.text.trim();
+      request.fields['make'] = makeController.text.trim();
+      request.fields['model'] = modelController.text.trim();
+      request.fields['variant'] = variantController.text.trim();
+      request.fields['yearOfRegistration'] = yearOfRegController.text.trim();
+      request.fields['ownershipSerialNumber'] = ownershipToNumber(
+        ownershipSerialNoController.text,
+      );
 
       // optional fields
-      if (odometerController.text.trim().isNotEmpty) {
-        request.fields['odometerReadingInKms'] = odometerController.text.trim();
+      if (odometerReadingInKmsController.text.trim().isNotEmpty) {
+        request.fields['odometerReadingInKms'] = odometerReadingInKmsController
+            .text
+            .trim();
       }
-      if (notesController.text.trim().isNotEmpty) {
-        request.fields['additionalNotes'] = notesController.text.trim();
+      if (additionalNotesController.text.trim().isNotEmpty) {
+        request.fields['additionalNotes'] = additionalNotesController.text
+            .trim();
       }
       if (inspectionDateTimeUtcForApi != null &&
           inspectionDateTimeUtcForApi!.isNotEmpty) {
         request.fields['inspectionDateTime'] = inspectionDateTimeUtcForApi!;
       }
-      if (addressController.text.trim().isNotEmpty) {
-        request.fields['inspectionAddress'] = addressController.text.trim();
+      if (inspectionAddressController.text.trim().isNotEmpty) {
+        request.fields['inspectionAddress'] = inspectionAddressController.text
+            .trim();
       }
 
       // images
@@ -484,13 +686,24 @@ class SellMyCarController extends GetxController {
       final streamedResponse = await request.send();
       final response = await http.Response.fromStream(streamedResponse);
 
-      debugPrint('Inspection API status: ${response.statusCode}');
-      debugPrint('Inspection API body: ${response.body}');
+      // debugPrint('Inspection API status: ${response.statusCode}');
+      // debugPrint('Inspection API body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return true;
       }
-      if (response.statusCode == 405) {
+      if (response.statusCode == 400) {
+        final message =
+            json.decode(response.body)['message'] ??
+            'Failed to submit inspection request. Please try again.';
+        ToastWidget.show(
+          context: Get.context!,
+          title: 'Error',
+          subtitle: message,
+          type: ToastType.error,
+        );
+        return false;
+      } else if (response.statusCode == 405) {
         ToastWidget.show(
           context: Get.context!,
           title: 'Error',
@@ -502,7 +715,7 @@ class SellMyCarController extends GetxController {
         ToastWidget.show(
           context: Get.context!,
           title: 'Error',
-          subtitle: 'Failed to submit request: ${response.statusCode}',
+          subtitle: 'Failed to submit request',
           type: ToastType.error,
         );
         return false;
@@ -517,87 +730,56 @@ class SellMyCarController extends GetxController {
       );
       return false;
     } finally {
-      isScheduleInspectionLoading.value = false;
+      loading.value = false;
     }
   }
 
-  Future<void> submitInspectionRequest1() async {
-    if (!(formKey.currentState?.validate() ?? false)) return;
-    isScheduleInspectionLoading.value = true;
-    try {
-      final uri = Uri.parse(AppUrls.addInspetionRequest);
+  void _updateDropdownItems(String tag, List<String> values) {
+    if (!Get.isRegistered<DropdownController<String>>(tag: tag)) return;
 
-      final request = http.MultipartRequest('POST', uri);
+    final dropdownCtrl = Get.find<DropdownController<String>>(tag: tag);
+    final items = values
+        .map((v) => DropdownMenuItem<String>(value: v, child: Text(v)))
+        .toList();
 
-      // 🔹 Add headers here
-      final token =
-          await SharedPrefsHelper.getString(SharedPrefsHelper.tokenKey) ?? '';
+    dropdownCtrl.updateItems(items);
+  }
 
-      if (token.isNotEmpty) {
-        request.headers.addAll({
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-          // DON'T set Content-Type here, http.MultipartRequest will handle boundary
-        });
-      }
+  void _clearDropdownItems(String tag) => _updateDropdownItems(tag, []);
 
-      // required fields
-      request.fields['carRegistrationNumber'] = carNumberController.text.trim();
-      request.fields['ownerName'] = ownerNameController.text.trim();
-      request.fields['carMakeModelVariant'] = modelController.text.trim();
-      request.fields['yearOfRegistration'] = yearOfMfgController.text.trim();
-      request.fields['ownershipSerialNumber'] = ownershipSerialNoController.text
-          .trim();
+  // Convert to number
+  String ownershipToNumber(String value) {
+    final v = value.trim().toLowerCase();
 
-      // optional fields
-      if (odometerController.text.trim().isNotEmpty) {
-        request.fields['odometerReadingInKms'] = odometerController.text.trim();
-      }
-      if (notesController.text.trim().isNotEmpty) {
-        request.fields['additionalNotes'] = notesController.text.trim();
-      }
-      if (inspectionDateTimeUtcForApi != null &&
-          inspectionDateTimeUtcForApi!.isNotEmpty) {
-        request.fields['inspectionDateTime'] = inspectionDateTimeUtcForApi!;
-      }
-      if (addressController.text.trim().isNotEmpty) {
-        request.fields['inspectionAddress'] = addressController.text.trim();
-      }
+    // handles: "1st", "2nd", "3rd", "4th", "5th"
+    final match = RegExp(r'^(\d+)').firstMatch(v);
+    if (match != null) return match.group(1)!;
 
-      // images: key must match upload.array("carImages", 5) on backend
-      for (final image in selectedImages) {
-        request.files.add(
-          await http.MultipartFile.fromPath(
-            'carImages',
-            image.path,
-            contentType: MediaType('image', 'jpeg'), // or detect type
-          ),
-        );
-      }
+    // handles: "above" (choose what backend expects)
+    if (v == 'above') return '6';
 
-      final streamedResponse = await request.send();
-      final response = await http.Response.fromStream(streamedResponse);
+    // fallback: send as-is (or return '' if you want to block)
+    return value.trim();
+  }
 
-      if (response.statusCode == 200) {
-        SellMyCarPage.showCallbackConfirmationDialog();
-      } else {
-        ToastWidget.show(
-          context: Get.context!,
-          title: 'Error',
-          subtitle: 'Failed to submit request: ${response.statusCode}',
-          type: ToastType.error,
-        );
-      }
-    } catch (e) {
-      debugPrint(e.toString());
-      ToastWidget.show(
-        context: Get.context!,
-        title: 'Error',
-        subtitle: 'Error submiting request',
-        type: ToastType.error,
-      );
-    } finally {
-      isScheduleInspectionLoading.value = false;
-    }
+  // Close method to dispose controllers
+  @override
+  void onClose() {
+    _makeSearchDebounce?.cancel();
+    _modelSearchDebounce?.cancel();
+    _variantSearchDebounce?.cancel();
+
+    carRegistrationNumberController.dispose();
+    ownerNameController.dispose();
+    makeController.dispose();
+    modelController.dispose();
+    variantController.dispose();
+    yearOfRegController.dispose();
+    ownershipSerialNoController.dispose();
+    odometerReadingInKmsController.dispose();
+    additionalNotesController.dispose();
+    inspectionDateTimeController.dispose();
+    inspectionAddressController.dispose();
+    super.onClose();
   }
 }

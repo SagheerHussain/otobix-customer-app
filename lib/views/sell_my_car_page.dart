@@ -94,8 +94,9 @@ class SellMyCarPage extends StatelessWidget {
                             _buildCustomTextField(
                               label: 'Car Registration Number',
                               icon: Icons.directions_car,
-                              controller: getxController.carNumberController,
-                              hintText: 'e.g. MH 12 AB 1234',
+                              controller: getxController
+                                  .carRegistrationNumberController,
+                              hintText: 'e.g. MH12AB1234',
                               keyboardType: TextInputType.text,
                               isRequired: true,
                             ),
@@ -128,57 +129,107 @@ class SellMyCarPage extends StatelessWidget {
                         isRequired: true,
                       ),
 
-                      // 3. Model
+                      // 3. Make Model Variant Description
+                      Obx(() => _buildMakeModelVariantDescription()),
+
+                      // 4. Make
                       DropdownTextfieldWidget<String>(
-                        label: 'Car Make-Model-Variant',
-                        controller: getxController.modelController,
-                        hintText: 'Select Make Model Variant...',
+                        label: 'Make',
+                        controller: getxController.makeController,
+                        hintText: 'Select make...',
                         icon: Icons.business,
                         isRequired: true,
                         allowCustomEntries: true,
                         customEntryValidationMessage:
-                            'Please select a valid Car Make Model Variant from the list',
+                            'Please select a valid Car Make from the list',
                         // We won't use this items list reactively; internal controller will be updated manually
                         items: const [], // or null, both are fine
                         validator: (value) {
                           if (value == 'invalid') {
-                            return 'This Car Model is not available';
+                            return 'This Car Make is not available';
                           }
                           return null;
                         },
-                        controllerTag: 'car_model',
+                        controllerTag: 'car_make',
                       ),
 
-                      // _buildCustomTextField(
-                      //   label: 'Car Model',
-                      //   icon: Icons.directions_car_filled,
-                      //   controller: getxController.modelController,
-                      //   hintText: 'e.g. Swift VXI',
-                      //   keyboardType: TextInputType.text,
-                      //   isRequired: true,
-                      // ),
+                      // 5. Model
+                      Obx(() {
+                        final enabled = getxController.isModelEnabled.value;
 
-                      // // 4. Variant
-                      // _buildCustomTextField(
-                      //   label: 'Variant',
-                      //   icon: Icons.tune,
-                      //   controller: getxController.variantController,
-                      //   hintText: 'e.g. Petrol, AMT',
-                      //   keyboardType: TextInputType.text,
-                      //   isRequired: true,
-                      // ),
+                        return IgnorePointer(
+                          ignoring: !enabled,
+                          child: Opacity(
+                            opacity: enabled ? 1 : 0.45,
+                            child: DropdownTextfieldWidget<String>(
+                              label: 'Model',
+                              controller: getxController.modelController,
+                              hintText: enabled
+                                  ? 'Select model...'
+                                  : 'Select make first',
+                              icon: Icons.business,
+                              isRequired: enabled, // ✅ IMPORTANT
+                              allowCustomEntries: true,
+                              customEntryValidationMessage:
+                                  'Please select a valid Car Model from the list',
+                              items: const [],
+                              validator: (value) {
+                                if (!enabled)
+                                  return null; // ✅ don’t block form when disabled
+                                if (value == 'invalid')
+                                  return 'This Car Model is not available';
+                                return null;
+                              },
+                              controllerTag: 'car_model',
+                            ),
+                          ),
+                        );
+                      }),
 
-                      // 5. Year Of Registration
+                      // 6. Variant
+                      Obx(() {
+                        final enabled = getxController.isVariantEnabled.value;
+
+                        return IgnorePointer(
+                          ignoring: !enabled,
+                          child: Opacity(
+                            opacity: enabled ? 1 : 0.45,
+                            child: DropdownTextfieldWidget<String>(
+                              label: 'Variant',
+                              controller: getxController.variantController,
+                              hintText: enabled
+                                  ? 'Select variant...'
+                                  : 'Select make & model first',
+                              icon: Icons.business,
+                              isRequired: enabled, // ✅ IMPORTANT
+                              allowCustomEntries: true,
+                              customEntryValidationMessage:
+                                  'Please select a valid Car Variant from the list',
+                              items: const [],
+                              validator: (value) {
+                                if (!enabled)
+                                  return null; // ✅ don’t block form when disabled
+                                if (value == 'invalid')
+                                  return 'This Car Variant is not available';
+                                return null;
+                              },
+                              controllerTag: 'car_variant',
+                            ),
+                          ),
+                        );
+                      }),
+
+                      // 7. Year Of Registration
                       _buildCustomTextField(
                         label: 'Year Of Registration',
                         icon: Icons.calendar_today,
-                        controller: getxController.yearOfMfgController,
+                        controller: getxController.yearOfRegController,
                         hintText: 'e.g. 2019',
                         keyboardType: TextInputType.number,
                         isRequired: true,
                       ),
 
-                      // 6. Ownership Serial No
+                      // 8. Ownership Serial No
                       DropdownTextfieldWidget<String>(
                         label: 'Ownership Serial Number',
                         controller: getxController.ownershipSerialNoController,
@@ -204,35 +255,18 @@ class SellMyCarPage extends StatelessWidget {
                         },
                         controllerTag: 'ownership_serial',
                       ),
-                      // _buildCustomTextField(
-                      //   label: 'Ownership Serial Number',
-                      //   icon: Icons.confirmation_number_outlined,
-                      //   controller: getxController.ownershipSerialNoController,
-                      //   hintText: 'e.g. 1st / 2nd owner',
-                      //   keyboardType: TextInputType.text,
-                      //   isRequired: true,
-                      // ),
 
-                      // // 7. Color
-                      // _buildCustomTextField(
-                      //   label: 'Car Color',
-                      //   icon: Icons.color_lens_outlined,
-                      //   controller: getxController.colorController,
-                      //   hintText: 'e.g. White, Black, Red',
-                      //   keyboardType: TextInputType.text,
-                      //   isRequired: true,
-                      // ),
-
-                      // 8. Odometer Reading
+                      // 9. Odometer Reading
                       _buildCustomTextField(
                         label: 'Odometer Reading (Km)',
                         icon: Icons.speed,
-                        controller: getxController.odometerController,
+                        controller:
+                            getxController.odometerReadingInKmsController,
                         hintText: 'e.g. 45,000',
                         keyboardType: TextInputType.number,
                       ),
 
-                      // 9. Notes (multi-line)
+                      // 10. Notes (multi-line)
                       _buildNotesField(),
 
                       const SizedBox(height: 16),
@@ -248,9 +282,10 @@ class SellMyCarPage extends StatelessWidget {
                             child: ButtonWidget(
                               text: 'Request a Callback',
                               isLoading:
-                                  getxController.isScheduleInspectionLoading,
+                                  getxController.isRequestCallbackLoading,
                               fontSize: 11,
                               elevation: 5,
+
                               onTap: () async {
                                 // validate main form if you want to require car details
                                 if (!(getxController.formKey.currentState
@@ -271,10 +306,11 @@ class SellMyCarPage extends StatelessWidget {
                                     null;
                                 getxController.inspectionDateTimeController
                                     .clear();
-                                getxController.addressController.clear();
+                                getxController.inspectionAddressController
+                                    .clear();
 
                                 final ok = await getxController
-                                    .submitInspectionRequest();
+                                    .submitInspectionRequest(isSchedule: false);
                                 if (ok) {
                                   SellMyCarPage.showCallbackConfirmationDialog();
                                 }
@@ -434,7 +470,7 @@ class SellMyCarPage extends StatelessWidget {
             border: Border.all(color: AppColors.grey.withValues(alpha: 0.3)),
           ),
           child: TextFormField(
-            controller: getxController.notesController,
+            controller: getxController.additionalNotesController,
             maxLines: 4,
             style: const TextStyle(fontSize: 14, color: Colors.black87),
             decoration: InputDecoration(
@@ -659,6 +695,7 @@ class SellMyCarPage extends StatelessWidget {
   // Show Request Callback Confirmation Dialog
   static showCallbackConfirmationDialog() {
     Get.dialog(
+      barrierDismissible: false,
       AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),
@@ -701,9 +738,10 @@ class SellMyCarPage extends StatelessWidget {
   void showScheduleInspectionDialog() {
     // Clear previous values
     getxController.inspectionDateTimeController.clear();
-    getxController.addressController.clear();
+    getxController.inspectionAddressController.clear();
 
     Get.dialog(
+      barrierDismissible: false,
       AlertDialog(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.0),
@@ -794,7 +832,7 @@ class SellMyCarPage extends StatelessWidget {
 
             // Address Field
             TextFormField(
-              controller: getxController.addressController,
+              controller: getxController.inspectionAddressController,
               maxLines: 3,
               textAlignVertical:
                   TextAlignVertical.top, // This makes text start from top
@@ -849,21 +887,36 @@ class SellMyCarPage extends StatelessWidget {
                     height: 35,
                     elevation: 5,
                     onTap: () async {
-                      // if (getxController
-                      //         .inspectionDateTimeController
-                      //         .text
-                      //         .isEmpty ||
-                      //     getxController.addressController.text.isEmpty) {
-                      //   ToastWidget.show(
-                      //     context: Get.context!,
-                      //     title: 'Error',
-                      //     subtitle: 'Please fill all fields',
-                      //     type: ToastType.error,
-                      //   );
-                      //   return;
-                      // }
+                      if (getxController.inspectionDateTimeUtcForApi == null ||
+                          getxController.inspectionDateTimeUtcForApi!.isEmpty ||
+                          getxController.inspectionAddressController.text
+                              .trim()
+                              .isEmpty) {
+                        ToastWidget.show(
+                          context: Get.context!,
+                          title: 'Error',
+                          subtitle:
+                              'Please select inspection date & time and enter address',
+                          type: ToastType.error,
+                        );
+                        return;
+                      }
 
-                      final ok = await getxController.submitInspectionRequest();
+                      // validate main form if you want to require car details
+                      if (!(getxController.formKey.currentState?.validate() ??
+                          false)) {
+                        ToastWidget.show(
+                          context: Get.context!,
+                          title: 'Error',
+                          subtitle: 'Please fill all required car details',
+                          type: ToastType.error,
+                        );
+                        return;
+                      }
+
+                      final ok = await getxController.submitInspectionRequest(
+                        isSchedule: true,
+                      );
                       if (ok) {
                         Get.back(); // close schedule dialog
                         SellMyCarPage.showCallbackConfirmationDialog();
@@ -876,6 +929,44 @@ class SellMyCarPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  // Show make model variant description if fetched
+  Widget _buildMakeModelVariantDescription() {
+    final makerDesc = getxController.fetchedMakerDescStringToShow.value;
+    final makerModel = getxController.fetchedMakerModelStringToShow.value;
+    return Column(
+      children: [
+        if (makerDesc.isNotEmpty)
+          _buildFetchedData(title: 'Maker Description', value: makerDesc),
+        if (makerModel.isNotEmpty)
+          _buildFetchedData(title: 'Maker Model', value: makerModel),
+        if (makerDesc.isNotEmpty || makerModel.isNotEmpty)
+          const SizedBox(height: 15),
+      ],
+    );
+  }
+
+  // Show fetched data
+  Widget _buildFetchedData({required String title, required String value}) {
+    return Row(
+      spacing: 10,
+      children: [
+        Text(
+          '$title:',
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        ),
+
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 14, color: AppColors.green),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }
