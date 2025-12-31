@@ -11,6 +11,7 @@ class AppConstants {
   static final BannerStatus bannerStatus = BannerStatus();
   static final BannerTypes bannerTypes = BannerTypes();
   static final BannerViews bannerViews = BannerViews();
+  static final BannerScreenNames bannerScreenNames = BannerScreenNames();
 
   // ---- configuration per environment ----
   static const _localConfiguration = _EnvConfig(
@@ -111,4 +112,13 @@ class BannerTypes {
 class BannerViews {
   final String home = 'Home';
   final String sellMyCar = 'Sell My Car';
+}
+
+// Banners Screens Names
+class BannerScreenNames {
+  final String buyACar = 'Buy a Car';
+  final String sellYourCar = 'Sell Your Car';
+  final String warranty = 'Warranty';
+  final String finance = 'Finance';
+  final String insurance = 'Insurance';
 }

@@ -1,6 +1,9 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:otobix_customer_app/controllers/bottom_navigation_bar_controller.dart';
 import 'package:otobix_customer_app/controllers/profile_controller.dart';
+import 'package:otobix_customer_app/utils/app_colors.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -111,6 +114,30 @@ class _ProfilePageState extends State<ProfilePage> {
                   //     Get.to(DeleteAccountPage());
                   //   },
                   // ),
+                  ProfileOption(
+                    icon: CupertinoIcons.car_detailed,
+                    color: AppColors.green,
+                    title: "My Cars",
+                    description: "Manage your cars and related details.",
+                    onTap: () {
+                      Get.find<BottomNavigationBarController>()
+                              .currentIndex
+                              .value =
+                          1;
+                    },
+                  ),
+                  ProfileOption(
+                    icon: CupertinoIcons.cart_fill,
+                    color: AppColors.grey,
+                    title: "My Orders",
+                    description: "Check order status and history.",
+                    onTap: () {
+                      Get.find<BottomNavigationBarController>()
+                              .currentIndex
+                              .value =
+                          2;
+                    },
+                  ),
                   ProfileOption(
                     icon: Icons.logout,
                     color: Colors.red,

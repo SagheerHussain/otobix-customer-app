@@ -4,11 +4,12 @@ import 'package:get/get.dart';
 import 'package:otobix_customer_app/controllers/login_controller.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
+import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
+import 'package:otobix_customer_app/views/home_page.dart.dart';
 import 'package:otobix_customer_app/views/profile_page.dart';
 import 'package:otobix_customer_app/views/login_page.dart';
-import 'package:otobix_customer_app/views/my_auctions_page.dart';
-import 'package:otobix_customer_app/views/sell_my_car_page.dart';
+import 'package:otobix_customer_app/views/under_development_page.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
 
 class BottomNavigationBarController extends GetxController {
@@ -16,13 +17,20 @@ class BottomNavigationBarController extends GetxController {
   final RxBool isLoadingLogout = false.obs;
 
   List<Widget> get pages => [
-    // HomePage(),
+    HomePage(),
     // ManageMyCarsPage(),
-    // const UnderDevelopmentPage(
-    //   screenName: "Cart",
-    //   icon: CupertinoIcons.cart_fill,
-    //   color: AppColors.grey,
-    // ),
+    UnderDevelopmentPage(
+      screenName: "My Cars",
+      icon: CupertinoIcons.car_detailed,
+      color: AppColors.green,
+      showAppBar: false,
+    ),
+    const UnderDevelopmentPage(
+      screenName: "Cart",
+      icon: CupertinoIcons.cart_fill,
+      color: AppColors.grey,
+      showAppBar: false,
+    ),
     //  UnderDevelopmentPage(
     //   screenName: "Profile",
     //   icon: CupertinoIcons.person_crop_circle,
@@ -39,8 +47,8 @@ class BottomNavigationBarController extends GetxController {
     //     },
     //   ),
     // ),
-    SellMyCarPage(),
-    MyAuctionsPage(),
+    // SellMyCarPage(),
+    // MyAuctionsPage(),
     ProfilePage(),
   ];
 

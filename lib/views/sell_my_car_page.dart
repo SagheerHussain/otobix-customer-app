@@ -4,6 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/controllers/sell_my_car_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
+import 'package:otobix_customer_app/utils/app_constants.dart';
+import 'package:otobix_customer_app/views/buy_a_car_page.dart';
+import 'package:otobix_customer_app/views/finance_page.dart';
+import 'package:otobix_customer_app/views/insurance_page.dart';
+import 'package:otobix_customer_app/views/warranty_page.dart';
+import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 import 'package:otobix_customer_app/widgets/dropdown_textfield_widget.dart';
 import 'package:otobix_customer_app/widgets/images_scroll_widget.dart';
@@ -17,7 +23,7 @@ class SellMyCarPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBarWidget(title: 'Sell My Car'),
+      appBar: AppBarWidget(title: 'Sell My Car'),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -347,14 +353,17 @@ class SellMyCarPage extends StatelessWidget {
                   return const SizedBox.shrink();
                 }
 
-                final imageUrls = banners.map((b) => b.imageUrl).toList();
+                final imageUrls = banners
+                    .map((banner) => banner.imageUrl)
+                    .toList();
 
                 // Each tap prints (or shows) its screenName
-                final onTaps = banners.map<VoidCallback>((b) {
+                final onTaps = banners.map<VoidCallback>((banner) {
                   return () {
-                    debugPrint('Banner tapped: ${b.screenName}');
+                    debugPrint('Banner tapped: ${banner.screenName}');
                     // or show a toast/snackbar / navigate etc.
                     // Get.snackbar('Banner', b.screenName);
+                    _navigateToScreenOnBannerTap(banner.screenName);
                   };
                 }).toList();
 
@@ -968,5 +977,37 @@ class SellMyCarPage extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  // Navigate to screen on banner tap
+  void _navigateToScreenOnBannerTap(String? screenName) {
+    final name = (screenName ?? '').trim().toLowerCase();
+
+    final routes = <String, Widget Function()>{
+      AppConstants.bannerScreenNames.buyACar.toLowerCase(): () => BuyACarPage(),
+      AppConstants.bannerScreenNames.sellYourCar.toLowerCase(): () =>
+          SellMyCarPage(),
+      AppConstants.bannerScreenNames.warranty.toLowerCase(): () =>
+          WarrantyPage(),
+      AppConstants.bannerScreenNames.finance.toLowerCase(): () => FinancePage(),
+      AppConstants.bannerScreenNames.insurance.toLowerCase(): () =>
+          InsurancePage(),
+    };
+
+    final builder = routes[name];
+
+    if (builder != null) {
+      Get.to(builder);
+      return;
+    }
+
+    // Default fallback
+    // Get.to(
+    //   () => UnderDevelopmentPage(
+    //     screenName: screenName ?? 'Coming Soon',
+    //     icon: CupertinoIcons.square_grid_2x2,
+    //     color: AppColors.grey,
+    //   ),
+    // );
   }
 }

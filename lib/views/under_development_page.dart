@@ -55,7 +55,8 @@ class UnderDevelopmentPage extends StatelessWidget {
 
               // Subtitle
               Text(
-                'Under Development',
+                // 'Under Development',
+                'Coming Soon',
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey[600],
@@ -66,7 +67,7 @@ class UnderDevelopmentPage extends StatelessWidget {
 
               // Description
               Text(
-                'This screen is currently under development and will be available soon.',
+                'This feature is currently under development and will be available soon.',
                 style: TextStyle(fontSize: 14, color: Colors.grey[500]),
                 textAlign: TextAlign.center,
               ),

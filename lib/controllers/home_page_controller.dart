@@ -16,6 +16,9 @@ class HomePageController extends GetxController {
   final RxBool isBannersLoading = false.obs;
   final RxString userName = ''.obs;
 
+  final TextEditingController searchController = TextEditingController();
+  final RxString searchQuery = ''.obs;
+
   // Search
   // final TextEditingController searchController = TextEditingController();
   // final RxString searchQuery = ''.obs;
@@ -54,14 +57,18 @@ class HomePageController extends GetxController {
         // If the backend sends { type: 'Header' | 'Footer' }
         final headerBannerMaps = dataList
             .where(
-              (banner) => banner['type'] == AppConstants.bannerTypes.header,
+              (banner) =>
+                  banner['type'] == AppConstants.bannerTypes.header &&
+                  banner['status'] == AppConstants.bannerStatus.active,
             )
             .cast<Map<String, dynamic>>()
             .toList();
 
         final footerBannerMaps = dataList
             .where(
-              (banner) => banner['type'] == AppConstants.bannerTypes.footer,
+              (banner) =>
+                  banner['type'] == AppConstants.bannerTypes.footer &&
+                  banner['status'] == AppConstants.bannerStatus.active,
             )
             .cast<Map<String, dynamic>>()
             .toList();

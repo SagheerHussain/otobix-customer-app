@@ -43,6 +43,8 @@ class SellMyCarController extends GetxController {
   final isRequestCallbackLoading = false.obs;
   final isScheduleInspectionLoading = false.obs;
 
+  static const String _loadingValueForDropdown = '__loading__';
+
   // Banners
   final headerBannersList = <SellMyCarBannersModel>[].obs;
   final footerBannersList = <SellMyCarBannersModel>[].obs;
@@ -445,6 +447,7 @@ class SellMyCarController extends GetxController {
   }
 
   Future<void> _fetchMakeSuggestions(String query) async {
+    _setDropdownLoading('car_make', true);
     try {
       final response = await ApiService.post(
         endpoint: AppUrls.searchCarMakes,
@@ -467,6 +470,7 @@ class SellMyCarController extends GetxController {
   }
 
   Future<void> _fetchModelSuggestions(String make, String query) async {
+    _setDropdownLoading('car_model', true);
     try {
       final response = await ApiService.post(
         endpoint: AppUrls.searchCarModelsByMake,
@@ -493,6 +497,7 @@ class SellMyCarController extends GetxController {
     String model,
     String query,
   ) async {
+    _setDropdownLoading('car_variant', true);
     try {
       final response = await ApiService.post(
         endpoint: AppUrls.searchCarVariantsByMakeModel,
@@ -574,14 +579,18 @@ class SellMyCarController extends GetxController {
         // If the backend sends { type: 'Header' | 'Footer' }
         final headerBannerMaps = dataList
             .where(
-              (banner) => banner['type'] == AppConstants.bannerTypes.header,
+              (banner) =>
+                  banner['type'] == AppConstants.bannerTypes.header &&
+                  banner['status'] == AppConstants.bannerStatus.active,
             )
             .cast<Map<String, dynamic>>()
             .toList();
 
         final footerBannerMaps = dataList
             .where(
-              (banner) => banner['type'] == AppConstants.bannerTypes.footer,
+              (banner) =>
+                  banner['type'] == AppConstants.bannerTypes.footer &&
+                  banner['status'] == AppConstants.bannerStatus.active,
             )
             .cast<Map<String, dynamic>>()
             .toList();
@@ -633,6 +642,12 @@ class SellMyCarController extends GetxController {
       final token =
           await SharedPrefsHelper.getString(SharedPrefsHelper.tokenKey) ?? '';
 
+      final customerContactNumber =
+          await SharedPrefsHelper.getString(
+            SharedPrefsHelper.userPhoneNumberKey,
+          ) ??
+          '';
+
       if (token.isNotEmpty) {
         request.headers.addAll({
           'Authorization': 'Bearer $token',
@@ -652,6 +667,7 @@ class SellMyCarController extends GetxController {
       request.fields['ownershipSerialNumber'] = ownershipToNumber(
         ownershipSerialNoController.text,
       );
+      request.fields['customerContactNumber'] = customerContactNumber;
 
       // optional fields
       if (odometerReadingInKmsController.text.trim().isNotEmpty) {
@@ -760,6 +776,32 @@ class SellMyCarController extends GetxController {
 
     // fallback: send as-is (or return '' if you want to block)
     return value.trim();
+  }
+
+  void _setDropdownLoading(String tag, bool loading) {
+    if (!Get.isRegistered<DropdownController<String>>(tag: tag)) return;
+
+    final dropdownCtrl = Get.find<DropdownController<String>>(tag: tag);
+
+    if (!loading) return; // we only need to inject placeholder while loading
+
+    dropdownCtrl.updateItems([
+      DropdownMenuItem<String>(
+        value: _loadingValueForDropdown,
+        enabled: false, // IMPORTANT: user can't select it
+        child: Row(
+          children: const [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(width: 10),
+            Text('Loading...'),
+          ],
+        ),
+      ),
+    ]);
   }
 
   // Close method to dispose controllers
