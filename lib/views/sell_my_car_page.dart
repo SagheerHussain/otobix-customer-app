@@ -12,7 +12,7 @@ import 'package:otobix_customer_app/views/warranty_page.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 import 'package:otobix_customer_app/widgets/dropdown_textfield_widget.dart';
-import 'package:otobix_customer_app/widgets/images_scroll_widget.dart';
+import 'package:otobix_customer_app/widgets/home_banners_widgets.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
 
 class SellMyCarPage extends StatelessWidget {
@@ -28,36 +28,63 @@ class SellMyCarPage extends StatelessWidget {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              const SizedBox(height: 20),
+              // const SizedBox(height: 20),
               // TOP header banners (replace your first ImagesScrollWidget with this)
               Obx(() {
                 final banners = getxController.headerBannersList;
 
-                // If list is empty => don't show banners at all
                 if (banners.isEmpty) {
-                  return const SizedBox.shrink();
+                  return SizedBox(
+                    height: MediaQuery.of(context).size.width * 0.563,
+                    child: Center(
+                      child: CircularProgressIndicator(color: AppColors.green),
+                    ),
+                  );
                 }
 
                 final imageUrls = banners.map((b) => b.imageUrl).toList();
 
-                // Each tap prints (or shows) its screenName
-                final onTaps = banners.map<VoidCallback>((b) {
-                  return () {
-                    debugPrint('Banner tapped: ${b.screenName}');
-                    // or show a toast/snackbar / navigate etc.
-                    // Get.snackbar('Banner', b.screenName);
-                  };
-                }).toList();
-
-                return ImagesScrollWidget(
-                  width: 200,
-                  height: 100,
+                return HomeBannersWidget(
                   imageUrls: imageUrls,
-                  onTaps: onTaps,
+                  height:
+                      MediaQuery.of(context).size.width *
+                      0.563, // whatever height you like
+                  displayDuration: const Duration(seconds: 2),
+                  onTap: (index) {
+                    final banner = banners[index];
+                    debugPrint('Banner tapped: ${banner.screenName}');
+                    // here you can navigate based on banner.screenName, etc.
+                  },
                 );
               }),
 
-              const SizedBox(height: 20),
+              // Obx(() {
+              //   final banners = getxController.headerBannersList;
+
+              //   // If list is empty => don't show banners at all
+              //   if (banners.isEmpty) {
+              //     return const SizedBox.shrink();
+              //   }
+
+              //   final imageUrls = banners.map((b) => b.imageUrl).toList();
+
+              //   // Each tap prints (or shows) its screenName
+              //   final onTaps = banners.map<VoidCallback>((b) {
+              //     return () {
+              //       debugPrint('Banner tapped: ${b.screenName}');
+              //       // or show a toast/snackbar / navigate etc.
+              //       // Get.snackbar('Banner', b.screenName);
+              //     };
+              //   }).toList();
+
+              //   return ImagesScrollWidget(
+              //     width: 200,
+              //     height: 100,
+              //     imageUrls: imageUrls,
+              //     onTaps: onTaps,
+              //   );
+              // }),
+              // const SizedBox(height: 20),
 
               // Car details form
               Container(
@@ -343,37 +370,37 @@ class SellMyCarPage extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              // TOP footer banners (replace your first ImagesScrollWidget with this)
-              Obx(() {
-                final banners = getxController.footerBannersList;
+              // const SizedBox(height: 20),
+              // // TOP footer banners (replace your first ImagesScrollWidget with this)
+              // Obx(() {
+              //   final banners = getxController.footerBannersList;
 
-                // If list is empty => don't show banners at all
-                if (banners.isEmpty) {
-                  return const SizedBox.shrink();
-                }
+              //   // If list is empty => don't show banners at all
+              //   if (banners.isEmpty) {
+              //     return const SizedBox.shrink();
+              //   }
 
-                final imageUrls = banners
-                    .map((banner) => banner.imageUrl)
-                    .toList();
+              //   final imageUrls = banners
+              //       .map((banner) => banner.imageUrl)
+              //       .toList();
 
-                // Each tap prints (or shows) its screenName
-                final onTaps = banners.map<VoidCallback>((banner) {
-                  return () {
-                    debugPrint('Banner tapped: ${banner.screenName}');
-                    // or show a toast/snackbar / navigate etc.
-                    // Get.snackbar('Banner', b.screenName);
-                    _navigateToScreenOnBannerTap(banner.screenName);
-                  };
-                }).toList();
+              //   // Each tap prints (or shows) its screenName
+              //   final onTaps = banners.map<VoidCallback>((banner) {
+              //     return () {
+              //       debugPrint('Banner tapped: ${banner.screenName}');
+              //       // or show a toast/snackbar / navigate etc.
+              //       // Get.snackbar('Banner', b.screenName);
+              //       _navigateToScreenOnBannerTap(banner.screenName);
+              //     };
+              //   }).toList();
 
-                return ImagesScrollWidget(
-                  width: 200,
-                  height: 100,
-                  imageUrls: imageUrls,
-                  onTaps: onTaps,
-                );
-              }),
+              //   return ImagesScrollWidget(
+              //     width: 200,
+              //     height: 100,
+              //     imageUrls: imageUrls,
+              //     onTaps: onTaps,
+              //   );
+              // }),
               const SizedBox(height: 30),
             ],
           ),

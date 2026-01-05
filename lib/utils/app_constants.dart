@@ -13,6 +13,9 @@ class AppConstants {
   static final BannerViews bannerViews = BannerViews();
   static final BannerScreenNames bannerScreenNames = BannerScreenNames();
 
+  // App Key for update app info
+  static const String appKey = 'customer';
+
   // ---- configuration per environment ----
   static const _localConfiguration = _EnvConfig(
     deploymentEnvironmentName: 'local',

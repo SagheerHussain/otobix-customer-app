@@ -51,7 +51,14 @@ class HomePage extends StatelessWidget {
                       final banners = homeController.headerBannersList;
 
                       if (banners.isEmpty) {
-                        return const SizedBox.shrink();
+                        return SizedBox(
+                          height: MediaQuery.of(context).size.width * 0.563,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: AppColors.green,
+                            ),
+                          ),
+                        );
                       }
 
                       final imageUrls = banners.map((b) => b.imageUrl).toList();
@@ -227,10 +234,10 @@ class HomePage extends StatelessWidget {
           children: [
             // Icon(icon, color: AppColors.grey, size: 50),
             Container(
-              // padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                // color: AppColors.grey.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(5),
+                color: AppColors.grey.withValues(alpha: 0.2),
               ),
 
               child: SvgPicture.asset(icon, height: 50, width: 50),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:otobix_customer_app/services/app_update_service.dart';
 import 'package:otobix_customer_app/services/notification_sevice.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 import 'package:otobix_customer_app/services/socket_service.dart';
@@ -16,9 +17,24 @@ void main() async {
   runApp(MyApp(home: start));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   final Widget home;
   const MyApp({super.key, required this.home});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+
+    // ✅ run after first frame to ensure context exists
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppUpdateService.instance.checkOnLaunch(appKey: AppConstants.appKey);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +56,7 @@ class MyApp extends StatelessWidget {
         ),
       ),
 
-      home: home,
+      home: widget.home,
     );
   }
 }

@@ -189,6 +189,10 @@ class AppUrls {
   static String getEntityDocumentsByName({required String entityName}) =>
       "${baseUrl}entity-documents/get-entity-documents-by-name/${Uri.encodeComponent(entityName)}";
 
+  // GET app update info
+  static String getAppUpdateInfo({required String appKey}) =>
+      "${baseUrl}admin/get-app-update-info?appKey=$appKey";
+
   // Socket URL Extraction
   static String _extractSocketBaseUrl(String url) {
     final uri = Uri.parse(url);
