@@ -12,6 +12,7 @@ class AppConstants {
   static final BannerTypes bannerTypes = BannerTypes();
   static final BannerViews bannerViews = BannerViews();
   static final BannerScreenNames bannerScreenNames = BannerScreenNames();
+  static final ActivityLogEvents activityLogEvents = ActivityLogEvents();
 
   // App Key for update app info
   static const String appKey = 'customer';
@@ -124,4 +125,9 @@ class BannerScreenNames {
   final String warranty = 'Warranty';
   final String finance = 'Finance';
   final String insurance = 'Insurance';
+}
+
+// Activity log events
+class ActivityLogEvents {
+  final String login = 'login';
 }

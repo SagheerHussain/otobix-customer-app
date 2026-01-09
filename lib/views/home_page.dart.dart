@@ -10,6 +10,7 @@ import 'package:otobix_customer_app/views/buy_a_car_page.dart';
 import 'package:otobix_customer_app/views/finance_page.dart';
 import 'package:otobix_customer_app/views/insurance_page.dart';
 import 'package:otobix_customer_app/views/my_auctions_page.dart';
+import 'package:otobix_customer_app/views/pdi_page.dart';
 import 'package:otobix_customer_app/views/sell_my_car_page.dart';
 import 'package:otobix_customer_app/views/under_development_page.dart';
 import 'package:otobix_customer_app/views/warranty_page.dart';
@@ -165,15 +166,15 @@ class HomePage extends StatelessWidget {
                               _buildNavigationItem(
                                 // PDI
                                 icon: AppIcons.pdi,
-
                                 title: 'PDI',
-                                onTap: () => Get.to(
-                                  () => UnderDevelopmentPage(
-                                    screenName: "PDI",
-                                    icon: CupertinoIcons.car,
-                                    color: AppColors.red,
-                                  ),
-                                ),
+                                onTap: () => Get.to(() => PdiPage()),
+                                // onTap: () => Get.to(
+                                //   () => UnderDevelopmentPage(
+                                //     screenName: "PDI",
+                                //     icon: CupertinoIcons.car,
+                                //     color: AppColors.red,
+                                //   ),
+                                // ),
                               ),
                               const SizedBox(width: 10),
                               _buildNavigationItem(

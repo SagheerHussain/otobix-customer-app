@@ -232,6 +232,7 @@ class AuctionDetailsLiveSection extends StatelessWidget {
                             .auctionDetails
                             .value
                             .priceDiscovery,
+                        fixedMargin: bid.fixedMargin,
                         variableMargin: bid.variableMargin,
                       );
 

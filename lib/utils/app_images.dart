@@ -19,4 +19,8 @@ class AppImages {
   static const String topBanner2 = 'lib/assets/images/bannerImage2.png';
   static const String topBanner3 = 'lib/assets/images/bannerImage3.png';
   static const String topBanner4 = 'lib/assets/images/bannerImage4.png';
+
+  // PDI Images
+  static const String pdiBanner = 'lib/assets/images/pdiBanner.jpg';
+  static const String pdiBanner2 = 'lib/assets/images/pdiBanner2.jpg';
 }

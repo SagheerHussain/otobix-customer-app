@@ -11,6 +11,7 @@ import 'package:otobix_customer_app/views/bottom_navigation_bar_page.dart';
 import 'package:otobix_customer_app/views/waiting_for_approval_page.dart';
 
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class LoginController extends GetxController {
   @override
@@ -73,6 +74,14 @@ class LoginController extends GetxController {
             title: "Your Account is Pending Approval.",
             type: ToastType.warning,
           );
+
+          // fire-and-forget (do NOT await)
+          Future.microtask(
+            () => addActivityLogSafe(
+              userId: userId,
+              eventDetails: 'User status was pending',
+            ),
+          );
           return;
         }
 
@@ -81,6 +90,13 @@ class LoginController extends GetxController {
             context: Get.context!,
             title: "Your Account did not get approved.",
             type: ToastType.error,
+          );
+          // fire-and-forget (do NOT await)
+          Future.microtask(
+            () => addActivityLogSafe(
+              userId: userId,
+              eventDetails: 'User status was rejected',
+            ),
           );
           return;
         }
@@ -127,6 +143,14 @@ class LoginController extends GetxController {
           } else if (approvalStatus == 'Approved') {
             if (userType == AppConstants.roles.customer) {
               Get.offAll(() => BottomNavigationBarPage());
+
+              // fire-and-forget (do NOT await)
+              Future.microtask(
+                () => addActivityLogSafe(
+                  userId: userId,
+                  eventDetails: 'Logged in successfully',
+                ),
+              );
             } else if (userType == AppConstants.roles.salesManager) {
               // Get.offAll(() => SalesManagerHomepage());
             } else if (userType == AppConstants.roles.dealer) {
@@ -206,6 +230,54 @@ class LoginController extends GetxController {
       debugPrint("Error: $error");
     }
     return fallback;
+  }
+
+  // Get app version
+  Future<String> _getAppVersion() async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      // info.version => "1.0.7"
+      // info.buildNumber => "12"
+      return '${info.version}(${info.buildNumber})';
+    } catch (e) {
+      debugPrint('Failed to get app version: $e');
+      return '';
+    }
+  }
+
+  // Add activity log
+  Future<void> addActivityLogSafe({
+    required String userId,
+    required String eventDetails,
+  }) async {
+    try {
+      if (userId.isEmpty) return;
+
+      final appVersion = await _getAppVersion();
+
+      final requestBody = {
+        'userId': userId,
+        'event': AppConstants.activityLogEvents.login,
+        'eventDetails': eventDetails,
+        'appVersion': appVersion,
+      };
+
+      final response = await ApiService.post(
+        endpoint: AppUrls.addUserActivityLog,
+        body: requestBody,
+      );
+
+      if (response.statusCode == 200) {
+        debugPrint("Activity log added");
+      } else {
+        debugPrint(
+          "Activity log failed: ${response.statusCode} ${response.body}",
+        );
+      }
+    } catch (e) {
+      // ✅ swallow errors so it never affects login
+      debugPrint("Activity log error: $e");
+    }
   }
 
   // Clear fields

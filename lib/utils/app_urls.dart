@@ -74,6 +74,9 @@ class AppUrls {
   static String checkUsernameExists(String username) =>
       "${baseUrl}user/check-username?username=$username";
 
+  static String get addUserActivityLog =>
+      "${baseUrl}user/add-user-activity-log";
+
   // static String updateUserStatus(String userId) =>
   //     "${baseUrl}user/update-user-status/$userId";
 

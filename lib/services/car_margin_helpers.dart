@@ -74,17 +74,25 @@ class CarMarginHelpers {
   static double netAfterMarginsFlexible({
     required num originalPrice,
     required num? priceDiscovery,
+    double? fixedMargin,
     double? variableMargin,
     bool roundTo1000 = true,
   }) {
     final pdMargins = getMargins(priceDiscovery);
+
+    // If fixedMargin not provided (null or 0) => use default fixed (4.0)
+    final usedFixed = (fixedMargin == null || fixedMargin == 0)
+        ? pdMargins.fixed
+        : fixedMargin;
+
+    // If variableMargin not provided (null or 0) => use slab-based variable
     final usedVariable = (variableMargin == null || variableMargin == 0)
         ? pdMargins.variable
         : variableMargin;
 
     final net = netAfterMargins(
       amount: originalPrice,
-      fixedPercent: pdMargins.fixed,
+      fixedPercent: usedFixed,
       variablePercent: usedVariable,
     );
 

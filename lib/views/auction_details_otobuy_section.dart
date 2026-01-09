@@ -240,6 +240,7 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
                             .auctionDetails
                             .value
                             .priceDiscovery,
+                        fixedMargin: offer.fixedMargin,
                         variableMargin: offer.variableMargin,
                       );
 
