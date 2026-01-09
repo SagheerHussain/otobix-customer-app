@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:otobix_customer_app/Utils/app_colors.dart';
+import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/controllers/get_warranty_controller.dart';
 import 'package:otobix_customer_app/views/warranty_payment_page.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
