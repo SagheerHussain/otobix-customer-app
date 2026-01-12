@@ -124,10 +124,10 @@ class GetWarrantyPage extends StatelessWidget {
               // Warranty Choices
               _buildWarrantyChoices(
                 choices: const [
-                  "Warranty Option A",
-                  "Warranty Option B",
-                  "Warranty Option C",
-                  "Warranty Option D",
+                  "6 Months Engine & Transmission",
+                  "6 Months Comprehensive",
+                  "12 Months Engine & Transmission",
+                  "12 Months Comprehensive",
                 ],
               ),
 

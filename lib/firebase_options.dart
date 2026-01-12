@@ -17,10 +17,7 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      throw UnsupportedError(
-        'DefaultFirebaseOptions have not been configured for web - '
-        'you can reconfigure this by running the FlutterFire CLI again.',
-      );
+      return web;
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -50,19 +47,30 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyAVONuk4OdJ0VIi23c3pfVHNcUA3CBKV4s',
-    appId: '1:814244149785:android:91e3e1c5e28517de524888',
-    messagingSenderId: '814244149785',
-    projectId: 'otobix-cutomer-app',
-    storageBucket: 'otobix-cutomer-app.firebasestorage.app',
+    apiKey: 'AIzaSyBOCTtoWbgDuXaVZFyrTBXlN1_oTj8x6DE',
+    appId: '1:845981097587:android:0a0191fe210b4b08b49406',
+    messagingSenderId: '845981097587',
+    projectId: 'otobix-auction-app-final',
+    storageBucket: 'otobix-auction-app-final.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBHSJ9S_u3xO-zYEf9GnJ_-8NY0LbOO1sQ',
-    appId: '1:814244149785:ios:8ff967c0e51d6f6b524888',
-    messagingSenderId: '814244149785',
-    projectId: 'otobix-cutomer-app',
-    storageBucket: 'otobix-cutomer-app.firebasestorage.app',
+    apiKey: 'AIzaSyBB-wjIKLovgSWFDpEoMHsgXPN3RyBr9wM',
+    appId: '1:845981097587:ios:2d63d8814d7a1472b49406',
+    messagingSenderId: '845981097587',
+    projectId: 'otobix-auction-app-final',
+    storageBucket: 'otobix-auction-app-final.firebasestorage.app',
     iosBundleId: 'com.otobix.customerapp',
   );
+
+  static const FirebaseOptions web = FirebaseOptions(
+    apiKey: 'AIzaSyBswYeHU33yfNh4MFEyhcfPyLqMg5ZXmz8',
+    appId: '1:845981097587:web:02899aefc9086df9b49406',
+    messagingSenderId: '845981097587',
+    projectId: 'otobix-auction-app-final',
+    authDomain: 'otobix-auction-app-final.firebaseapp.com',
+    storageBucket: 'otobix-auction-app-final.firebasestorage.app',
+    measurementId: 'G-KBTBHYY7JP',
+  );
+
 }
