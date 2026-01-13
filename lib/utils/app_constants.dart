@@ -20,7 +20,7 @@ class AppConstants {
   // ---- configuration per environment ----
   static const _localConfiguration = _EnvConfig(
     deploymentEnvironmentName: 'local',
-    renderBaseUrl: 'http://192.168.100.99:4000/api/',
+    renderBaseUrl: 'http://192.168.2.35:4000/api/',
     oneSignalAppId: 'ed92ee62-6b5c-4e1a-a5c0-5846bab4055e',
   );
 
