@@ -57,8 +57,14 @@ class AppUrls {
   static String get setOneClickPrice =>
       "${baseUrl}customer/auction-details/set-one-click-price";
 
+  static String get fetchCarsListForBuyACar =>
+      "${baseUrl}customer/buy-a-car/fetch-cars-list-from-firestore";
+
   static String get fetch10RandomCarsList =>
       "${baseUrl}customer/buy-a-car/fetch-10-random-cars-from-firestore";
+
+  static String get saveInterestedBuyer =>
+      "${baseUrl}customer/buy-a-car/save-interested-buyer";
 
   // static String get allUsersList => "${baseUrl}user/all-users-list";
 

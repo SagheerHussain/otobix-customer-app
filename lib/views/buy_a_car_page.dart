@@ -1,14 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/Models/cars_list_model_for_buy_a_car.dart';
+import 'package:otobix_customer_app/Utils/app_constants.dart';
 import 'package:otobix_customer_app/controllers/buy_a_car_controller.dart';
+import 'package:otobix_customer_app/controllers/buy_a_car_filters_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
-import 'package:otobix_customer_app/utils/global_functions.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
+import 'package:otobix_customer_app/widgets/buy_a_car_filters_widget.dart';
 import 'package:otobix_customer_app/widgets/empty_data_widget.dart';
 import 'package:otobix_customer_app/widgets/shimmer_widget.dart';
 import 'package:photo_view/photo_view.dart';
@@ -84,6 +85,7 @@ class BuyACarPage extends StatelessWidget {
   Widget _buildCarsList(List<CarsListModelForBuyACar> carsList) {
     return Expanded(
       child: ListView.separated(
+        controller: buyACarController.scrollController, // ✅ add this
         itemCount: carsList.length,
         separatorBuilder: (_, __) => const SizedBox(height: 15),
         itemBuilder: (context, index) {
@@ -261,8 +263,12 @@ class BuyACarPage extends StatelessWidget {
           borderRadius: 5,
           isLoading: false.obs,
           backgroundColor: AppColors.blue,
-          onTap: () {
+          onTap: () async {
             _showImageGalleryDialog(context, car);
+            await buyACarController.saveInterestedBuyer(
+              car: car,
+              activityType: AppConstants.buyACarActivityType.viewMoreImages,
+            );
           },
         ),
         const SizedBox(height: 7),
@@ -308,7 +314,25 @@ class BuyACarPage extends StatelessWidget {
             vertical: 0,
             horizontal: 10,
           ),
+
+          // Filters Icon
+          suffixIcon: BuyACarFiltersWidget(
+            onApplyPressed: () {
+              final filters = Get.put(BuyACarFiltersController());
+
+              void applySearchAndFilters() {
+                final filtered = filters.filterCars(
+                  source: buyACarController.searchFilteredCarsList,
+                  searchQueryLower: buyACarController.searchQuery.value,
+                );
+                buyACarController.searchFilteredCarsList.assignAll(filtered);
+              }
+
+              applySearchAndFilters();
+            },
+          ),
         ),
+
         onChanged: (value) {
           buyACarController.searchQuery.value = value.trim().toLowerCase();
         },
@@ -528,8 +552,6 @@ class BuyACarPage extends StatelessWidget {
   }
 
   // Image gallery dialog
-
-  // Improved Image gallery dialog with zoom
   void _showImageGalleryDialog(
     BuildContext context,
     CarsListModelForBuyACar car,
@@ -776,36 +798,14 @@ class BuyACarPage extends StatelessWidget {
             text: 'Submit Interest',
             height: 35,
             fontSize: 12,
-            isLoading: false.obs,
-            onTap: () {
+            isLoading: buyACarController.isSaveInterestedBuyerLoading,
+            onTap: () async {
               // Handle interest submission
-              Navigator.pop(context);
-              _showSuccessDialog(context);
+              await buyACarController.saveInterestedBuyer(
+                car: car,
+                activityType: AppConstants.buyACarActivityType.interested,
+              );
             },
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showSuccessDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Icon(Icons.check_circle, color: Colors.green, size: 50),
-        content: const Text(
-          'Interest submitted successfully!\nOur team will contact you soon.',
-          textAlign: TextAlign.center,
-        ),
-        actions: [
-          Center(
-            child: ButtonWidget(
-              text: 'OK',
-              height: 35,
-              fontSize: 12,
-              isLoading: false.obs,
-              onTap: () => Navigator.pop(context),
-            ),
           ),
         ],
       ),

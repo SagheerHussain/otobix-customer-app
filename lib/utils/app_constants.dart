@@ -13,6 +13,7 @@ class AppConstants {
   static final BannerViews bannerViews = BannerViews();
   static final BannerScreenNames bannerScreenNames = BannerScreenNames();
   static final ActivityLogEvents activityLogEvents = ActivityLogEvents();
+  static final BuyACarActivityType buyACarActivityType = BuyACarActivityType();
 
   // App Key for update app info
   static const String appKey = 'customer';
@@ -130,4 +131,10 @@ class BannerScreenNames {
 // Activity log events
 class ActivityLogEvents {
   final String login = 'login';
+}
+
+// Buy a car activity types
+class BuyACarActivityType {
+  final String interested = 'interested';
+  final String viewMoreImages = 'view_more_images';
 }

@@ -4,7 +4,7 @@ class CarsListModelForBuyACar {
   final String userPhoneNumber; // phoneNumber in firestore
   final String userRole; // role in firestore
   final String userCity; // city in firestore
-  final String dealershipName; // name in firestore
+  final String dealerName; // name in firestore
   final String userAssignedPhone; // assignedPhone in firestore
   final String userState; // state in firestore
   final String userId; // userId in firestore
@@ -26,14 +26,20 @@ class CarsListModelForBuyACar {
   final String carKms; // kms in firestore
   final String carTransmission; // transmission in firestore
   final String carFuelType; // fuel_type in firestore
+  final String bodyType; // body_type in firestore
   final List<String> imageUrls; // images in firestore
+  // dont show car price on frontend
+
+  // Extra fields just for sending data in mongo via buy a car screen
+  final String activityType; // the button customer clicked in buy a car screen
+  final String interestedBuyerId; // customer mongo id
 
   const CarsListModelForBuyACar({
     required this.userDocId,
     required this.userPhoneNumber,
     required this.userRole,
     required this.userCity,
-    required this.dealershipName,
+    required this.dealerName,
     required this.userAssignedPhone,
     required this.userState,
     required this.userId,
@@ -53,7 +59,10 @@ class CarsListModelForBuyACar {
     required this.carKms,
     required this.carTransmission,
     required this.carFuelType,
+    required this.bodyType,
     required this.imageUrls,
+    required this.activityType,
+    required this.interestedBuyerId,
   });
 
   /// Reads JSON where keys are EXACTLY your Dart field names
@@ -64,7 +73,7 @@ class CarsListModelForBuyACar {
       userPhoneNumber: json['userPhoneNumber'] ?? '',
       userRole: json['userRole'] ?? '',
       userCity: json['userCity'] ?? '',
-      dealershipName: json['dealershipName'] ?? '',
+      dealerName: json['dealerName'] ?? '',
       userAssignedPhone: json['userAssignedPhone'] ?? '',
       userState: json['userState'] ?? '',
       userId: json['userId'] ?? '',
@@ -86,7 +95,10 @@ class CarsListModelForBuyACar {
       carKms: json['carKms'] ?? '',
       carTransmission: json['carTransmission'] ?? '',
       carFuelType: json['carFuelType'] ?? '',
+      bodyType: json['bodyType'] ?? '',
       imageUrls: parseImagesList(json['imageUrls']),
+      activityType: json['activityType'] ?? '',
+      interestedBuyerId: json['interestedBuyerId'] ?? '',
     );
   }
 
@@ -98,7 +110,7 @@ class CarsListModelForBuyACar {
       'userPhoneNumber': userPhoneNumber,
       'userRole': userRole,
       'userCity': userCity,
-      'dealershipName': dealershipName,
+      'dealerName': dealerName,
       'userAssignedPhone': userAssignedPhone,
       'userState': userState,
       'userId': userId,
@@ -120,7 +132,10 @@ class CarsListModelForBuyACar {
       'carKms': carKms,
       'carTransmission': carTransmission,
       'carFuelType': carFuelType,
+      'bodyType': bodyType,
       'imageUrls': imageUrls.map((x) => x).toList(),
+      'activityType': activityType,
+      'interestedBuyerId': interestedBuyerId,
     };
   }
 }
