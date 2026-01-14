@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/Models/cars_list_model_for_buy_a_car.dart';
-import 'package:otobix_customer_app/Utils/app_constants.dart';
+import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/controllers/buy_a_car_controller.dart';
 import 'package:otobix_customer_app/controllers/buy_a_car_filters_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
