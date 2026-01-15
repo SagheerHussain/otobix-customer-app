@@ -151,6 +151,7 @@ class HomePage extends StatelessWidget {
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceEvenly,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     _buildNavigationItem(
                                       // Sell My Car
@@ -182,6 +183,7 @@ class HomePage extends StatelessWidget {
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceEvenly,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     _buildNavigationItem(
                                       // Insurance
@@ -214,6 +216,7 @@ class HomePage extends StatelessWidget {
                                 Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceEvenly,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     _buildNavigationItem(
                                       // PDI
@@ -291,12 +294,13 @@ class HomePage extends StatelessWidget {
     required String title,
     required VoidCallback onTap,
   }) {
-    final double width = MediaQuery.of(Get.context!).size.width;
+    // final double width = MediaQuery.of(Get.context!).size.width;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(5),
-        width: width / 4,
+        // width: width / 4,
+        width: 100,
 
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -314,8 +318,10 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 5),
             Text(
               title,
+              textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: width / 40,
+                // fontSize: width / 40,
+                fontSize: 11,
                 color: AppColors.black,
                 fontWeight: FontWeight.bold,
               ),
