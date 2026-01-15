@@ -49,7 +49,7 @@ class SellMyCarPage extends StatelessWidget {
                   height:
                       MediaQuery.of(context).size.width *
                       0.563, // whatever height you like
-                  displayDuration: const Duration(seconds: 2),
+                  displayDuration: const Duration(seconds: 4),
                   onTap: (index) {
                     final banner = banners[index];
                     debugPrint('Banner tapped: ${banner.screenName}');
@@ -345,7 +345,9 @@ class SellMyCarPage extends StatelessWidget {
                                 final ok = await getxController
                                     .submitInspectionRequest(isSchedule: false);
                                 if (ok) {
-                                  SellMyCarPage.showCallbackConfirmationDialog();
+                                  SellMyCarPage.showCallbackConfirmationDialog(
+                                    isClickedCallback: true,
+                                  );
                                 }
                               },
                             ),
@@ -729,7 +731,7 @@ class SellMyCarPage extends StatelessWidget {
   }
 
   // Show Request Callback Confirmation Dialog
-  static showCallbackConfirmationDialog() {
+  static showCallbackConfirmationDialog({required bool isClickedCallback}) {
     Get.dialog(
       barrierDismissible: false,
       AlertDialog(
@@ -750,7 +752,9 @@ class SellMyCarPage extends StatelessWidget {
           ],
         ),
         content: Text(
-          'Thank you for your interest, our team will contact you shortly.',
+          isClickedCallback
+              ? 'Thank you for your interest, our team will contact you shortly.'
+              : 'Inspection request received, Inspection will be scheduled soon.',
           style: TextStyle(fontSize: 16, color: Colors.grey[700]),
         ),
         actions: [
@@ -955,7 +959,9 @@ class SellMyCarPage extends StatelessWidget {
                       );
                       if (ok) {
                         Get.back(); // close schedule dialog
-                        SellMyCarPage.showCallbackConfirmationDialog();
+                        SellMyCarPage.showCallbackConfirmationDialog(
+                          isClickedCallback: false,
+                        );
                       }
                     },
                   ),

@@ -2,6 +2,7 @@ class AppImages {
   static const String otobixLogo = 'lib/assets/images/otobixLogo.png';
   static const String appLogo = 'lib/assets/images/appLogo.png';
   static const String splashLogo = 'lib/assets/images/splashLogo.png';
+  static const String homeScreenLogo = 'lib/assets/images/homeScreenLogo.png';
 
   // Car Images
   static const String carNotFound = 'lib/assets/images/carNotFound.png';
