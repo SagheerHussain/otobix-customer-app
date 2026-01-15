@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>aps-environment</key>
-	<string>production</string>
-	<!-- <string>$(APS_ENVIRONMENT)</string> -->
+	<!-- <string>production</string> -->
+	<string>$(APS_ENVIRONMENT)</string>
 </dict>
 </plist>
