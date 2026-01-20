@@ -51,6 +51,10 @@ platform :ios do
       xcargs: 'CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""'
     )
 
+    cd ios
+    unzip -q Runner.ipa -d ipa_out
+    codesign -d --entitlements :- ipa_out/Payload/Runner.app | sed -n '1,120p'
+
     upload_to_testflight(
       api_key: api_key,
       ipa: "Runner.ipa",                     # make the IPA explicit
