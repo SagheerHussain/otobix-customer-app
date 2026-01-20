@@ -69,5 +69,14 @@ jobs:
           cd ios
           fastlane beta
 
+      - name: Inspect entitlements in generated IPA
+        run: |
+          cd ios
+          ls -la
+          unzip -q Runner.ipa -d ipa_out
+          codesign -d --entitlements :- ipa_out/Payload/Runner.app | sed -n '1,160p'
+          security cms -D -i ipa_out/Payload/Runner.app/embedded.mobileprovision > prof.plist
+          /usr/libexec/PlistBuddy -c "Print :Entitlements:aps-environment" prof.plist
+
 
 

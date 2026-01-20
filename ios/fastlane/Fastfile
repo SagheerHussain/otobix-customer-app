@@ -48,12 +48,8 @@ platform :ios do
       },
 
       # <- Important: prevent Xcode from trying to auto-provision during archive
-      xcargs: 'CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""'
+      # xcargs: 'CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""'
     )
-
-    cd ios
-    unzip -q Runner.ipa -d ipa_out
-    codesign -d --entitlements :- ipa_out/Payload/Runner.app | sed -n '1,120p'
 
     upload_to_testflight(
       api_key: api_key,
