@@ -32,6 +32,16 @@ platform :ios do
     profile_name = Actions.lane_context[SharedValues::SIGH_NAME]
     UI.user_error!("Missing provisioning profile name") if profile_name.to_s.empty?
 
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Runner.xcodeproj",
+      targets: ["Runner"],
+      team_id: team_id,
+      bundle_identifier: app_id,
+      profile_name: profile_name,
+      code_sign_identity: "Apple Distribution"
+)
+
     # Archive WITHOUT signing. Export will embed the App Store profile.
     gym(
       workspace: "Runner.xcworkspace",
@@ -48,7 +58,7 @@ platform :ios do
       },
 
       # <- Important: prevent Xcode from trying to auto-provision during archive
-      xcargs: 'CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""'
+      # xcargs: 'CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY=""'
     )
 
     upload_to_testflight(
