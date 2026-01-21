@@ -5,8 +5,8 @@ name: Deploy Android App to Play Store
 on:
   push:
     branches:
-      # - main
-      - development
+      - main
+      # - development
 
 jobs:
   build-android:

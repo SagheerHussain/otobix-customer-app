@@ -300,7 +300,7 @@ class HomePage extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(5),
         // width: width / 4,
-        width: 100,
+        width: 80,
 
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -410,7 +410,7 @@ class HomePage extends StatelessWidget {
         style: const TextStyle(fontSize: 12),
         decoration: InputDecoration(
           isDense: true,
-          hintText: 'Search by Brand, Model or Keywords...',
+          hintText: 'Search features...',
           hintStyle: TextStyle(
             color: AppColors.grey.withValues(alpha: .5),
             fontSize: 12,

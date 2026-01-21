@@ -111,8 +111,8 @@ class BuyACarPage extends StatelessWidget {
                           top: Radius.circular(5),
                         ),
                         child: CachedNetworkImage(
-                          imageUrl: car.imageUrls.isNotEmpty
-                              ? car.imageUrls[0]
+                          imageUrl: car.carImageUrls.isNotEmpty
+                              ? car.carImageUrls[0].url
                               : '',
                           height: 160,
                           width: double.infinity,
@@ -370,13 +370,13 @@ class BuyACarPage extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, size: 14, color: iconColor ?? AppColors.green),
+                Icon(icon, size: 17, color: iconColor ?? AppColors.green),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
                     label,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 13,
                       color: AppColors.grey.withOpacity(0.7),
                       fontWeight: FontWeight.w500,
                     ),
@@ -389,7 +389,7 @@ class BuyACarPage extends StatelessWidget {
             Text(
               value,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 13,
                 color: AppColors.grey,
                 fontWeight: FontWeight.w600,
               ),
@@ -447,6 +447,15 @@ class BuyACarPage extends StatelessWidget {
         'label': 'Fuel Type',
         'value': car.carFuelType,
         'color': Colors.red,
+      });
+    }
+
+    if (hasData(car.carBodyType)) {
+      carDetails.add({
+        'icon': Icons.category,
+        'label': 'Body Type',
+        'value': car.carBodyType,
+        'color': Colors.blue,
       });
     }
 
@@ -530,7 +539,7 @@ class BuyACarPage extends StatelessWidget {
               crossAxisCount: 2,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
-              childAspectRatio: 2.4,
+              childAspectRatio: 2.2,
             ),
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -542,7 +551,7 @@ class BuyACarPage extends StatelessWidget {
                 label: detail['label'] as String,
                 value: detail['value'] as String,
                 iconColor: detail['color'] as Color,
-                bgColor: (detail['color'] as Color).withOpacity(0.05),
+                bgColor: (detail['color'] as Color).withValues(alpha: 0.05),
               );
             },
           ),
@@ -556,7 +565,7 @@ class BuyACarPage extends StatelessWidget {
     BuildContext context,
     CarsListModelForBuyACar car,
   ) {
-    if (car.imageUrls.isEmpty) {
+    if (car.carImageUrls.isEmpty) {
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -606,7 +615,7 @@ class BuyACarPage extends StatelessWidget {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -639,17 +648,17 @@ class BuyACarPage extends StatelessWidget {
                       child: Stack(
                         children: [
                           PhotoViewGallery.builder(
-                            itemCount: car.imageUrls.length,
+                            itemCount: car.carImageUrls.length,
                             builder: (context, index) {
                               return PhotoViewGalleryPageOptions(
                                 imageProvider: NetworkImage(
-                                  car.imageUrls[index],
+                                  car.carImageUrls[index].url,
                                 ),
                                 minScale: PhotoViewComputedScale.contained,
                                 maxScale: PhotoViewComputedScale.covered * 3,
                                 initialScale: PhotoViewComputedScale.contained,
                                 heroAttributes: PhotoViewHeroAttributes(
-                                  tag: car.imageUrls[index],
+                                  tag: car.carImageUrls[index].url,
                                 ),
                               );
                             },
@@ -682,11 +691,11 @@ class BuyACarPage extends StatelessWidget {
                                 vertical: 5,
                               ),
                               decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.6),
+                                color: Colors.black.withValues(alpha: 0.6),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
-                                '${currentIndex + 1}/${car.imageUrls.length}',
+                                '${currentIndex + 1}/${car.carImageUrls.length}',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
@@ -711,7 +720,7 @@ class BuyACarPage extends StatelessWidget {
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: Colors.black.withValues(alpha: 0.1),
                           blurRadius: 4,
                           offset: const Offset(0, -2),
                         ),

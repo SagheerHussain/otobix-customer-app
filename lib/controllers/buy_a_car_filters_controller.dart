@@ -60,10 +60,10 @@ class BuyACarFiltersController extends GetxController {
     makes.assignAll(_unique(cars.map((c) => c.carMake)));
 
     // Cities
-    cities.assignAll(_unique(cars.map((c) => c.userCity)));
+    cities.assignAll(_unique(cars.map((c) => c.dealerCity)));
 
     // Body types / fuel / transmission
-    bodyTypes.assignAll(_unique(cars.map((c) => c.bodyType)));
+    bodyTypes.assignAll(_unique(cars.map((c) => c.carBodyType)));
     fuelTypes.assignAll(_unique(cars.map((c) => c.carFuelType)));
     transmissionTypes.assignAll(_unique(cars.map((c) => c.carTransmission)));
 
@@ -225,7 +225,7 @@ class BuyACarFiltersController extends GetxController {
 
       // City
       if (appliedCity.value != null && appliedCity.value!.isNotEmpty) {
-        if (c.userCity != appliedCity.value!) return false;
+        if (c.dealerCity != appliedCity.value!) return false;
       }
 
       // Fuel / Transmission / Body (multi select)
@@ -238,7 +238,7 @@ class BuyACarFiltersController extends GetxController {
         return false;
       }
       if (appliedBodyTypes.isNotEmpty &&
-          !appliedBodyTypes.contains(c.bodyType)) {
+          !appliedBodyTypes.contains(c.carBodyType)) {
         return false;
       }
 
