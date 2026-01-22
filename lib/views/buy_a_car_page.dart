@@ -84,111 +84,120 @@ class BuyACarPage extends StatelessWidget {
 
   Widget _buildCarsList(List<CarsListModelForBuyACar> carsList) {
     return Expanded(
-      child: ListView.separated(
-        controller: buyACarController.scrollController, // ✅ add this
-        itemCount: carsList.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 15),
-        itemBuilder: (context, index) {
-          final car = carsList[index];
+      child: Obx(() {
+        final bool showLoader =
+            buyACarController.isLoadingMore.value &&
+            buyACarController.hasMore.value;
 
-          return InkWell(
-            onTap: () {
-              // Handle card tap if needed
-            },
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(5),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Car image
-                  Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: const BorderRadius.vertical(
-                          top: Radius.circular(5),
-                        ),
-                        child: CachedNetworkImage(
-                          imageUrl: car.carImageUrls.isNotEmpty
-                              ? car.carImageUrls[0].url
-                              : '',
-                          height: 160,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
+        return ListView.separated(
+          controller: buyACarController.scrollController,
+          itemCount: carsList.length + (showLoader ? 1 : 0),
+          separatorBuilder: (_, __) => const SizedBox(height: 15),
+          itemBuilder: (context, index) {
+            // ✅ last item -> loader
+            if (showLoader && index == carsList.length) {
+              return _buildLoadMoreShimmerFooter();
+            }
+
+            final car = carsList[index];
+
+            return InkWell(
+              onTap: () {},
+              child: Card(
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Car image
+                    Stack(
+                      children: [
+                        ClipRRect(
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(5),
+                          ),
+                          child: CachedNetworkImage(
+                            imageUrl: car.carImageUrls.isNotEmpty
+                                ? car.carImageUrls[0].url
+                                : '',
                             height: 160,
                             width: double.infinity,
-                            color: Colors.grey[300],
-                            child: const Center(
-                              child: CircularProgressIndicator(
-                                color: AppColors.green,
-                                strokeWidth: 2,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              height: 160,
+                              width: double.infinity,
+                              color: Colors.grey[300],
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColors.green,
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                            errorWidget: (context, error, stackTrace) {
+                              return Image.asset(
+                                AppImages.carNotFound,
+                                height: 160,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              );
+                            },
+                          ),
+                        ),
+                        Positioned(
+                          top: 10,
+                          right: 10,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.green.withOpacity(0.9),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              car.carPrice,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
-                          errorWidget: (context, error, stackTrace) {
-                            return Image.asset(
-                              AppImages.carNotFound,
-                              height: 160,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            );
-                          },
                         ),
-                      ),
-                      Positioned(
-                        top: 10,
-                        right: 10,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.green.withOpacity(0.9),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            car.carPrice,
+                      ],
+                    ),
+
+                    // Car details
+                    Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${car.carYear} ${car.carName}',
                             style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
+                              fontSize: 14,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
+                          const SizedBox(height: 6),
+                          _buildOtherDetails(car),
+                          const SizedBox(height: 5),
+                          _buildCarCardFooter(car, context),
+                        ],
                       ),
-                    ],
-                  ),
-
-                  // Car details
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '${car.carYear} ${car.carName}',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        _buildOtherDetails(car),
-                        const SizedBox(height: 5),
-                        _buildCarCardFooter(car, context),
-                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        },
-      ),
+            );
+          },
+        );
+      }),
     );
   }
 
@@ -590,7 +599,10 @@ class BuyACarPage extends StatelessWidget {
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
           return Dialog(
-            constraints: BoxConstraints(maxHeight: 500),
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width * 0.92,
+              maxHeight: MediaQuery.of(context).size.height * 0.50, // ✅ reduce
+            ),
             backgroundColor: Colors.transparent,
             insetPadding: const EdgeInsets.all(10),
             child: Container(
@@ -654,9 +666,9 @@ class BuyACarPage extends StatelessWidget {
                                 imageProvider: NetworkImage(
                                   car.carImageUrls[index].url,
                                 ),
-                                minScale: PhotoViewComputedScale.contained,
+                                minScale: PhotoViewComputedScale.covered,
                                 maxScale: PhotoViewComputedScale.covered * 3,
-                                initialScale: PhotoViewComputedScale.contained,
+                                initialScale: PhotoViewComputedScale.covered,
                                 heroAttributes: PhotoViewHeroAttributes(
                                   tag: car.carImageUrls[index].url,
                                 ),
@@ -824,5 +836,21 @@ class BuyACarPage extends StatelessWidget {
   // Helper function to check if data is not null or empty
   bool hasData(String? value) {
     return value != null && value.trim().isNotEmpty;
+  }
+
+  Widget _buildLoadMoreShimmerFooter() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 10, bottom: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          ShimmerWidget(height: 160, borderRadius: 12),
+          SizedBox(height: 12),
+          ShimmerWidget(height: 14, width: 100),
+          SizedBox(height: 10),
+          ShimmerWidget(height: 12, width: 150),
+        ],
+      ),
+    );
   }
 }

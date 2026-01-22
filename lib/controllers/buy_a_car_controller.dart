@@ -16,6 +16,11 @@ class BuyACarController extends GetxController {
   final RxBool isLoadingMore = false.obs;
   final RxBool hasMore = true.obs;
 
+  // Pagination (NEW)
+  int pageNumber = 0; // start from 0 (random page)
+  String? cursorDocId; // sequential cursor
+  final List<String> excludedIds = []; // first random 10 ids only
+
   final ScrollController scrollController = ScrollController();
 
   final TextEditingController searchController = TextEditingController();
@@ -28,7 +33,6 @@ class BuyACarController extends GetxController {
 
   // Pagination
   final int limit = 10;
-  int pageNumber = 1;
 
   @override
   void onInit() {
@@ -61,15 +65,31 @@ class BuyACarController extends GetxController {
       isLoadingMore.value = true;
     } else {
       isPageLoading.value = true;
-      pageNumber = 1;
+      pageNumber = 0; // first hit should be random
+      cursorDocId = null;
+      excludedIds.clear();
       hasMore.value = true;
       carsList.clear();
       searchFilteredCarsList.clear();
     }
 
     try {
-      final endpoint =
+      // final endpoint =
+      //     "${AppUrls.fetch10RandomCarsList}?limit=$limit&pageNumber=$pageNumber";
+
+      String endpoint =
           "${AppUrls.fetch10RandomCarsList}?limit=$limit&pageNumber=$pageNumber";
+
+      // For sequential pages (pageNumber >= 1), send cursor if available
+      if (pageNumber >= 1 && cursorDocId != null && cursorDocId!.isNotEmpty) {
+        endpoint += "&cursorDocId=$cursorDocId";
+      }
+
+      // Send excludedIds (only after first random call has saved them)
+      // If your ApiService.get supports query params only:
+      if (excludedIds.isNotEmpty) {
+        endpoint += "&excludedIds=${excludedIds.join(",")}";
+      }
 
       final response = await ApiService.get(endpoint: endpoint);
 
@@ -82,12 +102,24 @@ class BuyACarController extends GetxController {
         // Read hasMore safely (if missing, fallback to raw length == limit)
         hasMore.value = decoded['hasMore'] == true || raw.length == limit;
 
+        // Save excludedIds only once (from first random response)
+        final List rawExcluded = decoded['excludedIds'] ?? [];
+        if (pageNumber == 0 && excludedIds.isEmpty && rawExcluded.isNotEmpty) {
+          excludedIds.addAll(rawExcluded.map((e) => e.toString()));
+        }
+
+        // Save cursor for next sequential request
+        final nextCursor = decoded['nextCursorDocId'];
+        if (nextCursor != null) {
+          cursorDocId = nextCursor.toString();
+        }
+
         final fetched = raw
             .whereType<Map<String, dynamic>>()
             .map((e) => CarsListModelForBuyACar.fromJson(e))
             .toList();
 
-        debugPrint('Response: ${decoded.toString()}');
+        // debugPrint('Response: ${decoded.toString()}');
 
         if (fetched.isNotEmpty) {
           if (loadMore) {
