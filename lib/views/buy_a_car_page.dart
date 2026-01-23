@@ -18,6 +18,12 @@ import 'package:photo_view/photo_view_gallery.dart';
 class BuyACarPage extends StatelessWidget {
   BuyACarPage({super.key});
 
+  // ✅ Create filters controller once (needed by BuyACarController)
+  final BuyACarFiltersController filtersController = Get.put(
+    BuyACarFiltersController(),
+    permanent: true,
+  );
+
   final BuyACarController buyACarController = Get.put(BuyACarController());
 
   @override
@@ -35,28 +41,28 @@ class BuyACarPage extends StatelessWidget {
                 child: Row(
                   children: [
                     Flexible(child: _buildSearchBar(context)),
-                    Obx(() {
-                      if (buyACarController.searchQuery.isNotEmpty) {
-                        return IconButton(
-                          onPressed: () => buyACarController.clearSearch(),
-                          icon: const Icon(Icons.clear, size: 20),
-                          padding: const EdgeInsets.only(left: 8),
-                          constraints: const BoxConstraints(),
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    }),
+                    // Obx(() {
+                    if (buyACarController.searchController.text
+                        .trim()
+                        .isNotEmpty)
+                      IconButton(
+                        onPressed: () => buyACarController.clearSearch(),
+                        icon: const Icon(Icons.clear, size: 20),
+                        padding: const EdgeInsets.only(left: 8),
+                        constraints: const BoxConstraints(),
+                      ),
+
+                    if (buyACarController.searchController.text.trim().isEmpty)
+                      const SizedBox.shrink(),
+                    // }),
                   ],
                 ),
               ),
               const SizedBox(height: 10),
-
               Obx(() {
-                // Check if cars list is loading
                 if (buyACarController.isPageLoading.value) {
                   return _buildLoadingWidget();
-                } else if (buyACarController.searchFilteredCarsList.isEmpty) {
-                  // Check if cars list is empty
+                } else if (buyACarController.visibleCars.isEmpty) {
                   return Expanded(
                     child: Center(
                       child: EmptyDataWidget(
@@ -68,10 +74,7 @@ class BuyACarPage extends StatelessWidget {
                     ),
                   );
                 } else {
-                  // Show fetched and filtered cars list
-                  return _buildCarsList(
-                    buyACarController.searchFilteredCarsList,
-                  );
+                  return _buildCarsList(buyACarController.visibleCars);
                 }
               }),
               const SizedBox(height: 20),
@@ -86,6 +89,7 @@ class BuyACarPage extends StatelessWidget {
     return Expanded(
       child: Obx(() {
         final bool showLoader =
+            buyACarController.mode.value == BuyACarMode.normal &&
             buyACarController.isLoadingMore.value &&
             buyACarController.hasMore.value;
 
@@ -94,7 +98,6 @@ class BuyACarPage extends StatelessWidget {
           itemCount: carsList.length + (showLoader ? 1 : 0),
           separatorBuilder: (_, __) => const SizedBox(height: 15),
           itemBuilder: (context, index) {
-            // ✅ last item -> loader
             if (showLoader && index == carsList.length) {
               return _buildLoadMoreShimmerFooter();
             }
@@ -111,7 +114,6 @@ class BuyACarPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Car image
                     Stack(
                       children: [
                         ClipRRect(
@@ -170,8 +172,6 @@ class BuyACarPage extends StatelessWidget {
                         ),
                       ],
                     ),
-
-                    // Car details
                     Padding(
                       padding: const EdgeInsets.all(12),
                       child: Column(
@@ -214,20 +214,16 @@ class BuyACarPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Image shimmer
                 const ShimmerWidget(height: 160, borderRadius: 12),
                 Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
-                      // Title shimmer
                       ShimmerWidget(height: 14, width: 150),
                       SizedBox(height: 10),
-                      // Bid row shimmer
                       ShimmerWidget(height: 12, width: 100),
                       SizedBox(height: 6),
-                      // Year and KM
                       Row(
                         children: [
                           ShimmerWidget(height: 10, width: 60),
@@ -236,7 +232,6 @@ class BuyACarPage extends StatelessWidget {
                         ],
                       ),
                       SizedBox(height: 6),
-                      // Fuel and Location
                       Row(
                         children: [
                           ShimmerWidget(height: 10, width: 60),
@@ -245,7 +240,6 @@ class BuyACarPage extends StatelessWidget {
                         ],
                       ),
                       SizedBox(height: 8),
-                      // Inspection badge
                       ShimmerWidget(height: 10, width: 100),
                     ],
                   ),
@@ -295,7 +289,6 @@ class BuyACarPage extends StatelessWidget {
     );
   }
 
-  // Search Bar
   Widget _buildSearchBar(BuildContext context) {
     return SizedBox(
       height: 35,
@@ -323,39 +316,27 @@ class BuyACarPage extends StatelessWidget {
             vertical: 0,
             horizontal: 10,
           ),
-
-          // Filters Icon
           suffixIcon: BuyACarFiltersWidget(
-            onApplyPressed: () {
-              final filters = Get.put(BuyACarFiltersController());
-
-              void applySearchAndFilters() {
-                final filtered = filters.filterCars(
-                  source: buyACarController.searchFilteredCarsList,
-                  searchQueryLower: buyACarController.searchQuery.value,
-                );
-                buyACarController.searchFilteredCarsList.assignAll(filtered);
-              }
-
-              applySearchAndFilters();
+            onApplyPressed: () async {
+              await buyACarController.onApplyFiltersPressedServer();
             },
           ),
         ),
-
+        onFieldSubmitted: (value) {
+          buyACarController.onSearchSubmitted(value);
+        },
         onChanged: (value) {
+          // optional: keep typing behavior, or remove to only submit
           buyACarController.searchQuery.value = value.trim().toLowerCase();
         },
       ),
     );
   }
 
+  // --- your remaining helpers (unchanged) ---
   Widget _buildOtherDetails(CarsListModelForBuyACar car) {
-    // Helper function to check if data is not null or empty
-    bool hasData(String? value) {
-      return value != null && value.trim().isNotEmpty;
-    }
+    bool hasData(String? value) => value != null && value.trim().isNotEmpty;
 
-    // Function to create a grid item
     Widget gridDetailItem({
       required IconData icon,
       required String label,
@@ -410,10 +391,8 @@ class BuyACarPage extends StatelessWidget {
       );
     }
 
-    // Prepare car details with conditional checks
     final carDetails = <Map<String, dynamic>>[];
 
-    // Add details only if data exists
     if (hasData(car.carMake)) {
       carDetails.add({
         'icon': Icons.directions_car,
@@ -422,7 +401,6 @@ class BuyACarPage extends StatelessWidget {
         'color': Colors.blue,
       });
     }
-
     if (hasData(car.carModel)) {
       carDetails.add({
         'icon': Icons.model_training,
@@ -431,7 +409,6 @@ class BuyACarPage extends StatelessWidget {
         'color': Colors.purple,
       });
     }
-
     if (hasData(car.carYear)) {
       carDetails.add({
         'icon': Icons.calendar_month,
@@ -440,7 +417,6 @@ class BuyACarPage extends StatelessWidget {
         'color': Colors.orange,
       });
     }
-
     if (hasData(car.carKms)) {
       carDetails.add({
         'icon': Icons.speed,
@@ -449,7 +425,6 @@ class BuyACarPage extends StatelessWidget {
         'color': Colors.teal,
       });
     }
-
     if (hasData(car.carFuelType)) {
       carDetails.add({
         'icon': Icons.local_gas_station,
@@ -458,7 +433,6 @@ class BuyACarPage extends StatelessWidget {
         'color': Colors.red,
       });
     }
-
     if (hasData(car.carBodyType)) {
       carDetails.add({
         'icon': Icons.category,
@@ -467,7 +441,6 @@ class BuyACarPage extends StatelessWidget {
         'color': Colors.blue,
       });
     }
-
     if (hasData(car.carTransmission)) {
       carDetails.add({
         'icon': Icons.settings,
@@ -476,7 +449,6 @@ class BuyACarPage extends StatelessWidget {
         'color': Colors.deepPurple,
       });
     }
-
     if (hasData(car.carVariant)) {
       carDetails.add({
         'icon': Icons.directions_car_filled,
@@ -485,7 +457,6 @@ class BuyACarPage extends StatelessWidget {
         'color': Colors.green,
       });
     }
-
     if (hasData(car.carOwnershipSerialNo)) {
       carDetails.add({
         'icon': Icons.person,
@@ -494,7 +465,6 @@ class BuyACarPage extends StatelessWidget {
         'color': Colors.indigo,
       });
     }
-
     if (hasData(car.carTaxValidity)) {
       carDetails.add({
         'icon': Icons.receipt_long,
@@ -504,7 +474,6 @@ class BuyACarPage extends StatelessWidget {
       });
     }
 
-    // If no details available, show message
     if (carDetails.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(12),
@@ -538,38 +507,31 @@ class BuyACarPage extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Grid View of Details
-          GridView.builder(
-            padding: EdgeInsets.zero,
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-              childAspectRatio: 2.2,
-            ),
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: carDetails.length,
-            itemBuilder: (context, index) {
-              final detail = carDetails[index];
-              return gridDetailItem(
-                icon: detail['icon'] as IconData,
-                label: detail['label'] as String,
-                value: detail['value'] as String,
-                iconColor: detail['color'] as Color,
-                bgColor: (detail['color'] as Color).withValues(alpha: 0.05),
-              );
-            },
-          ),
-        ],
+      child: GridView.builder(
+        padding: EdgeInsets.zero,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          childAspectRatio: 2.2,
+        ),
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: carDetails.length,
+        itemBuilder: (context, index) {
+          final detail = carDetails[index];
+          return gridDetailItem(
+            icon: detail['icon'] as IconData,
+            label: detail['label'] as String,
+            value: detail['value'] as String,
+            iconColor: detail['color'] as Color,
+            bgColor: (detail['color'] as Color).withValues(alpha: 0.05),
+          );
+        },
       ),
     );
   }
 
-  // Image gallery dialog
   void _showImageGalleryDialog(
     BuildContext context,
     CarsListModelForBuyACar car,
@@ -595,13 +557,12 @@ class BuyACarPage extends StatelessWidget {
 
     showDialog(
       context: context,
-
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
           return Dialog(
             constraints: BoxConstraints(
               maxWidth: MediaQuery.of(context).size.width * 0.92,
-              maxHeight: MediaQuery.of(context).size.height * 0.50, // ✅ reduce
+              maxHeight: MediaQuery.of(context).size.height * 0.50,
             ),
             backgroundColor: Colors.transparent,
             insetPadding: const EdgeInsets.all(10),
@@ -610,50 +571,22 @@ class BuyACarPage extends StatelessWidget {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
               ),
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.9,
-              ),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Header with car name
                   Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(12),
-                        topRight: Radius.circular(12),
+                    child: Text(
+                      '${car.carYear} ${car.carName}',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.grey,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            '${car.carYear} ${car.carName}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.grey,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
-
-                  // Image gallery with zoom
                   Expanded(
                     child: Container(
                       color: Colors.black,
@@ -675,25 +608,17 @@ class BuyACarPage extends StatelessWidget {
                               );
                             },
                             onPageChanged: (index) {
-                              setState(() {
-                                currentIndex = index;
-                              });
+                              setState(() => currentIndex = index);
                             },
-                            loadingBuilder: (context, event) => Center(
-                              child: Container(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator(
-                                  color: AppColors.green,
-                                ),
+                            loadingBuilder: (context, event) => const Center(
+                              child: CircularProgressIndicator(
+                                color: AppColors.green,
                               ),
                             ),
                             backgroundDecoration: const BoxDecoration(
                               color: Colors.black,
                             ),
                           ),
-
-                          // Image counter
                           Positioned(
                             top: 16,
                             right: 16,
@@ -711,7 +636,6 @@ class BuyACarPage extends StatelessWidget {
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 12,
-                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),
@@ -720,24 +644,8 @@ class BuyACarPage extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  // Close button at bottom
-                  Container(
+                  Padding(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(12),
-                        bottomRight: Radius.circular(12),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          blurRadius: 4,
-                          offset: const Offset(0, -2),
-                        ),
-                      ],
-                    ),
                     child: SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -746,25 +654,8 @@ class BuyACarPage extends StatelessWidget {
                           backgroundColor: AppColors.green,
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          elevation: 0,
                         ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.close, size: 18),
-                            SizedBox(width: 8),
-                            Text(
-                              'Close',
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
+                        child: const Text('Close'),
                       ),
                     ),
                   ),
@@ -777,7 +668,6 @@ class BuyACarPage extends StatelessWidget {
     );
   }
 
-  // Interest dialog
   void _showInterestDialog(BuildContext context, CarsListModelForBuyACar car) {
     showDialog(
       context: context,
@@ -821,7 +711,6 @@ class BuyACarPage extends StatelessWidget {
             fontSize: 12,
             isLoading: buyACarController.isSaveInterestedBuyerLoading,
             onTap: () async {
-              // Handle interest submission
               await buyACarController.saveInterestedBuyer(
                 car: car,
                 activityType: AppConstants.buyACarActivityType.interested,
@@ -833,17 +722,14 @@ class BuyACarPage extends StatelessWidget {
     );
   }
 
-  // Helper function to check if data is not null or empty
-  bool hasData(String? value) {
-    return value != null && value.trim().isNotEmpty;
-  }
+  bool hasData(String? value) => value != null && value.trim().isNotEmpty;
 
   Widget _buildLoadMoreShimmerFooter() {
-    return Padding(
-      padding: const EdgeInsets.only(top: 10, bottom: 20),
+    return const Padding(
+      padding: EdgeInsets.only(top: 10, bottom: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
+        children: [
           ShimmerWidget(height: 160, borderRadius: 12),
           SizedBox(height: 12),
           ShimmerWidget(height: 14, width: 100),

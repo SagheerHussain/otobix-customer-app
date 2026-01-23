@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:otobix_customer_app/controllers/buy_a_car_controller.dart';
 import 'package:otobix_customer_app/controllers/buy_a_car_filters_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
@@ -7,14 +8,12 @@ import 'package:otobix_customer_app/widgets/button_widget.dart';
 class BuyACarFiltersWidget extends StatelessWidget {
   BuyACarFiltersWidget({super.key, required this.onApplyPressed});
 
-  /// Call your BuyACarController method here to refresh list.
   final VoidCallback onApplyPressed;
 
-  final BuyACarFiltersController fc = Get.put(BuyACarFiltersController());
+  final BuyACarFiltersController fc = Get.find<BuyACarFiltersController>();
 
   @override
   Widget build(BuildContext context) {
-    // IMPORTANT: suffixIcon needs compact sizing
     return SizedBox(
       width: 44,
       height: 44,
@@ -85,26 +84,44 @@ class BuyACarFiltersWidget extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // -------------------- MAKE / MODEL / VARIANT / CITY --------------------
+          // MAKE / STATE
           Row(
             children: [
               Expanded(
-                child: _buildDropdown(
-                  label: 'Make',
-                  hintText: 'Select Make',
-                  valueRx: fc.selectedMake,
-                  itemsRx: fc.makes,
-                  onChanged: (v) => fc.onMakeChanged(v),
+                child: Obx(
+                  () => _buildSearchableDropdownField(
+                    label: 'Make',
+                    hintText: 'Select Make',
+                    value: fc.selectedMake.value,
+                    enabled: true,
+                    isLoading: fc.isMakeLoading.value,
+                    onTap: () => _openSearchSheet(
+                      title: 'Select Make',
+                      itemsRx: fc.makeOptions,
+                      isLoadingRx: fc.isMakeLoading,
+                      onSearch: fc.onMakeSearchChanged,
+                      onSelect: (v) => fc.onMakePicked(v),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: _buildDropdown(
-                  label: 'Dealer Location',
-                  hintText: 'Select City',
-                  valueRx: fc.selectedCity,
-                  itemsRx: fc.cities,
-                  onChanged: (v) => fc.selectedCity.value = v,
+                child: Obx(
+                  () => _buildSearchableDropdownField(
+                    label: 'Dealer Location',
+                    hintText: 'Select State',
+                    value: fc.selectedState.value,
+                    enabled: true,
+                    isLoading: false,
+                    onTap: () => _openSearchSheet(
+                      title: 'Select State',
+                      itemsRx: fc.states,
+                      isLoadingRx: null,
+                      onSearch: null,
+                      onSelect: (v) => fc.selectedState.value = v,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -112,28 +129,51 @@ class BuyACarFiltersWidget extends StatelessWidget {
 
           const SizedBox(height: 15),
 
+          // MODEL / VARIANT
           Row(
             children: [
               Expanded(
                 child: Obx(
-                  () => _buildDropdownSimple(
+                  () => _buildSearchableDropdownField(
                     label: 'Model',
-                    hintText: 'Select Model',
+                    hintText: fc.isModelEnabled.value
+                        ? 'Select Model'
+                        : 'Select make first',
                     value: fc.selectedModel.value,
-                    items: fc.modelsForSelectedMake,
-                    onChanged: (v) => fc.onModelChanged(v),
+                    enabled: fc.isModelEnabled.value,
+                    isLoading: fc.isModelLoading.value,
+                    onTap: fc.isModelEnabled.value
+                        ? () => _openSearchSheet(
+                            title: 'Select Model',
+                            itemsRx: fc.modelOptions,
+                            isLoadingRx: fc.isModelLoading,
+                            onSearch: fc.onModelSearchChanged,
+                            onSelect: (v) => fc.onModelPicked(v),
+                          )
+                        : null,
                   ),
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
                 child: Obx(
-                  () => _buildDropdownSimple(
+                  () => _buildSearchableDropdownField(
                     label: 'Variant',
-                    hintText: 'Select Variant',
+                    hintText: fc.isVariantEnabled.value
+                        ? 'Select Variant'
+                        : 'Select model first',
                     value: fc.selectedVariant.value,
-                    items: fc.variantsForSelectedModel,
-                    onChanged: (v) => fc.selectedVariant.value = v,
+                    enabled: fc.isVariantEnabled.value,
+                    isLoading: fc.isVariantLoading.value,
+                    onTap: fc.isVariantEnabled.value
+                        ? () => _openSearchSheet(
+                            title: 'Select Variant',
+                            itemsRx: fc.variantOptions,
+                            isLoadingRx: fc.isVariantLoading,
+                            onSearch: fc.onVariantSearchChanged,
+                            onSelect: (v) => fc.onVariantPicked(v),
+                          )
+                        : null,
                   ),
                 ),
               ),
@@ -142,7 +182,7 @@ class BuyACarFiltersWidget extends StatelessWidget {
 
           const SizedBox(height: 15),
 
-          // -------------------- FUEL TYPE (chips like your old UI) --------------------
+          // FUEL
           const Text(
             'Fuel Type',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
@@ -184,7 +224,7 @@ class BuyACarFiltersWidget extends StatelessWidget {
 
           const SizedBox(height: 15),
 
-          // -------------------- TRANSMISSION --------------------
+          // TRANSMISSION
           const Text(
             'Transmission',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
@@ -226,7 +266,7 @@ class BuyACarFiltersWidget extends StatelessWidget {
 
           const SizedBox(height: 15),
 
-          // -------------------- BODY TYPE --------------------
+          // BODY
           const Text(
             'Body Type',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
@@ -268,31 +308,28 @@ class BuyACarFiltersWidget extends StatelessWidget {
 
           const SizedBox(height: 15),
 
-          // -------------------- YEAR OF REG (bucket range slider) --------------------
+          // CAR AGE
           const Text(
-            'Year of Registration',
+            'Car Age (Years)',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
           ),
           const SizedBox(height: 6),
           Obx(() {
-            final rv = fc.selectedRegBucket.value;
+            final rv = fc.selectedCarAgeYears.value;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 RangeSlider(
-                  values: RangeValues(
-                    rv.start.roundToDouble(),
-                    rv.end.roundToDouble(),
-                  ),
-                  min: BuyACarFiltersController.minRegBucket,
-                  max: BuyACarFiltersController.maxRegBucket,
-                  divisions: 3,
+                  values: rv,
+                  min: BuyACarFiltersController.minCarAgeYears,
+                  max: BuyACarFiltersController.maxCarAgeYears,
+                  divisions: 4,
                   labels: RangeLabels(
-                    _regLabel(rv.start.round()),
-                    _regLabel(rv.end.round()),
+                    '${rv.start.round()} yr',
+                    '${rv.end.round()} yr',
                   ),
                   onChanged: (values) {
-                    fc.selectedRegBucket.value = RangeValues(
+                    fc.selectedCarAgeYears.value = RangeValues(
                       values.start.roundToDouble(),
                       values.end.roundToDouble(),
                     );
@@ -301,11 +338,8 @@ class BuyACarFiltersWidget extends StatelessWidget {
                   inactiveColor: AppColors.grey.withValues(alpha: .3),
                 ),
                 Text(
-                  '${_regLabel(rv.start.round())} - ${_regLabel(rv.end.round())}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  '${rv.start.round()} year(s) - ${rv.end.round()} year(s)',
+                  style: const TextStyle(fontSize: 12),
                 ),
               ],
             );
@@ -313,31 +347,28 @@ class BuyACarFiltersWidget extends StatelessWidget {
 
           const SizedBox(height: 15),
 
-          // -------------------- ODOMETER (bucket range slider) --------------------
+          // MILEAGE
           const Text(
-            'Odometer (KMs)',
+            'Mileage (KM Driven)',
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
           ),
           const SizedBox(height: 6),
           Obx(() {
-            final rv = fc.selectedOdoBucket.value;
+            final rv = fc.selectedMileageKm.value;
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 RangeSlider(
-                  values: RangeValues(
-                    rv.start.roundToDouble(),
-                    rv.end.roundToDouble(),
-                  ),
-                  min: BuyACarFiltersController.minOdoBucket,
-                  max: BuyACarFiltersController.maxOdoBucket,
-                  divisions: 3,
+                  values: rv,
+                  min: BuyACarFiltersController.minMileageKm,
+                  max: BuyACarFiltersController.maxMileageKm,
+                  divisions: 4,
                   labels: RangeLabels(
-                    _odoLabel(rv.start.round()),
-                    _odoLabel(rv.end.round()),
+                    '${(rv.start / 1000).round()}k',
+                    '${(rv.end / 1000).round()}k',
                   ),
                   onChanged: (values) {
-                    fc.selectedOdoBucket.value = RangeValues(
+                    fc.selectedMileageKm.value = RangeValues(
                       values.start.roundToDouble(),
                       values.end.roundToDouble(),
                     );
@@ -346,11 +377,8 @@ class BuyACarFiltersWidget extends StatelessWidget {
                   inactiveColor: AppColors.grey.withValues(alpha: .3),
                 ),
                 Text(
-                  '${_odoLabel(rv.start.round())} - ${_odoLabel(rv.end.round())}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  '${rv.start.round()} km - ${rv.end.round()} km',
+                  style: const TextStyle(fontSize: 12),
                 ),
               ],
             );
@@ -358,7 +386,6 @@ class BuyACarFiltersWidget extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // -------------------- BUTTONS --------------------
           Row(
             children: [
               Expanded(
@@ -370,9 +397,8 @@ class BuyACarFiltersWidget extends StatelessWidget {
                   isLoading: false.obs,
                   elevation: 5,
                   onTap: () {
-                    fc.resetFilters();
                     Navigator.pop(Get.context!);
-                    onApplyPressed(); // refresh list
+                    Get.find<BuyACarController>().onResetFiltersPressed();
                   },
                 ),
               ),
@@ -386,7 +412,7 @@ class BuyACarFiltersWidget extends StatelessWidget {
                   onTap: () {
                     fc.applyFilters();
                     Navigator.pop(Get.context!);
-                    onApplyPressed(); // refresh list
+                    onApplyPressed();
                   },
                 ),
               ),
@@ -397,32 +423,16 @@ class BuyACarFiltersWidget extends StatelessWidget {
     );
   }
 
-  // -------------------- Dropdown (same style as your old) --------------------
-  Widget _buildDropdown({
-    required String label,
-    required String hintText,
-    required RxnString valueRx,
-    required RxList<String> itemsRx,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return Obx(
-      () => _buildDropdownSimple(
-        label: label,
-        hintText: hintText,
-        value: valueRx.value,
-        items: itemsRx,
-        onChanged: onChanged,
-      ),
-    );
-  }
-
-  Widget _buildDropdownSimple({
+  Widget _buildSearchableDropdownField({
     required String label,
     required String hintText,
     required String? value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
+    required bool enabled,
+    required bool isLoading,
+    required VoidCallback? onTap,
   }) {
+    final opacity = enabled ? 1.0 : 0.45;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -431,38 +441,54 @@ class BuyACarFiltersWidget extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
         ),
         const SizedBox(height: 5),
-        Container(
-          height: 35,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            border: Border.all(color: AppColors.grey.withValues(alpha: .3)),
+        Opacity(
+          opacity: opacity,
+          child: InkWell(
+            onTap: enabled ? onTap : null,
             borderRadius: BorderRadius.circular(5),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.black.withValues(alpha: .05),
-                blurRadius: 5,
-                offset: const Offset(0, 3),
+            child: Container(
+              height: 35,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                border: Border.all(color: AppColors.grey.withValues(alpha: .3)),
+                borderRadius: BorderRadius.circular(5),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.black.withValues(alpha: .05),
+                    blurRadius: 5,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
               ),
-            ],
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              isExpanded: true,
-              menuMaxHeight: 300,
-              value: value,
-              icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
-              style: const TextStyle(fontSize: 13, color: AppColors.black),
-              hint: Text(hintText, style: const TextStyle(fontSize: 12)),
-              items: items
-                  .map(
-                    (item) => DropdownMenuItem(
-                      value: item,
-                      child: Text(item, style: const TextStyle(fontSize: 12)),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      (value != null && value.trim().isNotEmpty)
+                          ? value
+                          : hintText,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: (value != null && value.trim().isNotEmpty)
+                            ? AppColors.black
+                            : AppColors.grey,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  )
-                  .toList(),
-              onChanged: items.isEmpty ? null : onChanged,
+                  ),
+                  if (isLoading) ...[
+                    const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                  const Icon(Icons.keyboard_arrow_down_rounded, size: 18),
+                ],
+              ),
             ),
           ),
         ),
@@ -470,17 +496,129 @@ class BuyACarFiltersWidget extends StatelessWidget {
     );
   }
 
-  String _regLabel(int i) {
-    if (i == 0) return '< 1';
-    if (i == 1) return '1 - 3';
-    if (i == 2) return '3 - 5';
-    return '5+';
-  }
+  void _openSearchSheet({
+    required String title,
+    required RxList<String> itemsRx,
+    required RxBool? isLoadingRx,
+    required void Function(String text)? onSearch,
+    required void Function(String? value) onSelect,
+  }) {
+    final searchCtrl = TextEditingController();
 
-  String _odoLabel(int i) {
-    if (i == 0) return '< 10k';
-    if (i == 1) return '10 - 30k';
-    if (i == 2) return '30 - 50k';
-    return '50k+';
+    showModalBottomSheet(
+      context: Get.context!,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(Get.context!).viewInsets.bottom,
+          ),
+          child: SizedBox(
+            height: MediaQuery.of(Get.context!).size.height * 0.7,
+            child: Column(
+              children: [
+                const SizedBox(height: 10),
+                Container(
+                  width: 45,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: AppColors.grey.withValues(alpha: .4),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(Get.context!),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextField(
+                    controller: searchCtrl,
+                    onChanged: (txt) {
+                      if (onSearch != null) onSearch(txt);
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Search...',
+                      prefixIcon: const Icon(Icons.search, size: 20),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      isDense: true,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Expanded(
+                  child: Obx(() {
+                    final all = itemsRx.toList();
+                    final query = searchCtrl.text.trim().toLowerCase();
+
+                    final filtered = query.isEmpty
+                        ? all
+                        : all
+                              .where((e) => e.toLowerCase().contains(query))
+                              .toList();
+
+                    final loading = isLoadingRx?.value ?? false;
+
+                    if (loading && all.isEmpty) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (filtered.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No results found',
+                          style: TextStyle(fontSize: 12, color: AppColors.grey),
+                        ),
+                      );
+                    }
+
+                    return ListView.separated(
+                      itemCount: filtered.length,
+                      separatorBuilder: (_, __) => Divider(
+                        height: 1,
+                        color: AppColors.grey.withValues(alpha: .25),
+                      ),
+                      itemBuilder: (_, i) {
+                        final v = filtered[i];
+                        return ListTile(
+                          dense: true,
+                          title: Text(v, style: const TextStyle(fontSize: 13)),
+                          onTap: () {
+                            onSelect(v);
+                            Navigator.pop(Get.context!);
+                          },
+                        );
+                      },
+                    );
+                  }),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }

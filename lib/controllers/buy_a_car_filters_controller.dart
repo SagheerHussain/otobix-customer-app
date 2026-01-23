@@ -1,152 +1,286 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/Models/cars_list_model_for_buy_a_car.dart';
+import 'package:otobix_customer_app/services/api_service.dart';
+import 'package:otobix_customer_app/utils/app_constants.dart';
+import 'package:otobix_customer_app/utils/app_urls.dart';
 
 class BuyACarFiltersController extends GetxController {
-  // -------------------- OPTIONS (can be set from real cars list) --------------------
-  final RxList<String> makes = <String>[].obs;
-  final RxMap<String, List<String>> modelsByMake = <String, List<String>>{}.obs;
-  final RxMap<String, List<String>> variantsByModel =
-      <String, List<String>>{}.obs;
+  final RxList<String> states = AppConstants.indianStates.obs;
 
-  final RxList<String> cities = <String>[].obs; // dealer location => userCity
-  final RxList<String> bodyTypes = <String>[].obs;
-  final RxList<String> fuelTypes = <String>[].obs;
-  final RxList<String> transmissionTypes = <String>[].obs;
+  final RxList<String> bodyTypes = <String>[
+    'Hatchback',
+    'Sedan',
+    'SUV',
+    'MUV',
+    'Coupe',
+    'Convertible',
+    'Pickup',
+    'Van',
+  ].obs;
 
-  // -------------------- UI SELECTED (inside sheet) --------------------
+  final RxList<String> fuelTypes = <String>[
+    'Petrol',
+    'Diesel',
+    'CNG',
+    'Electric',
+    'Hybrid',
+  ].obs;
+
+  final RxList<String> transmissionTypes = <String>[
+    'Manual',
+    'Automatic',
+    'AMT',
+    'CVT',
+    'DCT',
+  ].obs;
+
+  final RxList<String> makeOptions = <String>[].obs;
+  final RxList<String> modelOptions = <String>[].obs;
+  final RxList<String> variantOptions = <String>[].obs;
+
+  final isMakeLoading = false.obs;
+  final isModelLoading = false.obs;
+  final isVariantLoading = false.obs;
+
+  final isModelEnabled = false.obs;
+  final isVariantEnabled = false.obs;
+
+  Timer? _makeDebounce;
+  Timer? _modelDebounce;
+  Timer? _variantDebounce;
+
   final RxnString selectedMake = RxnString(null);
   final RxnString selectedModel = RxnString(null);
   final RxnString selectedVariant = RxnString(null);
+  final RxnString selectedState = RxnString(null);
 
-  final RxnString selectedCity = RxnString(null);
-
-  // Multi-select chips
   final RxList<String> selectedFuelTypes = <String>[].obs;
   final RxList<String> selectedTransmissions = <String>[].obs;
   final RxList<String> selectedBodyTypes = <String>[].obs;
 
-  // Year of registration bucket slider: 0..3
-  // 0=<1, 1=1-3, 2=3-5, 3=5+
-  static const double minRegBucket = 0;
-  static const double maxRegBucket = 3;
-  final Rx<RangeValues> selectedRegBucket = const RangeValues(0, 3).obs;
+  static const double minCarAgeYears = 1;
+  static const double maxCarAgeYears = 5;
 
-  // Odometer bucket slider: 0..3
-  // 0=<10k, 1=10-30k, 2=30-50k, 3=50k+
-  static const double minOdoBucket = 0;
-  static const double maxOdoBucket = 3;
-  final Rx<RangeValues> selectedOdoBucket = const RangeValues(0, 3).obs;
+  final Rx<RangeValues> selectedCarAgeYears = const RangeValues(
+    minCarAgeYears,
+    maxCarAgeYears,
+  ).obs;
 
-  // -------------------- APPLIED SNAPSHOT (used by page list) --------------------
+  final Rx<RangeValues> appliedCarAgeYears = const RangeValues(
+    minCarAgeYears,
+    maxCarAgeYears,
+  ).obs;
+
+  static const double minMileageKm = 10000;
+  static const double maxMileageKm = 50000;
+
+  final Rx<RangeValues> selectedMileageKm = const RangeValues(
+    minMileageKm,
+    maxMileageKm,
+  ).obs;
+
+  final Rx<RangeValues> appliedMileageKm = const RangeValues(
+    minMileageKm,
+    maxMileageKm,
+  ).obs;
+
   final RxBool isApplied = false.obs;
 
   final RxnString appliedMake = RxnString(null);
   final RxnString appliedModel = RxnString(null);
   final RxnString appliedVariant = RxnString(null);
-  final RxnString appliedCity = RxnString(null);
+  final RxnString appliedState = RxnString(null);
 
   final RxSet<String> appliedFuelTypes = <String>{}.obs;
   final RxSet<String> appliedTransmissions = <String>{}.obs;
   final RxSet<String> appliedBodyTypes = <String>{}.obs;
 
-  final Rx<RangeValues> appliedRegBucket = const RangeValues(0, 3).obs;
-  final Rx<RangeValues> appliedOdoBucket = const RangeValues(0, 3).obs;
+  @override
+  void onInit() {
+    super.onInit();
+    isModelEnabled.value = false;
+    isVariantEnabled.value = false;
+    fetchMakeSuggestions('');
+  }
 
-  // -------------------- INIT OPTIONS --------------------
-  /// Call this once when you have cars list (recommended)
+  @override
+  void onClose() {
+    _makeDebounce?.cancel();
+    _modelDebounce?.cancel();
+    _variantDebounce?.cancel();
+    super.onClose();
+  }
+
   void setOptionsFromCars(List<CarsListModelForBuyACar> cars) {
-    // Make list
-    makes.assignAll(_unique(cars.map((c) => c.carMake)));
+    // ✅ Always keep full list of Indian states in dropdown
+    states.assignAll(AppConstants.indianStates);
 
-    // Cities
-    cities.assignAll(_unique(cars.map((c) => c.dealerCity)));
-
-    // Body types / fuel / transmission
-    bodyTypes.assignAll(_unique(cars.map((c) => c.carBodyType)));
-    fuelTypes.assignAll(_unique(cars.map((c) => c.carFuelType)));
-    transmissionTypes.assignAll(_unique(cars.map((c) => c.carTransmission)));
-
-    // Models by make
-    final mapMakeModels = <String, Set<String>>{};
-    final mapModelVariants = <String, Set<String>>{};
-
-    for (final c in cars) {
-      final mk = c.carMake.trim();
-      final md = c.carModel.trim();
-      final vr = c.carVariant.trim();
-      if (mk.isEmpty) continue;
-
-      mapMakeModels.putIfAbsent(mk, () => <String>{});
-      if (md.isNotEmpty) mapMakeModels[mk]!.add(md);
-
-      if (md.isNotEmpty) {
-        mapModelVariants.putIfAbsent(md, () => <String>{});
-        if (vr.isNotEmpty) mapModelVariants[md]!.add(vr);
-      }
-    }
-
-    modelsByMake.assignAll({
-      for (final e in mapMakeModels.entries) e.key: (e.value.toList()..sort()),
-    });
-
-    variantsByModel.assignAll({
-      for (final e in mapModelVariants.entries)
-        e.key: (e.value.toList()..sort()),
-    });
+    bodyTypes.assignAll(
+      _mergeUnique(bodyTypes, cars.map((c) => c.carBodyType)),
+    );
+    fuelTypes.assignAll(
+      _mergeUnique(fuelTypes, cars.map((c) => c.carFuelType)),
+    );
+    transmissionTypes.assignAll(
+      _mergeUnique(transmissionTypes, cars.map((c) => c.carTransmission)),
+    );
   }
 
-  /// Dummy options (use if you want to test without backend)
-  void setDummyOptions() {
-    makes.assignAll(['Toyota', 'Honda', 'Kia']);
-    modelsByMake.assignAll({
-      'Toyota': ['Corolla', 'Hilux'],
-      'Honda': ['Civic'],
-      'Kia': ['Sportage'],
-    });
-    variantsByModel.assignAll({
-      'Corolla': ['XLi', 'GLi'],
-      'Hilux': ['Revo'],
-      'Civic': ['Oriel'],
-      'Sportage': ['FWD'],
-    });
-
-    cities.assignAll(['Lahore', 'Karachi', 'Islamabad']);
-    bodyTypes.assignAll(['Sedan', 'SUV', 'Pickup']);
-    fuelTypes.assignAll(['Petrol', 'Diesel']);
-    transmissionTypes.assignAll(['Manual', 'Automatic']);
-  }
-
-  // -------------------- CASCADING DROPDOWNS --------------------
-  List<String> get modelsForSelectedMake {
-    final mk = selectedMake.value;
-    if (mk == null) return [];
-    return modelsByMake[mk] ?? [];
-  }
-
-  List<String> get variantsForSelectedModel {
-    final md = selectedModel.value;
-    if (md == null) return [];
-    return variantsByModel[md] ?? [];
-  }
-
-  void onMakeChanged(String? mk) {
+  void onMakePicked(String? mk) {
     selectedMake.value = mk;
     selectedModel.value = null;
     selectedVariant.value = null;
+
+    modelOptions.clear();
+    variantOptions.clear();
+
+    final make = (mk ?? '').trim();
+    isModelEnabled.value = make.isNotEmpty;
+    isVariantEnabled.value = false;
+
+    if (make.isNotEmpty) {
+      fetchModelSuggestions(make: make, query: '');
+    }
   }
 
-  void onModelChanged(String? md) {
+  void onModelPicked(String? md) {
     selectedModel.value = md;
     selectedVariant.value = null;
+
+    variantOptions.clear();
+
+    final model = (md ?? '').trim();
+    isVariantEnabled.value = model.isNotEmpty;
+
+    final make = (selectedMake.value ?? '').trim();
+    if (make.isNotEmpty && model.isNotEmpty) {
+      fetchVariantSuggestions(make: make, model: model, query: '');
+    }
   }
 
-  // -------------------- APPLY / RESET --------------------
+  void onVariantPicked(String? vr) {
+    selectedVariant.value = vr;
+  }
+
+  void onMakeSearchChanged(String q) {
+    _makeDebounce?.cancel();
+    _makeDebounce = Timer(const Duration(milliseconds: 350), () {
+      fetchMakeSuggestions(q.trim());
+    });
+  }
+
+  void onModelSearchChanged(String q) {
+    final make = (selectedMake.value ?? '').trim();
+    if (make.isEmpty) return;
+
+    _modelDebounce?.cancel();
+    _modelDebounce = Timer(const Duration(milliseconds: 350), () {
+      fetchModelSuggestions(make: make, query: q.trim());
+    });
+  }
+
+  void onVariantSearchChanged(String q) {
+    final make = (selectedMake.value ?? '').trim();
+    final model = (selectedModel.value ?? '').trim();
+    if (make.isEmpty || model.isEmpty) return;
+
+    _variantDebounce?.cancel();
+    _variantDebounce = Timer(const Duration(milliseconds: 350), () {
+      fetchVariantSuggestions(make: make, model: model, query: q.trim());
+    });
+  }
+
+  Future<void> fetchMakeSuggestions(String query) async {
+    isMakeLoading.value = true;
+    try {
+      final response = await ApiService.post(
+        endpoint: AppUrls.searchCarMakes,
+        body: {'q': query, 'limit': 20},
+      );
+
+      if (response.statusCode != 200) return;
+
+      final body = jsonDecode(response.body);
+      if (body['success'] != true) return;
+
+      final List<String> makes = (body['data'] as List<dynamic>)
+          .map((e) => e.toString())
+          .toList();
+
+      makeOptions.assignAll(makes);
+    } catch (e) {
+      debugPrint('fetchMakeSuggestions error: $e');
+    } finally {
+      isMakeLoading.value = false;
+    }
+  }
+
+  Future<void> fetchModelSuggestions({
+    required String make,
+    required String query,
+  }) async {
+    isModelLoading.value = true;
+    try {
+      final response = await ApiService.post(
+        endpoint: AppUrls.searchCarModelsByMake,
+        body: {'make': make, 'q': query, 'limit': 20},
+      );
+
+      if (response.statusCode != 200) return;
+
+      final body = jsonDecode(response.body);
+      if (body['success'] != true) return;
+
+      final List<String> models = (body['data'] as List<dynamic>)
+          .map((e) => e.toString())
+          .toList();
+
+      modelOptions.assignAll(models);
+    } catch (e) {
+      debugPrint('fetchModelSuggestions error: $e');
+    } finally {
+      isModelLoading.value = false;
+    }
+  }
+
+  Future<void> fetchVariantSuggestions({
+    required String make,
+    required String model,
+    required String query,
+  }) async {
+    isVariantLoading.value = true;
+    try {
+      final response = await ApiService.post(
+        endpoint: AppUrls.searchCarVariantsByMakeModel,
+        body: {'make': make, 'model': model, 'q': query, 'limit': 20},
+      );
+
+      if (response.statusCode != 200) return;
+
+      final body = jsonDecode(response.body);
+      if (body['success'] != true) return;
+
+      final List<String> variants = (body['data'] as List<dynamic>)
+          .map((e) => e.toString())
+          .toList();
+
+      variantOptions.assignAll(variants);
+    } catch (e) {
+      debugPrint('fetchVariantSuggestions error: $e');
+    } finally {
+      isVariantLoading.value = false;
+    }
+  }
+
   void applyFilters() {
     appliedMake.value = selectedMake.value;
     appliedModel.value = selectedModel.value;
     appliedVariant.value = selectedVariant.value;
-    appliedCity.value = selectedCity.value;
+    appliedState.value = selectedState.value;
 
     appliedFuelTypes
       ..clear()
@@ -160,59 +294,64 @@ class BuyACarFiltersController extends GetxController {
       ..clear()
       ..addAll(selectedBodyTypes);
 
-    appliedRegBucket.value = selectedRegBucket.value;
-    appliedOdoBucket.value = selectedOdoBucket.value;
+    appliedCarAgeYears.value = selectedCarAgeYears.value;
+    appliedMileageKm.value = selectedMileageKm.value;
 
     isApplied.value = true;
   }
 
   void resetFilters() {
-    // selected (UI)
     selectedMake.value = null;
     selectedModel.value = null;
     selectedVariant.value = null;
-    selectedCity.value = null;
+    selectedState.value = null;
 
     selectedFuelTypes.clear();
     selectedTransmissions.clear();
     selectedBodyTypes.clear();
 
-    selectedRegBucket.value = const RangeValues(0, 3);
-    selectedOdoBucket.value = const RangeValues(0, 3);
+    selectedCarAgeYears.value = const RangeValues(
+      minCarAgeYears,
+      maxCarAgeYears,
+    );
+    selectedMileageKm.value = const RangeValues(minMileageKm, maxMileageKm);
 
-    // applied snapshot
     appliedMake.value = null;
     appliedModel.value = null;
     appliedVariant.value = null;
-    appliedCity.value = null;
+    appliedState.value = null;
 
     appliedFuelTypes.clear();
     appliedTransmissions.clear();
     appliedBodyTypes.clear();
 
-    appliedRegBucket.value = const RangeValues(0, 3);
-    appliedOdoBucket.value = const RangeValues(0, 3);
+    appliedCarAgeYears.value = const RangeValues(
+      minCarAgeYears,
+      maxCarAgeYears,
+    );
+    appliedMileageKm.value = const RangeValues(minMileageKm, maxMileageKm);
 
     isApplied.value = false;
+
+    isModelEnabled.value = false;
+    isVariantEnabled.value = false;
+    modelOptions.clear();
+    variantOptions.clear();
+
+    fetchMakeSuggestions('');
   }
 
-  // -------------------- FILTER LOGIC (use this from BuyACarController) --------------------
   List<CarsListModelForBuyACar> filterCars({
     required List<CarsListModelForBuyACar> source,
     required String searchQueryLower,
   }) {
     final q = searchQueryLower.trim();
-
-    // if not applied, still apply search only
     final useFilters = isApplied.value;
 
     return source.where((c) {
-      // Search by car name (your requirement)
       if (q.isNotEmpty && !c.carName.toLowerCase().contains(q)) return false;
-
       if (!useFilters) return true;
 
-      // Make / Model / Variant
       if (appliedMake.value != null && appliedMake.value!.isNotEmpty) {
         if (c.carMake != appliedMake.value!) return false;
       }
@@ -223,61 +362,41 @@ class BuyACarFiltersController extends GetxController {
         if (c.carVariant != appliedVariant.value!) return false;
       }
 
-      // City
-      if (appliedCity.value != null && appliedCity.value!.isNotEmpty) {
-        if (c.dealerCity != appliedCity.value!) return false;
+      if (appliedState.value != null && appliedState.value!.isNotEmpty) {
+        if (c.dealerState != appliedState.value!) return false;
       }
 
-      // Fuel / Transmission / Body (multi select)
       if (appliedFuelTypes.isNotEmpty &&
-          !appliedFuelTypes.contains(c.carFuelType)) {
+          !appliedFuelTypes.contains(c.carFuelType))
         return false;
-      }
+
       if (appliedTransmissions.isNotEmpty &&
-          !appliedTransmissions.contains(c.carTransmission)) {
+          !appliedTransmissions.contains(c.carTransmission))
         return false;
-      }
+
       if (appliedBodyTypes.isNotEmpty &&
-          !appliedBodyTypes.contains(c.carBodyType)) {
+          !appliedBodyTypes.contains(c.carBodyType))
         return false;
-      }
 
-      // Year of registration bucket
-      final regBucket = _regBucketIndex(c.carYear);
-      final regMin = appliedRegBucket.value.start.round();
-      final regMax = appliedRegBucket.value.end.round();
-      if (regBucket < regMin || regBucket > regMax) return false;
+      final carAge = _carAgeYears(c.carYear);
+      final minAge = appliedCarAgeYears.value.start.round();
+      final maxAge = appliedCarAgeYears.value.end.round();
+      if (carAge < minAge || carAge > maxAge) return false;
 
-      // Odometer bucket
-      final odoBucket = _odoBucketIndex(c.carKms);
-      final odoMin = appliedOdoBucket.value.start.round();
-      final odoMax = appliedOdoBucket.value.end.round();
-      if (odoBucket < odoMin || odoBucket > odoMax) return false;
+      final kms = _parseIntLoose(c.carKms);
+      final minKm = appliedMileageKm.value.start.round();
+      final maxKm = appliedMileageKm.value.end.round();
+      if (kms < minKm || kms > maxKm) return false;
 
       return true;
     }).toList();
   }
 
-  // -------------------- BUCKET HELPERS --------------------
-  int _regBucketIndex(String yearStr) {
+  int _carAgeYears(String yearStr) {
     final year = int.tryParse(yearStr.trim()) ?? 0;
-    if (year <= 0) return 3; // treat unknown as 5+ (old)
-
+    if (year <= 0) return 5;
     final nowYear = DateTime.now().year;
-    final age = (nowYear - year).clamp(0, 100);
-
-    if (age < 1) return 0; // < 1
-    if (age < 3) return 1; // 1 - 3
-    if (age < 5) return 2; // 3 - 5
-    return 3; // 5+
-  }
-
-  int _odoBucketIndex(String kmsStr) {
-    final kms = _parseIntLoose(kmsStr);
-    if (kms < 10000) return 0; // <10k
-    if (kms < 30000) return 1; // 10-30k
-    if (kms < 50000) return 2; // 30-50k
-    return 3; // 50k+
+    return (nowYear - year).clamp(0, 100);
   }
 
   int _parseIntLoose(String s) {
@@ -293,5 +412,47 @@ class BuyACarFiltersController extends GetxController {
     }
     final list = set.toList()..sort();
     return list;
+  }
+
+  List<String> _mergeUnique(List<String> existing, Iterable<String> incoming) {
+    final set = <String>{};
+
+    for (final e in existing) {
+      final v = e.trim();
+      if (v.isNotEmpty) set.add(v);
+    }
+    for (final x in incoming) {
+      final v = x.trim();
+      if (v.isNotEmpty) set.add(v);
+    }
+
+    final list = set.toList()..sort();
+    return list;
+  }
+
+  Map<String, dynamic> buildAppliedFilterPayload() {
+    // ensure applyFilters() was called before using this
+    return {
+      "make": appliedMake.value,
+      "model": appliedModel.value,
+      "variant": appliedVariant.value,
+      "dealerState": appliedState.value,
+      "fuelTypes": appliedFuelTypes.toList(),
+      "transmissions": appliedTransmissions.toList(),
+      "bodyTypes": appliedBodyTypes.toList(),
+      "carAgeYears": {
+        "min": appliedCarAgeYears.value.start.round(),
+        "max": appliedCarAgeYears.value.end.round(),
+      },
+      "mileageKm": {
+        "min": appliedMileageKm.value.start.round(),
+        "max": appliedMileageKm.value.end.round(),
+      },
+    }..removeWhere((k, v) {
+      if (v == null) return true;
+      if (v is String && v.trim().isEmpty) return true;
+      if (v is List && v.isEmpty) return true;
+      return false;
+    });
   }
 }
