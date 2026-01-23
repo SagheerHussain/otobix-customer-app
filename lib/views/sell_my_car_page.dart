@@ -45,6 +45,8 @@ class SellMyCarPage extends StatelessWidget {
                 final imageUrls = banners.map((b) => b.imageUrl).toList();
 
                 return HomeBannersWidget(
+                  cacheKey:
+                      '${AppConstants.bannerViews.sellMyCar} ${AppConstants.bannerTypes.header}',
                   imageUrls: imageUrls,
                   height:
                       MediaQuery.of(context).size.width *

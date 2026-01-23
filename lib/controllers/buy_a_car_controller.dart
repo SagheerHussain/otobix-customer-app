@@ -438,7 +438,7 @@ class BuyACarController extends GetxController {
         endpoint: AppUrls.searchCarsInBuyACar,
         body: {
           "q": query,
-          "limit": limit,
+          // "limit": limit,
           // if later you want pagination for search:
           // "cursorDocId": cursorDocId,
         },
@@ -492,7 +492,7 @@ class BuyACarController extends GetxController {
         endpoint: AppUrls.filterCarsInBuyACar,
         body: {
           ...payload,
-          "limit": limit,
+          // "limit": limit,
           // if later you want pagination for filter:
           // "cursorDocId": cursorDocId,
         },

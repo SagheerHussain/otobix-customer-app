@@ -108,6 +108,8 @@ class HomePage extends StatelessWidget {
                                 .toList();
 
                             return HomeBannersWidget(
+                              cacheKey:
+                                  '${AppConstants.bannerViews.home} ${AppConstants.bannerTypes.header}',
                               imageUrls: imageUrls,
                               height:
                                   MediaQuery.of(context).size.width *
