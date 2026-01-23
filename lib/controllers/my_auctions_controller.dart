@@ -126,8 +126,40 @@ class MyAuctionsController extends GetxController {
   }
 
   // ----------------- COUNTDOWN LOGIC -----------------
-
   void _initCountdowns() {
+    _countdownTimer?.cancel();
+
+    _tickCountdowns(); // fill once immediately
+
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _tickCountdowns();
+    });
+  }
+
+  void _tickCountdowns() {
+    final now = DateTime.now();
+
+    for (final car in myAuctionCarsList) {
+      Duration? diff;
+
+      if (car.auctionStatus == AppConstants.auctionStatuses.upcoming) {
+        final until = car.upcomingUntil;
+        if (until != null) diff = until.difference(now);
+      } else if (car.auctionStatus == AppConstants.auctionStatuses.live) {
+        final end = car.auctionEndTime;
+        if (end != null) diff = end.difference(now);
+      } else {
+        // For completed/sold/removed/etc you probably want no timer
+        diff = null;
+      }
+
+      remainingTimeByAppointmentId[car.appointmentId] = diff == null
+          ? '-- : -- : --'
+          : _formatDuration(diff);
+    }
+  }
+
+  void _initCountdowns1() {
     // Fill initial values
     final now = DateTime.now();
     for (final car in myAuctionCarsList) {
@@ -144,7 +176,7 @@ class MyAuctionsController extends GetxController {
     });
   }
 
-  void _tickCountdowns() {
+  void _tickCountdowns1() {
     final now = DateTime.now();
 
     for (final car in myAuctionCarsList) {
