@@ -687,6 +687,7 @@ class SellMyCarController extends GetxController {
         request.fields['inspectionAddress'] = inspectionAddressController.text
             .trim();
       }
+      request.fields['addedBy'] = 'Customer';
 
       // images
       for (final image in selectedImages) {

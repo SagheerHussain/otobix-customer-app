@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:otobix_customer_app/Models/auction_details_model.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
@@ -26,6 +28,8 @@ class AuctionDetailsController extends GetxController {
   final RxBool isMoveCarToOtobuyLoading = false.obs;
   final RxBool isAcceptOfferLoading = false.obs;
   final RxBool isSetOneClickPriceLoading = false.obs;
+  final RxBool isSubmitReAuctionRequestLoading = false.obs;
+  final RxBool isSubmitReInspectionRequestLoading = false.obs;
 
   final auctionDetails = AuctionDetailsModel.empty().obs;
 
@@ -56,10 +60,15 @@ class AuctionDetailsController extends GetxController {
       if (response.statusCode == 200) {
         var jsonResponse = jsonDecode(response.body);
 
+        // // Print API response
+        // GlobalFunctions.printApiResponse(
+        //   input: response.body,
+        //   title: 'Auction Details',
+        // );
+
         auctionDetails.value = AuctionDetailsModel.fromJson(
           jsonResponse['data'],
         );
-        // debugPrint('Auction Details: ${auctionDetails.value.toJson()}');
       } else {
         auctionDetails.value = AuctionDetailsModel.empty();
         debugPrint('Failed to load auction details');
@@ -293,6 +302,159 @@ class AuctionDetailsController extends GetxController {
       );
     } finally {
       isSetOneClickPriceLoading.value = false;
+    }
+  }
+
+  // Submit re auction request
+  Future<bool> submitReAuctionRequest({
+    required String appointmentId,
+    required int odometerReading,
+    required File otometerProofImage,
+  }) async {
+    isSubmitReAuctionRequestLoading.value = true;
+    try {
+      if (odometerReading <= 0) {
+        ToastWidget.show(
+          context: Get.context!,
+          title: 'Enter a valid odometer reading',
+          type: ToastType.error,
+        );
+        return false;
+      }
+
+      final uri = Uri.parse(AppUrls.submitReAuctionRequest);
+      final request = http.MultipartRequest('POST', uri);
+
+      final token =
+          await SharedPrefsHelper.getString(SharedPrefsHelper.tokenKey) ?? '';
+      final customerContactNumber =
+          await SharedPrefsHelper.getString(
+            SharedPrefsHelper.userPhoneNumberKey,
+          ) ??
+          '';
+
+      if (token.isNotEmpty) {
+        request.headers.addAll({
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        });
+      }
+
+      final details = auctionDetails.value;
+
+      // ✅ Required fields (as per your backend validation)
+      request.fields['carId'] = (details.carId).trim();
+      request.fields['appointmentId'] = appointmentId.trim();
+      request.fields['odometerReading'] = odometerReading.toString();
+
+      request.fields['ownerName'] = (details.registeredOwner)
+          .trim(); // ensure this exists
+      request.fields['make'] = (details.make).trim();
+      request.fields['model'] = (details.model).trim();
+      request.fields['variant'] = (details.variant).trim();
+
+      // optional but included
+      request.fields['customerContactNumber'] = customerContactNumber.trim();
+
+      // ✅ File field name MUST match multer: uploadImages.single("image")
+      request.files.add(
+        await http.MultipartFile.fromPath('image', otometerProofImage.path),
+      );
+
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode == 200) {
+        return true;
+      }
+
+      debugPrint('Failed: ${response.statusCode} body: ${response.body}');
+
+      ToastWidget.show(
+        context: Get.context!,
+        title: 'Failed',
+        subtitle: 'Failed to submit re auction request',
+        type: ToastType.error,
+      );
+      return false;
+    } catch (error) {
+      debugPrint('Error: $error');
+      ToastWidget.show(
+        context: Get.context!,
+        title: 'Error submitting re auction request',
+        type: ToastType.error,
+      );
+      return false;
+    } finally {
+      isSubmitReAuctionRequestLoading.value = false;
+    }
+  }
+
+  // Submit Re-Inspection request
+  Future<bool> submitReInspectionRequest({
+    required String appointmentId,
+  }) async {
+    isSubmitReInspectionRequestLoading.value = true;
+    try {
+      final userId =
+          await SharedPrefsHelper.getString(SharedPrefsHelper.userIdKey) ?? '';
+      final userRole =
+          await SharedPrefsHelper.getString(SharedPrefsHelper.userTypeKey) ??
+          '';
+      final customerContactNumber =
+          await SharedPrefsHelper.getString(
+            SharedPrefsHelper.userPhoneNumberKey,
+          ) ??
+          '';
+
+      final body = {
+        'appointmentId': appointmentId,
+        'changedBy': userId,
+        'source': userRole,
+
+        // required fields for create if doc doesn't exist
+        'carRegistrationNumber': auctionDetails.value.registrationNumber.trim(),
+        'ownerName': auctionDetails.value.registeredOwner.trim(),
+        'make': auctionDetails.value.make.trim(),
+        'model': auctionDetails.value.model.trim(),
+        'variant': auctionDetails.value.variant.trim(),
+
+        // ✅ year only (4 digits)
+        'yearOfRegistration':
+            auctionDetails.value.registrationDate?.year.toString() ?? '',
+        'inspectionStatus': 'Re-Inspection',
+        'ownershipSerialNumber': auctionDetails.value.ownerSerialNumber,
+        'customerContactNumber': customerContactNumber,
+        'createdBy': AppConstants.roles.customer,
+        'addedBy': AppConstants.roles.customer,
+      };
+
+      final response = await ApiService.put(
+        endpoint: AppUrls.updateTelecallingRequest,
+        body: body,
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return true;
+      } else {
+        ToastWidget.show(
+          context: Get.context!,
+          title: 'Error',
+          subtitle: 'Failed to submit request',
+          type: ToastType.error,
+        );
+        return false;
+      }
+    } catch (e) {
+      ToastWidget.show(
+        context: Get.context!,
+        title: 'Error',
+        subtitle: 'Error submitting request',
+        type: ToastType.error,
+      );
+      return false;
+    } finally {
+      isSubmitReInspectionRequestLoading.value = false;
     }
   }
 
@@ -548,5 +710,33 @@ class AuctionDetailsController extends GetxController {
         ? false
         : true;
     return type;
+  }
+
+  // Check if 72 hours have passed since auction end
+  bool has72HoursPassedSinceAuctionEnd() {
+    final end = auctionDetails.value.auctionEndTime;
+    if (end == null) return true; // null => consider > 72 hours
+    return DateTime.now().isAfter(end.add(const Duration(hours: 72)));
+  }
+
+  // Check if 72 hours have passed since otobuy started
+  bool has72HoursPassedSinceOtobuyStarted() {
+    final end = auctionDetails.value.movedToOtobuyAt;
+    if (end == null) return true; // null => consider > 72 hours
+    return DateTime.now().isAfter(end.add(const Duration(hours: 72)));
+  }
+
+  // Check if 15 days have passed since auction end
+  bool has15DaysPassedSinceAuctionEnd() {
+    final end = auctionDetails.value.auctionEndTime;
+    if (end == null) return false; // null => consider < 15 days
+    return DateTime.now().isAfter(end.add(const Duration(days: 15)));
+  }
+
+  // Check if 30 days have passed since auction end
+  bool has30DaysPassedSinceAuctionEnd() {
+    final end = auctionDetails.value.auctionEndTime;
+    if (end == null) return false; // null => consider < 30 days
+    return DateTime.now().isAfter(end.add(const Duration(days: 30)));
   }
 }

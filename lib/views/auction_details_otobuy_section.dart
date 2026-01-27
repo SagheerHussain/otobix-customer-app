@@ -333,20 +333,32 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
               ),
               if (showActions) ...[
                 const SizedBox(width: 10),
-                InkWell(
-                  onTap: () => _showAcceptOfferDialog(
-                    carId: carId,
-                    originalOfferAmmount: originalOfferAmmount,
-                    marginAdjustedOfferAmmount: marginAdjustedOfferAmmount,
-                    offerBy: offerBy,
-                  ),
-                  child: const Icon(
-                    Icons.check_circle,
-                    color: AppColors.green,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: 8),
+                Obx(() {
+                  final hide = auctionDetailsController
+                      .has72HoursPassedSinceOtobuyStarted();
+                  return hide
+                      ? const SizedBox.shrink()
+                      : Row(
+                          children: [
+                            InkWell(
+                              onTap: () => _showAcceptOfferDialog(
+                                carId: carId,
+                                originalOfferAmmount: originalOfferAmmount,
+                                marginAdjustedOfferAmmount:
+                                    marginAdjustedOfferAmmount,
+                                offerBy: offerBy,
+                              ),
+                              child: const Icon(
+                                Icons.check_circle,
+                                color: AppColors.green,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                        );
+                }),
+
                 InkWell(
                   onTap: () => showSetExpectedPriceDialog(
                     context: Get.context!,

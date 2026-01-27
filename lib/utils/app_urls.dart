@@ -47,6 +47,9 @@ class AppUrls {
   static String get addTelecallingRequest =>
       "${baseUrl}inspection/telecallings/add";
 
+  static String get updateTelecallingRequest =>
+      "${baseUrl}inspection/telecallings/update";
+
   static String get removeCar => "${baseUrl}car/remove-car";
 
   static String get moveCarToOtobuy => "${baseUrl}otobuy/move-car-to-otobuy";
@@ -56,6 +59,9 @@ class AppUrls {
 
   static String get setOneClickPrice =>
       "${baseUrl}customer/auction-details/set-one-click-price";
+
+  static String get submitReAuctionRequest =>
+      "${baseUrl}customer/auction-details/submit-re-auction-request";
 
   static String get fetch10RandomCarsList =>
       "${baseUrl}customer/buy-a-car/fetch-10-random-cars-from-firestore";

@@ -1,3 +1,5 @@
+import 'package:otobix_customer_app/utils/global_functions.dart';
+
 class AuctionDetailsModel {
   final String carId;
   final String auctionStatus;
@@ -6,15 +8,18 @@ class AuctionDetailsModel {
   final String make;
   final String model;
   final String variant;
-  final DateTime registrationDate;
-  final DateTime yearOfManufacture;
-  final DateTime upcomingUntil;
-  final DateTime auctionEndTime;
+  final DateTime? registrationDate;
+  final DateTime? yearOfManufacture;
+  final DateTime? upcomingUntil;
+  final DateTime? auctionEndTime;
   final List<AuctionDetailsBidModel> liveBids;
   final List<AuctionDetailsOtobuyOfferModel> otobuyOffers;
   final double oneClickPrice;
   final double priceDiscovery;
   final double customerExpectedPrice;
+  final DateTime? movedToOtobuyAt;
+  final String registeredOwner;
+  final int ownerSerialNumber;
 
   AuctionDetailsModel({
     required this.carId,
@@ -33,6 +38,9 @@ class AuctionDetailsModel {
     required this.oneClickPrice,
     required this.priceDiscovery,
     required this.customerExpectedPrice,
+    required this.movedToOtobuyAt,
+    required this.registeredOwner,
+    required this.ownerSerialNumber,
   });
 
   // Factory method to create AuctionDetails from JSON
@@ -45,10 +53,14 @@ class AuctionDetailsModel {
       make: json['make'] ?? '',
       model: json['model'] ?? '',
       variant: json['variant'] ?? '',
-      registrationDate: DateTime.parse(json['registrationDate']),
-      yearOfManufacture: DateTime.parse(json['yearOfManufacture']),
-      upcomingUntil: DateTime.parse(json['upcomingUntil']),
-      auctionEndTime: DateTime.parse(json['auctionEndTime']),
+      registrationDate: GlobalFunctions.parseMongoDbDate(
+        json['registrationDate'],
+      ),
+      yearOfManufacture: GlobalFunctions.parseMongoDbDate(
+        json['yearOfManufacture'],
+      ),
+      upcomingUntil: GlobalFunctions.parseMongoDbDate(json['upcomingUntil']),
+      auctionEndTime: GlobalFunctions.parseMongoDbDate(json['auctionEndTime']),
       liveBids:
           (json['liveBids'] as List<dynamic>?)
               ?.map((e) => AuctionDetailsBidModel.fromJson(e))
@@ -62,6 +74,11 @@ class AuctionDetailsModel {
       oneClickPrice: _toDouble(json['oneClickPrice']),
       priceDiscovery: _toDouble(json['priceDiscovery']),
       customerExpectedPrice: _toDouble(json['customerExpectedPrice']),
+      movedToOtobuyAt: GlobalFunctions.parseMongoDbDate(
+        json['movedToOtobuyAt'],
+      ),
+      registeredOwner: json['registeredOwner'] ?? '',
+      ownerSerialNumber: json['ownerSerialNumber'] ?? 1,
     );
   }
 
@@ -74,15 +91,16 @@ class AuctionDetailsModel {
       'make': make,
       'model': model,
       'variant': variant,
-      'registrationDate': registrationDate.toIso8601String(),
-      'yearOfManufacture': yearOfManufacture.toIso8601String(),
-      'upcomingUntil': upcomingUntil.toIso8601String(),
-      'auctionEndTime': auctionEndTime.toIso8601String(),
+      'registrationDate': registrationDate,
+      'yearOfManufacture': yearOfManufacture,
+      'upcomingUntil': upcomingUntil,
+      'auctionEndTime': auctionEndTime,
       'liveBids': liveBids.map((e) => e.toJson()).toList(),
       'otobuyOffers': otobuyOffers.map((e) => e.toJson()).toList(),
       'oneClickPrice': oneClickPrice,
       'priceDiscovery': priceDiscovery,
       'customerExpectedPrice': customerExpectedPrice,
+      'movedToOtobuyAt': movedToOtobuyAt,
     };
   }
 
@@ -104,6 +122,9 @@ class AuctionDetailsModel {
     double? oneClickPrice,
     double? priceDiscovery,
     double? customerExpectedPrice,
+    DateTime? movedToOtobuyAt,
+    String? registeredOwner,
+    int? ownerSerialNumber,
   }) {
     return AuctionDetailsModel(
       carId: carId ?? this.carId,
@@ -123,6 +144,9 @@ class AuctionDetailsModel {
       priceDiscovery: priceDiscovery ?? this.priceDiscovery,
       customerExpectedPrice:
           customerExpectedPrice ?? this.customerExpectedPrice,
+      movedToOtobuyAt: movedToOtobuyAt ?? this.movedToOtobuyAt,
+      registeredOwner: registeredOwner ?? this.registeredOwner,
+      ownerSerialNumber: ownerSerialNumber ?? this.ownerSerialNumber,
     );
   }
 
@@ -145,6 +169,9 @@ class AuctionDetailsModel {
       oneClickPrice: 0.0,
       priceDiscovery: 0.0,
       customerExpectedPrice: 0.0,
+      movedToOtobuyAt: DateTime.now(),
+      registeredOwner: '',
+      ownerSerialNumber: 1,
     );
   }
 }

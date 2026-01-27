@@ -8,7 +8,6 @@ import 'package:otobix_customer_app/services/car_margin_helpers.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/utils/global_functions.dart';
-import 'package:otobix_customer_app/views/my_auctions_page.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 import 'package:otobix_customer_app/widgets/set_expected_price_dialog_widget.dart';
 
@@ -430,7 +429,9 @@ class AuctionDetailsLiveSection extends StatelessWidget {
                               soldAt: originalOfferAmmount,
                             );
                         if (ok) {
-                          Get.off(MyAuctionsPage());
+                          // Get.off(MyAuctionsPage());
+                          Get.back();
+                          Get.back();
                           myAuctionsController.fetchCarsList();
                           _showCongratulationsDialog();
                         }
