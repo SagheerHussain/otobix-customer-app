@@ -39,6 +39,7 @@ class AuctionDetailsLiveSection extends StatelessWidget {
               _buildCarName(),
               _buildShowMyCurrentExpectedPrice(),
               _buildSetExpectedPriceButton(),
+              _buildAcceptOfferButton(),
               _buildBidsList(),
               const SizedBox(height: 10),
             ],
@@ -182,6 +183,39 @@ class AuctionDetailsLiveSection extends StatelessWidget {
     );
   }
 
+  // Accept Offer Button
+  Widget _buildAcceptOfferButton() {
+    return ButtonWidget(
+      text: 'Accept Offer',
+      isLoading: false.obs,
+      width: 200,
+      backgroundColor: AppColors.blue,
+      elevation: 5,
+      fontSize: 12,
+      onTap: () {
+        final liveBids = auctionDetailsController.auctionDetails.value.liveBids;
+
+        final bid = liveBids[0];
+
+        final bidAmountAfterMarginAdjustment =
+            CarMarginHelpers.netAfterMarginsFlexible(
+              originalPrice: bid.amount,
+              priceDiscovery:
+                  auctionDetailsController.auctionDetails.value.priceDiscovery,
+              fixedMargin: bid.fixedMargin,
+              variableMargin: bid.variableMargin,
+            );
+
+        _showAcceptOfferDialog(
+          carId: auctionDetailsController.auctionDetails.value.carId,
+          originalOfferAmmount: bid.amount,
+          marginAdjustedOfferAmmount: bidAmountAfterMarginAdjustment,
+          offerBy: bid.offerBy,
+        );
+      },
+    );
+  }
+
   // Bids List
   Widget _buildBidsList() {
     return Container(
@@ -222,7 +256,8 @@ class AuctionDetailsLiveSection extends StatelessWidget {
                     const Divider(height: 1, color: AppColors.grayWithOpacity1),
                 itemBuilder: (context, index) {
                   final bid = liveBids[index];
-                  final bool showActions = index == 0;
+                  // final bool showActions = index == 0; // 👈 show actions only for latest bid
+                  final bool showActions = false; // disabled for now
 
                   final bidAmountAfterMarginAdjustment =
                       CarMarginHelpers.netAfterMarginsFlexible(

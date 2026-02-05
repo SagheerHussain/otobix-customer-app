@@ -162,6 +162,7 @@ class SellMyCarPage extends StatelessWidget {
                         hintText: 'Enter your full name',
                         keyboardType: TextInputType.name,
                         isRequired: true,
+                        mask: true,
                       ),
 
                       // 3. Make Model Variant Description
@@ -421,6 +422,7 @@ class SellMyCarPage extends StatelessWidget {
     required TextInputType keyboardType,
     required IconData icon,
     bool isRequired = false,
+    bool mask = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -482,6 +484,12 @@ class SellMyCarPage extends StatelessWidget {
                 return 'This field is required';
               }
               return null;
+            },
+            onChanged: (value) {
+              if (!mask) return;
+
+              // ✅ special handling only for Owner Name field
+              getxController.handleOwnerNameMaskedInput(value);
             },
           ),
         ),
