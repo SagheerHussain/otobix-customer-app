@@ -1,7 +1,7 @@
 class CarMarginHelpers {
   CarMarginHelpers._();
 
-  static const double fixedMargin = 4.0;
+  static const double fixedMargin = 2.0;
 
   static double toLacs(num? priceDiscovery) {
     final n = (priceDiscovery ?? 0).toDouble();

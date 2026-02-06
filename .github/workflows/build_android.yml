@@ -64,5 +64,5 @@ jobs:
           packageName: com.otobix.customerapp
           releaseFiles: build/app/outputs/bundle/release/app-release.aab
           track: internal   # can be internal, alpha, beta, production
-          # status: completed
-          status: draft  # ← CHANGE THIS TO 'completed' WHEN RELEASING THE APP TO PRODUCTION
+          status: completed
+          # status: draft  # ← CHANGE THIS TO 'completed' WHEN RELEASING THE APP TO PRODUCTION

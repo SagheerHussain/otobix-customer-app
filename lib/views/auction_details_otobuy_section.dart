@@ -38,6 +38,7 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
               _buildCarImage(),
               _buildCarName(),
               _buildShowMyCurrentOtobuyPrice(),
+              _buildAcceptOfferButton(),
               _buildReviseOtobuyPriceAndRemoveCarButtons(),
               _buildOtobuyOffersList(),
               const SizedBox(height: 10),
@@ -136,6 +137,48 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
     );
   }
 
+  // Accept Offer Button
+  Widget _buildAcceptOfferButton() {
+    return Obx(() {
+      final hide = auctionDetailsController
+          .has72HoursPassedSinceOtobuyStarted();
+      return hide
+          ? const SizedBox.shrink()
+          : ButtonWidget(
+              text: 'Accept Offer',
+              isLoading: false.obs,
+              width: double.infinity,
+              backgroundColor: AppColors.blue,
+              elevation: 5,
+              fontSize: 12,
+              onTap: () {
+                final otobuyOffers =
+                    auctionDetailsController.auctionDetails.value.otobuyOffers;
+
+                final offer = otobuyOffers[0];
+
+                final offerAmountAfterMarginAdjustment =
+                    CarMarginHelpers.netAfterMarginsFlexible(
+                      originalPrice: offer.amount,
+                      priceDiscovery: auctionDetailsController
+                          .auctionDetails
+                          .value
+                          .priceDiscovery,
+                      fixedMargin: offer.fixedMargin,
+                      variableMargin: offer.variableMargin,
+                    );
+
+                _showAcceptOfferDialog(
+                  carId: auctionDetailsController.auctionDetails.value.carId,
+                  originalOfferAmmount: offer.amount,
+                  marginAdjustedOfferAmmount: offerAmountAfterMarginAdjustment,
+                  offerBy: offer.offerBy,
+                );
+              },
+            );
+    });
+  }
+
   // Revise Otobuy Price Button
   Widget _buildReviseOtobuyPriceAndRemoveCarButtons() {
     return Column(
@@ -231,7 +274,8 @@ class AuctionDetailsOtobuySection extends StatelessWidget {
                     const Divider(height: 1, color: AppColors.grayWithOpacity1),
                 itemBuilder: (context, index) {
                   final offer = otobuyOffers[index];
-                  final bool showActions = index == 0; // first offer only
+                  // final bool showActions = index == 0; // latest offer only
+                  final bool showActions = false; // disabled for now
 
                   final offerAmountAfterMarginAdjustment =
                       CarMarginHelpers.netAfterMarginsFlexible(

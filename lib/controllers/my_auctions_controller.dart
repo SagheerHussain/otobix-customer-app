@@ -6,8 +6,10 @@ import 'package:get/get.dart';
 import 'package:otobix_customer_app/Models/cars_list_model.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
+import 'package:otobix_customer_app/services/socket_service.dart';
 import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
+import 'package:otobix_customer_app/utils/socket_events.dart';
 
 class MyAuctionsController extends GetxController {
   final RxBool isPageLoading = true.obs;
@@ -31,6 +33,7 @@ class MyAuctionsController extends GetxController {
   void onInit() {
     super.onInit();
     fetchCarsList();
+    _listenToAllCarSectionsInRealtime();
 
     // Whenever searchQuery changes, re-apply filter
     ever<String>(searchQuery, (_) => filterCars());
@@ -159,33 +162,33 @@ class MyAuctionsController extends GetxController {
     }
   }
 
-  void _initCountdowns1() {
-    // Fill initial values
-    final now = DateTime.now();
-    for (final car in myAuctionCarsList) {
-      final diff = car.auctionStatus == AppConstants.auctionStatuses.upcoming
-          ? car.upcomingUntil!.difference(now)
-          : car.auctionEndTime!.difference(now);
-      remainingTimeByAppointmentId[car.appointmentId] = _formatDuration(diff);
-    }
+  // void _initCountdowns1() {
+  //   // Fill initial values
+  //   final now = DateTime.now();
+  //   for (final car in myAuctionCarsList) {
+  //     final diff = car.auctionStatus == AppConstants.auctionStatuses.upcoming
+  //         ? car.upcomingUntil!.difference(now)
+  //         : car.auctionEndTime!.difference(now);
+  //     remainingTimeByAppointmentId[car.appointmentId] = _formatDuration(diff);
+  //   }
 
-    // Restart timer
-    _countdownTimer?.cancel();
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
-      _tickCountdowns();
-    });
-  }
+  //   // Restart timer
+  //   _countdownTimer?.cancel();
+  //   _countdownTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+  //     _tickCountdowns();
+  //   });
+  // }
 
-  void _tickCountdowns1() {
-    final now = DateTime.now();
+  // void _tickCountdowns1() {
+  //   final now = DateTime.now();
 
-    for (final car in myAuctionCarsList) {
-      final diff = car.auctionStatus == AppConstants.auctionStatuses.upcoming
-          ? car.upcomingUntil!.difference(now)
-          : car.auctionEndTime!.difference(now);
-      remainingTimeByAppointmentId[car.appointmentId] = _formatDuration(diff);
-    }
-  }
+  //   for (final car in myAuctionCarsList) {
+  //     final diff = car.auctionStatus == AppConstants.auctionStatuses.upcoming
+  //         ? car.upcomingUntil!.difference(now)
+  //         : car.auctionEndTime!.difference(now);
+  //     remainingTimeByAppointmentId[car.appointmentId] = _formatDuration(diff);
+  //   }
+  // }
 
   String _formatDuration(Duration diff) {
     var totalSeconds = diff.inSeconds;
@@ -204,5 +207,38 @@ class MyAuctionsController extends GetxController {
     final s = seconds.toString().padLeft(2, '0');
 
     return '${h}h : ${m}m : ${s}s';
+  }
+
+  // Listen to all car sections realtime
+  void _listenToAllCarSectionsInRealtime() {
+    // Completed Auctions Section
+    SocketService.instance.joinRoom(
+      SocketEvents.auctionCompletedCarsSectionRoom,
+    );
+    SocketService.instance.on(SocketEvents.auctionCompletedCarsSectionUpdated, (
+      data,
+    ) async {
+      final String id = '${data['id']}';
+
+      // refresh only if this car already exists in my list
+      final bool exists = myAuctionCarsList.any((car) => car.id == id);
+      if (exists) {
+        await fetchCarsList();
+      }
+    });
+
+    // Otobuy Section
+    SocketService.instance.joinRoom(SocketEvents.otobuyCarsSectionRoom);
+    SocketService.instance.on(SocketEvents.otobuyCarsSectionUpdated, (
+      data,
+    ) async {
+      final String id = '${data['id']}';
+
+      // refresh only if this car already exists in my list
+      final bool exists = myAuctionCarsList.any((car) => car.id == id);
+      if (exists) {
+        await fetchCarsList();
+      }
+    });
   }
 }

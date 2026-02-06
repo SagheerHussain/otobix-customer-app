@@ -3,10 +3,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/controllers/registration_form_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
-import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_icons.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
-import 'package:otobix_customer_app/widgets/dropdown_widget.dart';
 
 class RegistrationFormPage extends StatelessWidget {
   final String userRole;
@@ -130,95 +128,8 @@ class RegistrationFormPage extends StatelessWidget {
                           return null;
                         },
                       ),
-                      if (userRole == AppConstants.roles.dealer)
-                        _buildCustomTextField(
-                          icon: Icons.business,
-                          label: "Dealership Name",
-                          controller: getxController.dealershipNameController,
-                          hintText: "e.g. Super Cars Pvt Ltd",
-                          keyboardType: TextInputType.text,
-                          isRequired: true,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Dealership name is required';
-                            }
-                            return null;
-                          },
-                        ),
-                      if (userRole == AppConstants.roles.dealer)
-                        _buildEntityTypeDropdown(context),
-
-                      const SizedBox(height: 30),
-
-                      if (userRole == AppConstants.roles.dealer)
-                        _buildCustomTextField(
-                          icon: Icons.person_outline,
-                          label: "Primary Contact Person",
-                          controller:
-                              getxController.primaryContactPersonController,
-                          hintText: "e.g. Amit Parekh",
-                          keyboardType: TextInputType.text,
-                          isRequired: true,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Primary contact person is required';
-                            }
-                            return null;
-                          },
-                        ),
-                      if (userRole == AppConstants.roles.dealer)
-                        _buildCustomTextField(
-                          icon: Icons.phone_android,
-                          label: "Primary Contact Mobile No.",
-                          controller: getxController.primaryMobileController,
-                          hintText: "e.g. 9876543210",
-                          keyboardType: TextInputType.phone,
-                          isRequired: true,
-                          maxLengthTen: true,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Primary mobile number is required';
-                            }
-                            final phoneRegex = RegExp(r'^[6-9]\d{9}$');
-                            if (!phoneRegex.hasMatch(value.trim())) {
-                              return 'Enter a valid 10-digit mobile number';
-                            }
-                            return null;
-                          },
-                        ),
-                      if (userRole == AppConstants.roles.dealer)
-                        _buildCustomTextField(
-                          icon: Icons.person_outline,
-                          label: "Secondary Contact Person (Optional)",
-                          controller:
-                              getxController.secondaryContactPersonController,
-                          hintText: "e.g. Pawan Singh",
-                          keyboardType: TextInputType.text,
-                          isRequired: false,
-                        ),
-                      if (userRole == AppConstants.roles.dealer)
-                        _buildCustomTextField(
-                          icon: Icons.phone_android,
-                          label: "Secondary Contact Mobile No. (Optional)",
-                          controller: getxController.secondaryMobileController,
-                          hintText: "e.g. 9123456789",
-                          keyboardType: TextInputType.phone,
-                          isRequired: false,
-                          maxLengthTen: true,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return null;
-                            }
-
-                            final phoneRegex = RegExp(r'^[6-9]\d{9}$');
-
-                            if (!phoneRegex.hasMatch(value.trim())) {
-                              return 'Enter a valid 10-digit mobile number';
-                            }
-
-                            return null;
-                          },
-                        ),
+                   
+                    
                       _buildCustomTextField(
                         icon: Icons.lock,
                         label: "Password",
@@ -439,87 +350,6 @@ class RegistrationFormPage extends StatelessWidget {
       ],
     );
   }
-
-  Widget _buildEntityTypeDropdown(BuildContext context) {
-    return GetBuilder<RegistrationFormController>(
-      builder: (getxController) {
-        return FormField<String>(
-          validator: (value) {
-            if (getxController.selectedEntityType == null ||
-                getxController.selectedEntityType!.trim().isEmpty) {
-              return 'Please select an entity type';
-            }
-            return null;
-          },
-          builder: (formFieldState) {
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                DropdownWidget(
-                  label: "Entity Type",
-                  isRequired: true,
-                  selectedValue: getxController.selectedEntityType,
-                  hintText: "Select Entity Type",
-                  prefixIcon: Icons.category,
-                  items: getxController.entityTypes,
-                  giveSpaceToBottom: false,
-                  onChanged: (val) {
-                    getxController.selectedEntityType = val;
-                    getxController.update();
-                    formFieldState.didChange(val); // update FormField state
-                  },
-                  validator: (value) {
-                    if (value == null || value.toString().trim().isEmpty) {
-                      return 'Please select an entity type';
-                    }
-                    return null;
-                  },
-                ),
-                if (formFieldState.hasError)
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10, top: 2),
-                    child: Text(
-                      formFieldState.errorText ?? '',
-                      style: TextStyle(
-                        color: AppColors.validationErrorRed,
-                        fontSize: 12,
-                        // fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  // Widget _buildEntityTypeDropdown1(BuildContext context) {
-  //   return GetBuilder<RegistrationFormController>(
-  //     builder: (getxController) {
-  //       return DropdownWidget(
-  //         label: "Entity Type",
-  //         isRequired: true,
-  //         selectedValue: getxController.selectedEntityType,
-  //         hintText: "Select Entity Type",
-  //         prefixIcon: Icons.category,
-  //         items: getxController.entityTypes,
-  //         onChanged: (val) {
-  //           getxController.selectedEntityType = val;
-  //           getxController.update();
-  //         },
-  //         validator: (value) {
-  //           if (value == null || value.toString().trim().isEmpty) {
-  //             return 'Please select an entity type';
-  //           }
-  //           return null;
-  //         },
-  //       );
-  //     },
-  //   );
-  // }
-
   Widget _buildCustomTextField({
     required String label,
     required TextEditingController controller,

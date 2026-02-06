@@ -43,6 +43,9 @@ class SellMyCarController extends GetxController {
   final isRequestCallbackLoading = false.obs;
   final isScheduleInspectionLoading = false.obs;
 
+  String unmaskedOwnerName = '';
+  String _maskedOwnerNamePrev = '';
+
   static const String _loadingValueForDropdown = '__loading__';
 
   // Banners
@@ -196,7 +199,9 @@ class SellMyCarController extends GetxController {
       }
 
       // Fill controllers
-      ownerNameController.text = fetchedOwnerName;
+      // ownerNameController.text = fetchedOwnerName;
+      setUnmaskedOwnerName(fetchedOwnerName);
+
       yearOfRegController.text = yearOnly;
 
       // Optional: you can show status somewhere if needed
@@ -659,7 +664,8 @@ class SellMyCarController extends GetxController {
       request.fields['carRegistrationNumber'] = carRegistrationNumberController
           .text
           .trim();
-      request.fields['ownerName'] = ownerNameController.text.trim();
+      // request.fields['ownerName'] = ownerNameController.text.trim();
+      request.fields['ownerName'] = unmaskedOwnerName.trim();
       request.fields['make'] = makeController.text.trim();
       request.fields['model'] = modelController.text.trim();
       request.fields['variant'] = variantController.text.trim();
@@ -803,6 +809,68 @@ class SellMyCarController extends GetxController {
         ),
       ),
     ]);
+  }
+
+  String maskAlternate(String s) {
+    final chars = s.split('');
+    for (int i = 1; i < chars.length; i += 2) {
+      if (chars[i] != ' ') chars[i] = '*';
+    }
+    return chars.join();
+  }
+
+  void setUnmaskedOwnerName(String raw) {
+    unmaskedOwnerName = raw;
+    final masked = maskAlternate(unmaskedOwnerName);
+    _maskedOwnerNamePrev = masked;
+    ownerNameController.text = masked;
+  }
+
+  void handleOwnerNameMaskedInput(String currentText) {
+    // If this is first time typing
+    if (_maskedOwnerNamePrev.isEmpty) {
+      unmaskedOwnerName = currentText;
+    }
+    // User added characters (most common case)
+    else if (currentText.length > _maskedOwnerNamePrev.length) {
+      final added = currentText.substring(_maskedOwnerNamePrev.length);
+      unmaskedOwnerName += added;
+    }
+    // User removed characters (backspace)
+    else if (currentText.length < _maskedOwnerNamePrev.length) {
+      final removed = _maskedOwnerNamePrev.length - currentText.length;
+      if (removed <= unmaskedOwnerName.length) {
+        unmaskedOwnerName = unmaskedOwnerName.substring(
+          0,
+          unmaskedOwnerName.length - removed,
+        );
+      } else {
+        unmaskedOwnerName = '';
+      }
+    }
+    // Same length: replacement/selection edit (rare) → best effort
+    else {
+      final buf = StringBuffer();
+      for (
+        int i = 0;
+        i < currentText.length && i < unmaskedOwnerName.length;
+        i++
+      ) {
+        final ch = currentText[i];
+        buf.write(ch == '*' ? unmaskedOwnerName[i] : ch);
+      }
+      unmaskedOwnerName = buf.toString();
+    }
+
+    final masked = maskAlternate(unmaskedOwnerName);
+    _maskedOwnerNamePrev = masked;
+
+    if (ownerNameController.text != masked) {
+      ownerNameController.value = TextEditingValue(
+        text: masked,
+        selection: TextSelection.collapsed(offset: masked.length),
+      );
+    }
   }
 
   // Close method to dispose controllers
