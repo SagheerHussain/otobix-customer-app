@@ -5,6 +5,7 @@ import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/controllers/warranty_controller.dart';
 import 'package:otobix_customer_app/views/claim_rsa_page.dart';
 import 'package:otobix_customer_app/views/get_warranty_page.dart';
+import 'package:otobix_customer_app/views/under_development_page.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 
@@ -15,28 +16,35 @@ class WarrantyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBarWidget(title: 'Warranty'),
-      backgroundColor: AppColors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              // Benefits Section
-              _buildBenefitsSection(),
-              // Inclusions Button
-              _buildInclusionsButton(),
-              const SizedBox(height: 20),
-              // Action Buttons
-              _buildActionButtons(),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
-    );
+    return 1 == 1
+        ? const UnderDevelopmentPage(
+            screenName: "Warranty",
+            icon: CupertinoIcons.wrench,
+            color: AppColors.blue,
+            completedPercentage: 50,
+          )
+        : Scaffold(
+            appBar: AppBarWidget(title: 'Warranty'),
+            backgroundColor: AppColors.white,
+            body: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 20),
+                    // Benefits Section
+                    _buildBenefitsSection(),
+                    // Inclusions Button
+                    _buildInclusionsButton(),
+                    const SizedBox(height: 20),
+                    // Action Buttons
+                    _buildActionButtons(),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ),
+          );
   }
 
   // Benefits Section

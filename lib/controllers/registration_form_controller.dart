@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/Models/user_model.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
+import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/views/login_page.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
@@ -77,7 +78,7 @@ class RegistrationFormController extends GetxController {
   String? selectedEntityType;
 
   List<String> filteredStates = [];
-  List<String> indianStates = [];
+  List<String> indianStates = AppConstants.indianStates;
 
   final RxBool obscurePassword = true.obs;
 
@@ -223,6 +224,7 @@ class RegistrationFormController extends GetxController {
           type: ToastType.error,
         );
       } else {
+        debugPrint("Failed to register user. Status code: ${response.statusCode}, Body: ${response.body}");
         ToastWidget.show(
           context: Get.context!,
           title: "Failed to register user",
@@ -436,32 +438,4 @@ class RegistrationFormController extends GetxController {
     update(); // refresh GetBuilder
   }
 
-  // Fetch entity documents
-  Future<List<String>> _fetchEntityDocuments(String? entityType) async {
-    final fallback = <String>[
-      // optional: keep empty list if you don't want a fallback
-      'No documents found',
-    ];
-
-    if (entityType == null || entityType.trim().isEmpty) return fallback;
-
-    try {
-      final response = await ApiService.get(
-        endpoint: AppUrls.getEntityDocumentsByName(
-          entityName: entityType.trim(),
-        ),
-      );
-
-      if (response.statusCode == 200) {
-        final json = jsonDecode(response.body) as Map<String, dynamic>;
-        final data = (json['data'] ?? {}) as Map<String, dynamic>;
-        final docs = (data['documents'] ?? []) as List;
-        return docs.map((e) => '$e').toList();
-      }
-    } catch (error) {
-      // ignore and use fallback
-      debugPrint("Error: $error");
-    }
-    return fallback;
-  }
 }

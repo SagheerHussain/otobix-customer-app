@@ -4,6 +4,9 @@ import 'package:get/get.dart';
 import 'package:otobix_customer_app/controllers/bottom_navigation_bar_controller.dart';
 import 'package:otobix_customer_app/controllers/profile_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
+import 'package:otobix_customer_app/views/delete_account_page.dart';
+import 'package:otobix_customer_app/views/privacy_policy_page.dart';
+import 'package:otobix_customer_app/views/terms_and_conditions_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -128,7 +131,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   ProfileOption(
                     icon: CupertinoIcons.cart_fill,
-                    color: AppColors.grey,
+                    color: AppColors.blue,
                     title: "My Orders",
                     description: "Check order status and history.",
                     onTap: () {
@@ -139,8 +142,35 @@ class _ProfilePageState extends State<ProfilePage> {
                     },
                   ),
                   ProfileOption(
+                    icon: Icons.description,
+                    color: AppColors.green,
+                    title: "Terms and Conditions",
+                    description: "View terms and conditions.",
+                    onTap: () {
+                      Get.to(TermsAndConditionsPage());
+                    },
+                  ),
+                  ProfileOption(
+                    icon: Icons.lock,
+                    color: AppColors.grey,
+                    title: "Privacy Policy",
+                    description: "View privacy policy.",
+                    onTap: () {
+                      Get.to(PrivacyPolicyPage());
+                    },
+                  ),
+                  ProfileOption(
+                    icon: Icons.delete,
+                    color: AppColors.red,
+                    title: "Delete Account",
+                    description: "Delete your account securely.",
+                    onTap: () {
+                      Get.to(DeleteAccountPage());
+                    },
+                  ),
+                  ProfileOption(
                     icon: Icons.logout,
-                    color: Colors.red,
+                    color: AppColors.red,
                     title: "Logout",
                     description: "Sign out of your account securely.",
                     onTap: () {

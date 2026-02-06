@@ -187,11 +187,11 @@ class AppUrls {
 
   // static String get uploadPrivacyPolicy => "${baseUrl}privacy-policy/upload";
 
-  // static String get getLatestPrivacyPolicy => "${baseUrl}privacy-policy/latest";
+  static String get getLatestPrivacyPolicy => "${baseUrl}privacy-policy/latest";
 
   // static String get uploadDealerGuide => "${baseUrl}dealer-guide/upload";
 
-  // static String get getLatestDealerGuide => "${baseUrl}dealer-guide/latest";
+  static String get getLatestDealerGuide => "${baseUrl}dealer-guide/latest";
 
   // static String get moveCarToOtobuy => "${baseUrl}otobuy/move-car-to-otobuy";
 

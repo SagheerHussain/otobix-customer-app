@@ -225,13 +225,6 @@ class HomePage extends StatelessWidget {
                                       icon: AppIcons.pdi,
                                       title: 'PDI',
                                       onTap: () => Get.to(() => PdiPage()),
-                                      // onTap: () => Get.to(
-                                      //   () => UnderDevelopmentPage(
-                                      //     screenName: "PDI",
-                                      //     icon: CupertinoIcons.car,
-                                      //     color: AppColors.red,
-                                      //   ),
-                                      // ),
                                     ),
                                     const SizedBox(width: 10),
                                     _buildNavigationItem(

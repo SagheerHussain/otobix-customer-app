@@ -1,7 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/controllers/pdi_controller.dart';
+import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
+import 'package:otobix_customer_app/views/under_development_page.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 
 class PdiPage extends StatelessWidget {
@@ -15,30 +18,43 @@ class PdiPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBarWidget(title: 'Pre Delivery Inspection'),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const SizedBox(height: 10),
-              _buildBanner(context: context, bannerPath: AppImages.pdiBanner),
-              const SizedBox(height: 14),
-              _buildServiceCategoriesSection(context),
-              const SizedBox(height: 16),
-              _buildCoverageSection(context),
-              const SizedBox(height: 16),
-              _buildBanner(context: context, bannerPath: AppImages.pdiBanner2),
-              const SizedBox(height: 16),
-              _buildHowItWorksSection(context),
-              const SizedBox(height: 16),
-              _buildFaqSection(context),
-              const SizedBox(height: 30),
-            ],
-          ),
-        ),
-      ),
-    );
+    return 1 == 1
+        ? const UnderDevelopmentPage(
+            screenName: "PDI",
+            icon: CupertinoIcons.car,
+            color: AppColors.red,
+            completedPercentage: 50,
+          )
+        : Scaffold(
+            appBar: AppBarWidget(title: 'Pre Delivery Inspection'),
+            body: SafeArea(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    _buildBanner(
+                      context: context,
+                      bannerPath: AppImages.pdiBanner,
+                    ),
+                    const SizedBox(height: 14),
+                    _buildServiceCategoriesSection(context),
+                    const SizedBox(height: 16),
+                    _buildCoverageSection(context),
+                    const SizedBox(height: 16),
+                    _buildBanner(
+                      context: context,
+                      bannerPath: AppImages.pdiBanner2,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildHowItWorksSection(context),
+                    const SizedBox(height: 16),
+                    _buildFaqSection(context),
+                    const SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            ),
+          );
   }
 
   // ===== BANNER =====
