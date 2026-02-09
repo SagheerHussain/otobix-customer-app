@@ -66,3 +66,4 @@ jobs:
           track: internal   # can be internal, alpha, beta, production
           status: completed
           # status: draft  # ← CHANGE THIS TO 'completed' WHEN RELEASING THE APP TO PRODUCTION
+          changesNotSentForReview: true
