@@ -198,50 +198,50 @@ class HomePageController extends GetxController {
       subtitle: 'Browse cars & place bids',
       pageBuilder: () => BuyACarPage(),
     ),
-    HomeNavItem(
-      icon: AppIcons.insurance,
-      title: 'Insurance',
-      subtitle: 'Get coverage options',
-      pageBuilder: () => InsurancePage(),
-    ),
-    HomeNavItem(
-      icon: AppIcons.finance,
-      title: 'Finance',
-      subtitle: 'Explore installment plans',
-      pageBuilder: () => FinancePage(),
-    ),
-    HomeNavItem(
-      icon: AppIcons.warranty,
-      title: 'Warranty',
-      subtitle: 'Protect your purchase',
-      pageBuilder: () => WarrantyPage(),
-    ),
-    HomeNavItem(
-      icon: AppIcons.pdi,
-      title: 'PDI',
-      subtitle: 'Vehicle inspection service',
-      pageBuilder: () => PdiPage(),
-    ),
-    HomeNavItem(
-      icon: AppIcons.manageMyCars,
-      title: 'Manage My Cars',
-      subtitle: 'Manage your listings',
-      pageBuilder: () => UnderDevelopmentPage(
-        screenName: "Manage My Cars",
-        icon: CupertinoIcons.car,
-        color: AppColors.green,
-      ),
-    ),
-    HomeNavItem(
-      icon: AppIcons.referAndEarn,
-      title: 'Refer and Earn',
-      subtitle: 'Invite friends & earn rewards',
-      pageBuilder: () => UnderDevelopmentPage(
-        screenName: "Refer and Earn",
-        icon: CupertinoIcons.checkmark_shield,
-        color: AppColors.blue,
-      ),
-    ),
+    // HomeNavItem(
+    //   icon: AppIcons.insurance,
+    //   title: 'Insurance',
+    //   subtitle: 'Get coverage options',
+    //   pageBuilder: () => InsurancePage(),
+    // ),
+    // HomeNavItem(
+    //   icon: AppIcons.finance,
+    //   title: 'Finance',
+    //   subtitle: 'Explore installment plans',
+    //   pageBuilder: () => FinancePage(),
+    // ),
+    // HomeNavItem(
+    //   icon: AppIcons.warranty,
+    //   title: 'Warranty',
+    //   subtitle: 'Protect your purchase',
+    //   pageBuilder: () => WarrantyPage(),
+    // ),
+    // HomeNavItem(
+    //   icon: AppIcons.pdi,
+    //   title: 'PDI',
+    //   subtitle: 'Vehicle inspection service',
+    //   pageBuilder: () => PdiPage(),
+    // ),
+    // HomeNavItem(
+    //   icon: AppIcons.manageMyCars,
+    //   title: 'Manage My Cars',
+    //   subtitle: 'Manage your listings',
+    //   pageBuilder: () => UnderDevelopmentPage(
+    //     screenName: "Manage My Cars",
+    //     icon: CupertinoIcons.car,
+    //     color: AppColors.green,
+    //   ),
+    // ),
+    // HomeNavItem(
+    //   icon: AppIcons.referAndEarn,
+    //   title: 'Refer and Earn',
+    //   subtitle: 'Invite friends & earn rewards',
+    //   pageBuilder: () => UnderDevelopmentPage(
+    //     screenName: "Refer and Earn",
+    //     icon: CupertinoIcons.checkmark_shield,
+    //     color: AppColors.blue,
+    //   ),
+    // ),
   ];
 
   // ✅ Filtered results (title + subtitle)

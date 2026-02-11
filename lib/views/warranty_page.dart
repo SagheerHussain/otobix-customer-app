@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/controllers/warranty_controller.dart';
-import 'package:otobix_customer_app/views/claim_rsa_page.dart';
-import 'package:otobix_customer_app/views/get_warranty_page.dart';
-import 'package:otobix_customer_app/views/under_development_page.dart';
+import 'package:otobix_customer_app/views/claim_rsa_cars_list_page.dart';
+import 'package:otobix_customer_app/views/get_warranty_cars_list_page.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 
@@ -16,14 +15,16 @@ class WarrantyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return 1 == 1
-        ? const UnderDevelopmentPage(
-            screenName: "Warranty",
-            icon: CupertinoIcons.wrench,
-            color: AppColors.blue,
-            completedPercentage: 50,
-          )
-        : Scaffold(
+    return 
+    // 1 == 1
+    //     ? const UnderDevelopmentPage(
+    //         screenName: "Warranty",
+    //         icon: CupertinoIcons.wrench,
+    //         color: AppColors.blue,
+    //         completedPercentage: 50,
+    //       )
+    //     :
+         Scaffold(
             appBar: AppBarWidget(title: 'Warranty'),
             backgroundColor: AppColors.white,
             body: SafeArea(
@@ -150,7 +151,7 @@ class WarrantyPage extends StatelessWidget {
               fontSize: 13,
               backgroundColor: AppColors.blue,
               onTap: () {
-                Get.to(() => ClaimRsaPage());
+                Get.to(() => ClaimRsaCarsListPage());
               },
             ),
           ),
@@ -165,7 +166,7 @@ class WarrantyPage extends StatelessWidget {
               fontSize: 13,
               backgroundColor: AppColors.blue,
               onTap: () {
-                Get.to(() => GetWarrantyPage());
+                Get.to(() => GetWarrantyCarsListPage());
               },
             ),
           ),

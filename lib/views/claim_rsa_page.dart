@@ -6,8 +6,10 @@ import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 
 class ClaimRsaPage extends StatelessWidget {
-  ClaimRsaPage({super.key});
+  ClaimRsaPage({super.key, required this.appointmentId, required this.carImageUrl});
 
+  final String appointmentId;
+  final String carImageUrl;
   final ClaimRsaController claimRsaController = Get.put(ClaimRsaController());
 
   Future<void> submitRsa() async {
