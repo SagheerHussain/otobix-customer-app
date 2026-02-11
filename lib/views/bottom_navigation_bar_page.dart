@@ -39,33 +39,21 @@ class BottomNavigationBarPage extends StatelessWidget {
               selectedColor: AppColors.blue,
             ),
 
-            /// My Cars
-            SalomonBottomBarItem(
-              icon: const Icon(CupertinoIcons.car_detailed, size: 22),
-              title: const Text("My Cars", style: TextStyle(fontSize: 13)),
-              selectedColor: AppColors.green,
-            ),
-
-            /// Cart
-            SalomonBottomBarItem(
-              icon: const Icon(CupertinoIcons.cart_fill, size: 22),
-              title: const Text("Cart", style: TextStyle(fontSize: 13)),
-              selectedColor: AppColors.red,
-            ),
-
-            // /// Sell My Car
-            // SalomonBottomBarItem(
-            //   icon: const Icon(CupertinoIcons.money_dollar, size: 22),
-            //   title: const Text("Sell My Car", style: TextStyle(fontSize: 13)),
-            //   selectedColor: AppColors.blue,
-            // ),
-
-            // /// My Auctions
+            // /// My Cars
             // SalomonBottomBarItem(
             //   icon: const Icon(CupertinoIcons.car_detailed, size: 22),
-            //   title: const Text("My Auctions", style: TextStyle(fontSize: 13)),
+            //   title: const Text("My Cars", style: TextStyle(fontSize: 13)),
             //   selectedColor: AppColors.green,
             // ),
+
+            // /// Cart
+            // SalomonBottomBarItem(
+            //   icon: const Icon(CupertinoIcons.cart_fill, size: 22),
+            //   title: const Text("Cart", style: TextStyle(fontSize: 13)),
+            //   selectedColor: AppColors.red,
+            // ),
+
+         
 
             /// Profile
             SalomonBottomBarItem(

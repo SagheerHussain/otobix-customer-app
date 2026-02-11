@@ -81,66 +81,32 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   const SizedBox(height: 30),
 
+                
+
                   // ProfileOption(
-                  //   icon: Icons.description,
+                  //   icon: CupertinoIcons.car_detailed,
                   //   color: AppColors.green,
-                  //   title: "Terms and Conditions",
-                  //   description: "View terms and conditions.",
+                  //   title: "My Cars",
+                  //   description: "Manage your cars and related details.",
                   //   onTap: () {
-                  //     Get.to(TermsAndConditionsPage());
+                  //     Get.find<BottomNavigationBarController>()
+                  //             .currentIndex
+                  //             .value =
+                  //         1;
                   //   },
                   // ),
                   // ProfileOption(
-                  //   icon: Icons.lock,
-                  //   color: AppColors.grey,
-                  //   title: "Privacy Policy",
-                  //   description: "View privacy policy.",
-                  //   onTap: () {
-                  //     Get.to(PrivacyPolicyPage());
-                  //   },
-                  // ),
-                  // ProfileOption(
-                  //   icon: Icons.menu_book,
+                  //   icon: CupertinoIcons.cart_fill,
                   //   color: AppColors.blue,
-                  //   title: "Dealer Guide",
-                  //   description: "View dealer guide.",
+                  //   title: "My Orders",
+                  //   description: "Check order status and history.",
                   //   onTap: () {
-                  //     Get.to(DealerGuidePage());
+                  //     Get.find<BottomNavigationBarController>()
+                  //             .currentIndex
+                  //             .value =
+                  //         2;
                   //   },
                   // ),
-                  // ProfileOption(
-                  //   icon: Icons.delete,
-                  //   color: Colors.red,
-                  //   title: "Delete Account",
-                  //   description: "Delete your account securely.",
-                  //   onTap: () {
-                  //     Get.to(DeleteAccountPage());
-                  //   },
-                  // ),
-                  ProfileOption(
-                    icon: CupertinoIcons.car_detailed,
-                    color: AppColors.green,
-                    title: "My Cars",
-                    description: "Manage your cars and related details.",
-                    onTap: () {
-                      Get.find<BottomNavigationBarController>()
-                              .currentIndex
-                              .value =
-                          1;
-                    },
-                  ),
-                  ProfileOption(
-                    icon: CupertinoIcons.cart_fill,
-                    color: AppColors.blue,
-                    title: "My Orders",
-                    description: "Check order status and history.",
-                    onTap: () {
-                      Get.find<BottomNavigationBarController>()
-                              .currentIndex
-                              .value =
-                          2;
-                    },
-                  ),
                   ProfileOption(
                     icon: Icons.description,
                     color: AppColors.green,

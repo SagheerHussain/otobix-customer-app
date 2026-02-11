@@ -128,136 +128,8 @@ class HomePage extends StatelessWidget {
 
                           const SizedBox(height: 20),
 
-                          Container(
-                            padding: EdgeInsets.all(15),
-                            margin: EdgeInsets.symmetric(horizontal: 15),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: AppColors.blue),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Column(
-                              children: [
-                                Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    'Services',
-                                    style: TextStyle(
-                                      fontSize:
-                                          MediaQuery.of(context).size.width /
-                                          25,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.blue,
-                                    ),
-                                  ),
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildNavigationItem(
-                                      // Sell My Car
-                                      icon: AppIcons.sellMyCar,
-                                      title: 'Sell My Car',
-                                      onTap: () =>
-                                          Get.to(() => SellMyCarPage()),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    _buildNavigationItem(
-                                      // View My Auctions
-                                      icon: AppIcons.viewMyAuctions,
-                                      title: 'View My Auctions',
-                                      onTap: () =>
-                                          Get.to(() => MyAuctionsPage()),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    _buildNavigationItem(
-                                      // Buy A Car
-                                      icon: AppIcons.buyACar,
-                                      title: 'Buy A Car',
-                                      onTap: () => Get.to(() => BuyACarPage()),
-                                    ),
-                                  ],
-                                ),
-
-                                const SizedBox(height: 10),
-
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildNavigationItem(
-                                      // Insurance
-                                      icon: AppIcons.insurance,
-
-                                      title: 'Insurance',
-                                      onTap: () =>
-                                          Get.to(() => InsurancePage()),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    _buildNavigationItem(
-                                      // Finance
-                                      icon: AppIcons.finance,
-                                      title: 'Finance',
-                                      onTap: () => Get.to(() => FinancePage()),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    _buildNavigationItem(
-                                      // Warranty
-                                      icon: AppIcons.warranty,
-
-                                      title: 'Warranty',
-                                      onTap: () => Get.to(() => WarrantyPage()),
-                                    ),
-                                  ],
-                                ),
-
-                                const SizedBox(height: 10),
-
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    _buildNavigationItem(
-                                      // PDI
-                                      icon: AppIcons.pdi,
-                                      title: 'PDI',
-                                      onTap: () => Get.to(() => PdiPage()),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    _buildNavigationItem(
-                                      // Manage My Cars
-                                      icon: AppIcons.manageMyCars,
-                                      title: 'Manage My Cars',
-                                      onTap: () => Get.to(
-                                        () => UnderDevelopmentPage(
-                                          screenName: "Manage My Cars",
-                                          icon: CupertinoIcons.car,
-                                          color: AppColors.green,
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    _buildNavigationItem(
-                                      // Refer and Earn
-                                      icon: AppIcons.referAndEarn,
-
-                                      title: 'Refer and Earn',
-                                      onTap: () => Get.to(
-                                        () => UnderDevelopmentPage(
-                                          screenName: "Refer and Earn",
-                                          icon: CupertinoIcons.checkmark_shield,
-                                          color: AppColors.blue,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
+                          // Services section
+                          _buildTempServicesSection(context),
                         ],
                       ),
                     ),
@@ -279,6 +151,249 @@ class HomePage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Build Temp Services Section
+  Widget _buildTempServicesSection(BuildContext context) {
+    return Container(
+      // padding: EdgeInsets.all(15),
+      margin: EdgeInsets.symmetric(horizontal: 15),
+
+      child: Column(
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Our Services',
+              style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width / 25,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          SizedBox(height: 10),
+          _buildTempNavigationItem(
+            icon: AppIcons.sellMyCar,
+            title: 'Sell My Car',
+            subtitle: 'Book Scientific and Tech Driven Doorstep Inspection',
+            color: AppColors.red,
+            onTap: () => Get.to(() => SellMyCarPage()),
+          ),
+          const SizedBox(height: 10),
+
+          _buildTempNavigationItem(
+            icon: AppIcons.viewMyAuctions,
+            title: 'View My Auctions',
+            subtitle:
+                'Your Car, Your Price, Your Control - Set Your Price and View Live Offers',
+            color: AppColors.blue,
+            onTap: () => Get.to(() => MyAuctionsPage()),
+          ),
+          const SizedBox(height: 10),
+
+          _buildTempNavigationItem(
+            icon: AppIcons.buyACar,
+            title: 'Buy A Car',
+            subtitle:
+                'Explore Pre-Owned Cars from Certified & Verified Listings',
+            color: AppColors.green,
+            onTap: () => Get.to(() => BuyACarPage()),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Build temporary navigation item
+  Widget _buildTempNavigationItem({
+    required String icon,
+    required String title,
+    required VoidCallback onTap,
+    required Color color,
+    required String subtitle,
+  }) {
+    // final double width = MediaQuery.of(Get.context!).size.width;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        // width: width / 4,
+        // width: 80,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          border: Border.all(),
+        ),
+
+        child: Row(
+          // mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(5),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(5),
+                color: AppColors.grey.withValues(alpha: 0.2),
+              ),
+
+              child: SvgPicture.asset(
+                icon,
+                height: 55,
+                width: 55,
+                colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: AppColors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildServicesSection(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(15),
+      margin: EdgeInsets.symmetric(horizontal: 15),
+      decoration: BoxDecoration(
+        border: Border.all(color: AppColors.blue),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Services',
+              style: TextStyle(
+                fontSize: MediaQuery.of(context).size.width / 25,
+                fontWeight: FontWeight.bold,
+                color: AppColors.blue,
+              ),
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildNavigationItem(
+                // Sell My Car
+                icon: AppIcons.sellMyCar,
+                title: 'Sell My Car',
+                onTap: () => Get.to(() => SellMyCarPage()),
+              ),
+              const SizedBox(width: 10),
+              _buildNavigationItem(
+                // View My Auctions
+                icon: AppIcons.viewMyAuctions,
+                title: 'View My Auctions',
+                onTap: () => Get.to(() => MyAuctionsPage()),
+              ),
+              const SizedBox(width: 10),
+              _buildNavigationItem(
+                // Buy A Car
+                icon: AppIcons.buyACar,
+                title: 'Buy A Car',
+                onTap: () => Get.to(() => BuyACarPage()),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildNavigationItem(
+                // Insurance
+                icon: AppIcons.insurance,
+
+                title: 'Insurance',
+                onTap: () => Get.to(() => InsurancePage()),
+              ),
+              const SizedBox(width: 10),
+              _buildNavigationItem(
+                // Finance
+                icon: AppIcons.finance,
+                title: 'Finance',
+                onTap: () => Get.to(() => FinancePage()),
+              ),
+              const SizedBox(width: 10),
+              _buildNavigationItem(
+                // Warranty
+                icon: AppIcons.warranty,
+
+                title: 'Warranty',
+                onTap: () => Get.to(() => WarrantyPage()),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildNavigationItem(
+                // PDI
+                icon: AppIcons.pdi,
+                title: 'PDI',
+                onTap: () => Get.to(() => PdiPage()),
+              ),
+              const SizedBox(width: 10),
+              _buildNavigationItem(
+                // Manage My Cars
+                icon: AppIcons.manageMyCars,
+                title: 'Manage My Cars',
+                onTap: () => Get.to(
+                  () => UnderDevelopmentPage(
+                    screenName: "Manage My Cars",
+                    icon: CupertinoIcons.car,
+                    color: AppColors.green,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              _buildNavigationItem(
+                // Refer and Earn
+                icon: AppIcons.referAndEarn,
+
+                title: 'Refer and Earn',
+                onTap: () => Get.to(
+                  () => UnderDevelopmentPage(
+                    screenName: "Refer and Earn",
+                    icon: CupertinoIcons.checkmark_shield,
+                    color: AppColors.blue,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -335,11 +450,11 @@ class HomePage extends StatelessWidget {
       AppConstants.bannerScreenNames.buyACar.toLowerCase(): () => BuyACarPage(),
       AppConstants.bannerScreenNames.sellYourCar.toLowerCase(): () =>
           SellMyCarPage(),
-      AppConstants.bannerScreenNames.warranty.toLowerCase(): () =>
-          WarrantyPage(),
-      AppConstants.bannerScreenNames.finance.toLowerCase(): () => FinancePage(),
-      AppConstants.bannerScreenNames.insurance.toLowerCase(): () =>
-          InsurancePage(),
+      // AppConstants.bannerScreenNames.warranty.toLowerCase(): () =>
+      //     WarrantyPage(),
+      // AppConstants.bannerScreenNames.finance.toLowerCase(): () => FinancePage(),
+      // AppConstants.bannerScreenNames.insurance.toLowerCase(): () =>
+          // InsurancePage(),
     };
 
     final builder = routes[name];

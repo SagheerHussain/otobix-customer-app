@@ -41,6 +41,7 @@ class RegistrationFormPage extends StatelessWidget {
                 const SizedBox(height: 20),
                 Text(
                   "Registration Form",
+                  // "SignUp Form",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 20,

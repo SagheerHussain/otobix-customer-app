@@ -18,37 +18,19 @@ class BottomNavigationBarController extends GetxController {
 
   List<Widget> get pages => [
     HomePage(),
-    // ManageMyCarsPage(),
-    UnderDevelopmentPage(
-      screenName: "My Cars",
-      icon: CupertinoIcons.car_detailed,
-      color: AppColors.green,
-      showAppBar: false,
-    ),
-    const UnderDevelopmentPage(
-      screenName: "Cart",
-      icon: CupertinoIcons.cart_fill,
-      color: AppColors.grey,
-      showAppBar: false,
-    ),
-    //  UnderDevelopmentPage(
-    //   screenName: "Profile",
-    //   icon: CupertinoIcons.person_crop_circle,
-    //   color: AppColors.deepOrange,
-    //   completedPercentage: 10,
+    // UnderDevelopmentPage(
+    //   screenName: "My Cars",
+    //   icon: CupertinoIcons.car_detailed,
+    //   color: AppColors.green,
     //   showAppBar: false,
-    //   actionButton: ButtonWidget(
-    //     text: 'Logout',
-    //     height: 30,
-    //     fontSize: 11,
-    //     isLoading: isLoadingLogout,
-    //     onTap: () {
-    //       logout();
-    //     },
-    //   ),
     // ),
-    // SellMyCarPage(),
-    // MyAuctionsPage(),
+    // const UnderDevelopmentPage(
+    //   screenName: "Cart",
+    //   icon: CupertinoIcons.cart_fill,
+    //   color: AppColors.grey,
+    //   showAppBar: false,
+    // ),
+   
     ProfilePage(),
   ];
 

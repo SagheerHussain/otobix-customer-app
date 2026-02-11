@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:otobix_customer_app/controllers/razorpay_payment_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/controllers/get_warranty_controller.dart';
-import 'package:otobix_customer_app/views/warranty_payment_page.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
 
 class GetWarrantyPage extends StatelessWidget {
-  GetWarrantyPage({super.key});
+  GetWarrantyPage({super.key, required this.appointmentId, required this.carImageUrl});
+
+  final String appointmentId;
+  final String carImageUrl;
 
   final GetWarrantyController getWarrantyController = Get.put(
     GetWarrantyController(),
@@ -151,9 +154,42 @@ class GetWarrantyPage extends StatelessWidget {
                     return;
                   }
                   // If selected a warranty option then navigate to warranty payment page
-                  Get.to(WarrantyPaymentPage());
+                  // Get.to(WarrantyPaymentPage());
+
+                  final RazorpayPaymentController razorpayPaymentController =
+                      Get.put(RazorpayPaymentController());
+
+                  razorpayPaymentController.onResultMessage = (msg) {
+                    debugPrint(msg);
+                    ToastWidget.show(
+                      context: context,
+                      title: "Payment Result",
+                      subtitle: msg,
+                      type: msg.startsWith("✅")
+                          ? ToastType.success
+                          : ToastType.error,
+                    );
+                  };
+
+                  razorpayPaymentController.pay(
+                    amountRupees: 1,
+                    name:
+                        "Get Warranty", // Display name shown on Razorpay checkout sheet.
+                    description: "Warranty Purchase",
+                    email: "amit.parekh@otobix.in",
+                    phone: "9999999999",
+                    notes: {
+                      'User ID': '12345',
+                      "appointmentId": "26-100043",
+                      "warrantyIndex":
+                          getWarrantyController.selectedWarrantyIndex.value,
+                    },
+                    receipt:
+                        "warranty_${DateTime.now().millisecondsSinceEpoch}",
+                  );
                 },
               ),
+
               const SizedBox(height: 20),
 
               ButtonWidget(

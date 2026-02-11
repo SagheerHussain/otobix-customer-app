@@ -69,11 +69,20 @@ class AppUrls {
   static String get saveInterestedBuyer =>
       "${baseUrl}customer/buy-a-car/save-interested-buyer";
 
-  // ✅ add these
   static String get searchCarsInBuyACar =>
       "${baseUrl}customer/buy-a-car/search";
+
   static String get filterCarsInBuyACar =>
       "${baseUrl}customer/buy-a-car/filter";
+
+  static String get fetchInspectedCarsList =>
+      "${baseUrl}customer/warranty/fetch-inspected-cars-list";
+
+  static String get createRazorpayOrder =>
+      "${baseUrl}razorpay/create-order";
+
+  static String get verifyRazorpayPayment =>
+      "${baseUrl}razorpay/verify-payment";
 
   // static String get allUsersList => "${baseUrl}user/all-users-list";
 
