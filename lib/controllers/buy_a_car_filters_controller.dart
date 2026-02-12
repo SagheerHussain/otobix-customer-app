@@ -63,7 +63,7 @@ class BuyACarFiltersController extends GetxController {
   final RxList<String> selectedBodyTypes = <String>[].obs;
 
   static const double minCarAgeYears = 1;
-  static const double maxCarAgeYears = 5;
+  static const double maxCarAgeYears = 10;
 
   final Rx<RangeValues> selectedCarAgeYears = const RangeValues(
     minCarAgeYears,
@@ -75,8 +75,8 @@ class BuyACarFiltersController extends GetxController {
     maxCarAgeYears,
   ).obs;
 
-  static const double minMileageKm = 10000;
-  static const double maxMileageKm = 50000;
+  static const double minMileageKm = 1; // 10000;
+  static const double maxMileageKm = 100000; // 50000;
 
   final Rx<RangeValues> selectedMileageKm = const RangeValues(
     minMileageKm,
