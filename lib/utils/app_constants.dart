@@ -3,7 +3,7 @@ enum DeploymentEnvironment { local, dev, prod }
 class AppConstants {
   // ---- Deploy on Production or Development by changing this ----
   static const DeploymentEnvironment deploymentEnvironment =
-      DeploymentEnvironment.prod;
+      DeploymentEnvironment.local;
 
   // Other constant classes
   static final Roles roles = Roles();

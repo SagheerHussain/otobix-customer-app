@@ -87,25 +87,7 @@ class BuyACarFiltersWidget extends StatelessWidget {
           // MAKE / STATE
           Row(
             children: [
-              Expanded(
-                child: Obx(
-                  () => _buildSearchableDropdownField(
-                    label: 'Make',
-                    hintText: 'Select Make',
-                    value: fc.selectedMake.value,
-                    enabled: true,
-                    isLoading: fc.isMakeLoading.value,
-                    onTap: () => _openSearchSheet(
-                      title: 'Select Make',
-                      itemsRx: fc.makeOptions,
-                      isLoadingRx: fc.isMakeLoading,
-                      onSearch: fc.onMakeSearchChanged,
-                      onSelect: (v) => fc.onMakePicked(v),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
+            
               Expanded(
                 child: Obx(
                   () => _buildSearchableDropdownField(
@@ -132,6 +114,26 @@ class BuyACarFiltersWidget extends StatelessWidget {
           // MODEL / VARIANT
           Row(
             children: [
+                Expanded(
+                child: Obx(
+                  () => _buildSearchableDropdownField(
+                    label: 'Make',
+                    hintText: 'Select Make',
+                    value: fc.selectedMake.value,
+                    enabled: true,
+                    isLoading: fc.isMakeLoading.value,
+                    onTap: () => _openSearchSheet(
+                      title: 'Select Make',
+                      itemsRx: fc.makeOptions,
+                      isLoadingRx: fc.isMakeLoading,
+                      onSearch: fc.onMakeSearchChanged,
+                      onSelect: (v) => fc.onMakePicked(v),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              
               Expanded(
                 child: Obx(
                   () => _buildSearchableDropdownField(
@@ -154,29 +156,29 @@ class BuyACarFiltersWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Obx(
-                  () => _buildSearchableDropdownField(
-                    label: 'Variant',
-                    hintText: fc.isVariantEnabled.value
-                        ? 'Select Variant'
-                        : 'Select model first',
-                    value: fc.selectedVariant.value,
-                    enabled: fc.isVariantEnabled.value,
-                    isLoading: fc.isVariantLoading.value,
-                    onTap: fc.isVariantEnabled.value
-                        ? () => _openSearchSheet(
-                            title: 'Select Variant',
-                            itemsRx: fc.variantOptions,
-                            isLoadingRx: fc.isVariantLoading,
-                            onSearch: fc.onVariantSearchChanged,
-                            onSelect: (v) => fc.onVariantPicked(v),
-                          )
-                        : null,
-                  ),
-                ),
-              ),
+              // const SizedBox(width: 10),
+              // Expanded(
+              //   child: Obx(
+              //     () => _buildSearchableDropdownField(
+              //       label: 'Variant',
+              //       hintText: fc.isVariantEnabled.value
+              //           ? 'Select Variant'
+              //           : 'Select model first',
+              //       value: fc.selectedVariant.value,
+              //       enabled: fc.isVariantEnabled.value,
+              //       isLoading: fc.isVariantLoading.value,
+              //       onTap: fc.isVariantEnabled.value
+              //           ? () => _openSearchSheet(
+              //               title: 'Select Variant',
+              //               itemsRx: fc.variantOptions,
+              //               isLoadingRx: fc.isVariantLoading,
+              //               onSearch: fc.onVariantSearchChanged,
+              //               onSelect: (v) => fc.onVariantPicked(v),
+              //             )
+              //           : null,
+              //     ),
+              //   ),
+              // ),
             ],
           ),
 
