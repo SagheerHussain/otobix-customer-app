@@ -80,10 +80,11 @@ class ProfileController extends GetxController {
       if (response.statusCode == 200 && data['success'] == true) {
         // unlink the device from the current user (call on sign-out)
         NotificationService.instance.logout();
-        await SharedPrefsHelper.remove(SharedPrefsHelper.tokenKey);
-        await SharedPrefsHelper.remove(SharedPrefsHelper.userKey);
-        await SharedPrefsHelper.remove(SharedPrefsHelper.userTypeKey);
-        await SharedPrefsHelper.remove(SharedPrefsHelper.userIdKey);
+        // await SharedPrefsHelper.remove(SharedPrefsHelper.tokenKey);
+        // await SharedPrefsHelper.remove(SharedPrefsHelper.userTypeKey);
+        // await SharedPrefsHelper.remove(SharedPrefsHelper.userKey);
+        // await SharedPrefsHelper.remove(SharedPrefsHelper.userIdKey);
+        await SharedPrefsHelper.clearAll();
 
         ToastWidget.show(
           context: Get.context!,

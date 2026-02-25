@@ -46,7 +46,7 @@ class GetWarrantyCarsListController extends GetxController {
           '';
 
       final response = await ApiService.post(
-        endpoint: AppUrls.fetchInspectedCarsList,
+        endpoint: AppUrls.fetchInspectedCarsListForWarranty,
         body: {'phoneNumber': phoneNumber},
       );
 

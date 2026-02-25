@@ -3,12 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/controllers/sell_my_car_controller.dart';
+import 'package:otobix_customer_app/services/auth_service.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_constants.dart';
-import 'package:otobix_customer_app/views/buy_a_car_page.dart';
-import 'package:otobix_customer_app/views/finance_page.dart';
-import 'package:otobix_customer_app/views/insurance_page.dart';
-import 'package:otobix_customer_app/views/warranty_page.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 import 'package:otobix_customer_app/widgets/dropdown_textfield_widget.dart';
@@ -16,7 +13,8 @@ import 'package:otobix_customer_app/widgets/home_banners_widgets.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
 
 class SellMyCarPage extends StatelessWidget {
-  SellMyCarPage({super.key});
+  final String? inspectionRequestedThrough;
+  SellMyCarPage({super.key, this.inspectionRequestedThrough});
 
   final SellMyCarController getxController = Get.put(SellMyCarController());
 
@@ -159,10 +157,28 @@ class SellMyCarPage extends StatelessWidget {
                         label: 'Owner Name',
                         icon: Icons.person,
                         controller: getxController.ownerNameController,
-                        hintText: 'Enter your full name',
+                        hintText: 'e.g. Amit Parekh',
                         keyboardType: TextInputType.name,
                         isRequired: true,
                         mask: true,
+                      ),
+
+                      // Temporary only if user not logged in
+                      FutureBuilder(
+                        future: AuthService.isLoggedIn(),
+                        builder: (context, snapshot) {
+                          final loggedIn = snapshot.data ?? false;
+                          if (loggedIn) return const SizedBox.shrink();
+
+                          return _buildCustomTextField(
+                            label: 'Contact Number',
+                            icon: Icons.phone,
+                            controller: getxController.contactNumberController,
+                            hintText: 'e.g. 9876543210',
+                            keyboardType: TextInputType.phone,
+                            isRequired: true,
+                          );
+                        },
                       ),
 
                       // 3. Make Model Variant Description
@@ -346,7 +362,11 @@ class SellMyCarPage extends StatelessWidget {
                                     .clear();
 
                                 final ok = await getxController
-                                    .submitInspectionRequest(isSchedule: false);
+                                    .submitInspectionRequest(
+                                      isSchedule: false,
+                                      inspectionRequestedThrough:
+                                          inspectionRequestedThrough,
+                                    );
                                 if (ok) {
                                   SellMyCarPage.showCallbackConfirmationDialog(
                                     isClickedCallback: true,
@@ -966,6 +986,7 @@ class SellMyCarPage extends StatelessWidget {
 
                       final ok = await getxController.submitInspectionRequest(
                         isSchedule: true,
+                        inspectionRequestedThrough: inspectionRequestedThrough,
                       );
                       if (ok) {
                         Get.back(); // close schedule dialog
@@ -1022,35 +1043,35 @@ class SellMyCarPage extends StatelessWidget {
     );
   }
 
-  // Navigate to screen on banner tap
-  void _navigateToScreenOnBannerTap(String? screenName) {
-    final name = (screenName ?? '').trim().toLowerCase();
+  // // Navigate to screen on banner tap
+  // void _navigateToScreenOnBannerTap(String? screenName) {
+  //   final name = (screenName ?? '').trim().toLowerCase();
 
-    final routes = <String, Widget Function()>{
-      AppConstants.bannerScreenNames.buyACar.toLowerCase(): () => BuyACarPage(),
-      AppConstants.bannerScreenNames.sellYourCar.toLowerCase(): () =>
-          SellMyCarPage(),
-      AppConstants.bannerScreenNames.warranty.toLowerCase(): () =>
-          WarrantyPage(),
-      AppConstants.bannerScreenNames.finance.toLowerCase(): () => FinancePage(),
-      AppConstants.bannerScreenNames.insurance.toLowerCase(): () =>
-          InsurancePage(),
-    };
+  //   final routes = <String, Widget Function()>{
+  //     AppConstants.bannerScreenNames.buyACar.toLowerCase(): () => BuyACarPage(),
+  //     AppConstants.bannerScreenNames.sellYourCar.toLowerCase(): () =>
+  //         SellMyCarPage(),
+  //     AppConstants.bannerScreenNames.warranty.toLowerCase(): () =>
+  //         WarrantyPage(),
+  //     AppConstants.bannerScreenNames.finance.toLowerCase(): () => FinancePage(),
+  //     AppConstants.bannerScreenNames.insurance.toLowerCase(): () =>
+  //         InsurancePage(),
+  //   };
 
-    final builder = routes[name];
+  //   final builder = routes[name];
 
-    if (builder != null) {
-      Get.to(builder);
-      return;
-    }
+  //   if (builder != null) {
+  //     Get.to(builder);
+  //     return;
+  //   }
 
-    // Default fallback
-    // Get.to(
-    //   () => UnderDevelopmentPage(
-    //     screenName: screenName ?? 'Coming Soon',
-    //     icon: CupertinoIcons.square_grid_2x2,
-    //     color: AppColors.grey,
-    //   ),
-    // );
-  }
+  //   // Default fallback
+  //   // Get.to(
+  //   //   () => UnderDevelopmentPage(
+  //   //     screenName: screenName ?? 'Coming Soon',
+  //   //     icon: CupertinoIcons.square_grid_2x2,
+  //   //     color: AppColors.grey,
+  //   //   ),
+  //   // );
+  // }
 }

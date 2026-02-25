@@ -61,6 +61,12 @@ class ManagerMyCarsController extends GetxController {
       oneClickPrice: 565000,
       otobuyOffer: 540000,
       soldAt: 0,
+      registeredOwner: 'John Doe',
+      registeredAddressAsPerRc: '123 Main St, Pune, Maharashtra',
+      contactNumber: '+91 98765 43210',
+      emailAddress: 'john.doe@example.com',
+      chassisNumber: 'ABC123XYZ789',
+      engineNumber: 'ENG456XYZ789',
       imageUrls: const [],
     );
 
@@ -98,6 +104,12 @@ class ManagerMyCarsController extends GetxController {
       oneClickPrice: 1495000,
       otobuyOffer: 1400000,
       soldAt: 0,
+      registeredOwner: 'Jane Smith',
+      registeredAddressAsPerRc: '456 Oak Ave, New Delhi, Delhi',
+      contactNumber: '+91 98765 43211',
+      emailAddress: 'jane.smith@example.com',
+      chassisNumber: 'XYZ789ABC123',
+      engineNumber: 'ENG789XYZ123',
       imageUrls: const [],
     );
 

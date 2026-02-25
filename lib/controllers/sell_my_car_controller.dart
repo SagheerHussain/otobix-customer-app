@@ -9,6 +9,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:otobix_customer_app/Models/sell_my_car_banners_model.dart';
 import 'package:otobix_customer_app/controllers/dropdown_textfield_widget_controller.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
+import 'package:otobix_customer_app/services/auth_service.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
@@ -20,6 +21,7 @@ class SellMyCarController extends GetxController {
 
   late TextEditingController carRegistrationNumberController;
   late TextEditingController ownerNameController;
+  late TextEditingController contactNumberController;
   late TextEditingController makeController;
   late TextEditingController modelController;
   late TextEditingController variantController;
@@ -92,6 +94,7 @@ class SellMyCarController extends GetxController {
     super.onInit();
     carRegistrationNumberController = TextEditingController();
     ownerNameController = TextEditingController();
+    contactNumberController = TextEditingController();
     makeController = TextEditingController();
     modelController = TextEditingController();
     variantController = TextEditingController();
@@ -633,7 +636,10 @@ class SellMyCarController extends GetxController {
   }
 
   // Submit inspection request
-  Future<bool> submitInspectionRequest({required bool isSchedule}) async {
+  Future<bool> submitInspectionRequest({
+    required bool isSchedule,
+    String? inspectionRequestedThrough,
+  }) async {
     if (!(formKey.currentState?.validate() ?? false)) return false;
     final loading = isSchedule
         ? isScheduleInspectionLoading
@@ -673,7 +679,14 @@ class SellMyCarController extends GetxController {
       request.fields['ownershipSerialNumber'] = ownershipToNumber(
         ownershipSerialNoController.text,
       );
-      request.fields['customerContactNumber'] = customerContactNumber;
+      debugPrint('Contact number: ${contactNumberController.text.trim()}');
+      final isLoggedIn = await AuthService.isLoggedIn();
+      if (!isLoggedIn) {
+        request.fields['customerContactNumber'] = contactNumberController.text
+            .trim();
+      } else {
+        request.fields['customerContactNumber'] = customerContactNumber;
+      }
 
       // optional fields
       if (odometerReadingInKmsController.text.trim().isNotEmpty) {
@@ -692,6 +705,11 @@ class SellMyCarController extends GetxController {
       if (inspectionAddressController.text.trim().isNotEmpty) {
         request.fields['inspectionAddress'] = inspectionAddressController.text
             .trim();
+      }
+      if (inspectionRequestedThrough != null &&
+          inspectionRequestedThrough.isNotEmpty) {
+        request.fields['inspectionRequestedThrough'] =
+            inspectionRequestedThrough;
       }
       request.fields['addedBy'] = 'Customer';
 
@@ -882,6 +900,7 @@ class SellMyCarController extends GetxController {
 
     carRegistrationNumberController.dispose();
     ownerNameController.dispose();
+    contactNumberController.dispose();
     makeController.dispose();
     modelController.dispose();
     variantController.dispose();

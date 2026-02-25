@@ -2,15 +2,18 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/Models/cars_list_model_for_buy_a_car.dart';
+import 'package:otobix_customer_app/services/auth_service.dart';
 import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/controllers/buy_a_car_controller.dart';
 import 'package:otobix_customer_app/controllers/buy_a_car_filters_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
+import 'package:otobix_customer_app/views/login_page.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 import 'package:otobix_customer_app/widgets/buy_a_car_filters_widget.dart';
 import 'package:otobix_customer_app/widgets/empty_data_widget.dart';
+import 'package:otobix_customer_app/widgets/login_required_dialog_widget.dart';
 import 'package:otobix_customer_app/widgets/shimmer_widget.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
@@ -105,7 +108,25 @@ class BuyACarPage extends StatelessWidget {
             final car = carsList[index];
 
             return InkWell(
-              onTap: () {},
+              onTap: () async {
+                final isLoggedIn = await AuthService.isLoggedIn();
+                if (isLoggedIn) {
+                  _showImageGalleryDialog(context, car);
+                  await buyACarController.saveInterestedBuyer(
+                    car: car,
+                    activityType:
+                        AppConstants.buyACarActivityType.viewMoreImages,
+                  );
+                } else {
+                  LoginRequiredDialogWidget.show(
+                    context,
+                    message: 'Login to view more details.',
+                    onLogin: () {
+                      Get.offAll(LoginPage());
+                    },
+                  );
+                }
+              },
               child: Card(
                 elevation: 4,
                 shape: RoundedRectangleBorder(
@@ -259,30 +280,40 @@ class BuyACarPage extends StatelessWidget {
     return Column(
       children: [
         const Divider(),
-        ButtonWidget(
-          text: 'View More Images',
-          height: 35,
-          fontSize: 12,
-          borderRadius: 5,
-          isLoading: false.obs,
-          backgroundColor: AppColors.blue,
-          onTap: () async {
-            _showImageGalleryDialog(context, car);
-            await buyACarController.saveInterestedBuyer(
-              car: car,
-              activityType: AppConstants.buyACarActivityType.viewMoreImages,
-            );
-          },
-        ),
-        const SizedBox(height: 7),
+        // ButtonWidget(
+        //   text: 'View More Images',
+        //   height: 35,
+        //   fontSize: 12,
+        //   borderRadius: 5,
+        //   isLoading: false.obs,
+        //   backgroundColor: AppColors.blue,
+        //   onTap: () async {
+        //     _showImageGalleryDialog(context, car);
+        //     await buyACarController.saveInterestedBuyer(
+        //       car: car,
+        //       activityType: AppConstants.buyACarActivityType.viewMoreImages,
+        //     );
+        //   },
+        // ),
+        // const SizedBox(height: 7),
         ButtonWidget(
           text: 'Interested!',
           height: 35,
           fontSize: 12,
           borderRadius: 5,
           isLoading: false.obs,
-          onTap: () {
-            _showInterestDialog(context, car);
+          onTap: () async {
+            final isLoggedIn = await AuthService.isLoggedIn();
+            if (isLoggedIn) {
+              _showInterestDialog(context, car);
+            } else {
+              LoginRequiredDialogWidget.show(
+                context,
+                onLogin: () {
+                  Get.offAll(LoginPage());
+                },
+              );
+            }
           },
         ),
       ],

@@ -18,6 +18,10 @@ class AppConstants {
   // App Key for update app info
   static const String appKey = 'customer';
 
+  // App pkg and Display name
+  static const String appPkgName = 'com.otobix.customerapp';
+  static const String appDisplayName = 'OtoBix Customer App';
+
   // Indian states
   static const List<String> indianStates = [
     "Andhra Pradesh",
@@ -61,7 +65,7 @@ class AppConstants {
   // ---- configuration per environment ----
   static const _localConfiguration = _EnvConfig(
     deploymentEnvironmentName: 'local',
-    renderBaseUrl: 'http://192.168.2.35:4000/api/',
+    renderBaseUrl: 'http://192.168.41.105:4000/api/',
     oneSignalAppId: 'ed92ee62-6b5c-4e1a-a5c0-5846bab4055e',
   );
 

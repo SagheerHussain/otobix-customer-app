@@ -7,6 +7,7 @@ class SharedPrefsHelper {
   static const String userIdKey = 'id';
   static const String userNameKey = 'name';
   static const String userPhoneNumberKey = 'phoneNumber';
+  static const String userEmailKey = 'email';
   static const String entityTypeKey = 'entityType';
 
   static SharedPreferences? _prefs;

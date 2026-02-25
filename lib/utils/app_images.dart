@@ -24,4 +24,8 @@ class AppImages {
   // PDI Images
   static const String pdiBanner = 'lib/assets/images/pdiBanner.jpg';
   static const String pdiBanner2 = 'lib/assets/images/pdiBanner2.jpg';
+
+  // Warranty Screen Banner
+  static const String warrantyScreenBanner =
+      'lib/assets/images/warrantyScreenBanner.jpg';
 }
