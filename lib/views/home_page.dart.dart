@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:otobix_customer_app/services/auth_service.dart';
+import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/controllers/home_page_controller.dart';
 import 'package:otobix_customer_app/utils/app_constants.dart';
@@ -10,6 +12,7 @@ import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/views/buy_a_car_page.dart';
 import 'package:otobix_customer_app/views/finance_page.dart';
 import 'package:otobix_customer_app/views/insurance_page.dart';
+import 'package:otobix_customer_app/views/login_page.dart';
 import 'package:otobix_customer_app/views/my_auctions_page.dart';
 import 'package:otobix_customer_app/views/pdi_page.dart';
 import 'package:otobix_customer_app/views/sell_my_car_page.dart';
@@ -17,6 +20,7 @@ import 'package:otobix_customer_app/views/under_development_page.dart';
 import 'package:otobix_customer_app/views/user_notifications_page.dart';
 import 'package:otobix_customer_app/views/warranty_page.dart';
 import 'package:otobix_customer_app/widgets/home_banners_widgets.dart';
+import 'package:otobix_customer_app/widgets/login_required_dialog_widget.dart';
 
 class HomePage extends StatelessWidget {
   HomePage({super.key});
@@ -174,6 +178,16 @@ class HomePage extends StatelessWidget {
             ),
           ),
           SizedBox(height: 10),
+
+          // _buildTempNavigationItem(
+          //   icon: AppIcons.warranty,
+          //   title: 'Warranty',
+          //   subtitle:
+          //       'Explore Pre-Owned Cars from Certified & Verified Listings',
+          //   color: AppColors.grey,
+          //   onTap: () => Get.to(() => WarrantyPage()),
+          // ),
+          // const SizedBox(height: 10),
           _buildTempNavigationItem(
             icon: AppIcons.sellMyCar,
             title: 'Sell My Car',
@@ -189,7 +203,18 @@ class HomePage extends StatelessWidget {
             subtitle:
                 'Your Car, Your Price, Your Control - Set Your Price and View Live Offers',
             color: AppColors.blue,
-            onTap: () => Get.to(() => MyAuctionsPage()),
+            onTap: () async {
+              final isLoggedIn = await AuthService.isLoggedIn();
+              if (!isLoggedIn) {
+                LoginRequiredDialogWidget.show(
+                  Get.context!,
+                  message: "Login to view your auctions.",
+                  onLogin: () => Get.offAll(() => LoginPage()),
+                );
+                return;
+              }
+              Get.to(() => MyAuctionsPage());
+            },
           ),
           const SizedBox(height: 10),
 
@@ -223,7 +248,7 @@ class HomePage extends StatelessWidget {
         // width: 80,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(5),
-          border: Border.all(),
+          border: Border.all(color: AppColors.grey.withValues(alpha: 0.3)),
         ),
 
         child: Row(
@@ -233,7 +258,7 @@ class HomePage extends StatelessWidget {
               padding: const EdgeInsets.all(5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
-                color: AppColors.grey.withValues(alpha: 0.2),
+                color: color.withValues(alpha: 0.1),
               ),
 
               child: SvgPicture.asset(
@@ -309,7 +334,18 @@ class HomePage extends StatelessWidget {
                 // View My Auctions
                 icon: AppIcons.viewMyAuctions,
                 title: 'View My Auctions',
-                onTap: () => Get.to(() => MyAuctionsPage()),
+                onTap: () async {
+                  final isLoggedIn = await AuthService.isLoggedIn();
+                  if (!isLoggedIn) {
+                    LoginRequiredDialogWidget.show(
+                      context,
+                      message: "Login to view your auctions.",
+                      onLogin: () => Get.offAll(() => LoginPage()),
+                    );
+                    return;
+                  }
+                  Get.to(() => MyAuctionsPage());
+                },
               ),
               const SizedBox(width: 10),
               _buildNavigationItem(
@@ -454,7 +490,7 @@ class HomePage extends StatelessWidget {
       //     WarrantyPage(),
       // AppConstants.bannerScreenNames.finance.toLowerCase(): () => FinancePage(),
       // AppConstants.bannerScreenNames.insurance.toLowerCase(): () =>
-          // InsurancePage(),
+      // InsurancePage(),
     };
 
     final builder = routes[name];
@@ -599,9 +635,10 @@ class HomePage extends StatelessWidget {
 
                 return InkWell(
                   borderRadius: BorderRadius.circular(10),
-                  onTap: () {
+                  onTap: () async {
                     homeController.clearSearch();
-                    homeController.openNavItem(item);
+                    // homeController.openNavItem(item);
+                    await homeController.openNavItem(context, item);
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(

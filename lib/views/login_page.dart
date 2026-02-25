@@ -4,7 +4,9 @@ import 'package:otobix_customer_app/controllers/register_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:get/get.dart';
+import 'package:otobix_customer_app/views/buy_a_car_page.dart';
 import 'package:otobix_customer_app/views/forget_password_page.dart';
+import 'package:otobix_customer_app/views/home_page.dart.dart';
 import 'package:otobix_customer_app/views/register_page.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 
@@ -69,7 +71,7 @@ class LoginPage extends StatelessWidget {
                     _buildForgetPasswordButton(),
                     SizedBox(height: 15),
                     _buildContinueButton(context),
-                    SizedBox(height: 50),
+                    SizedBox(height: 30),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -98,6 +100,28 @@ class LoginPage extends StatelessWidget {
                           ),
                         ),
                       ],
+                    ),
+                    SizedBox(height: 10),
+                    InkWell(
+                      onTap: () {
+                        Get.to(() => HomePage());
+                      },
+                      borderRadius: BorderRadius.circular(50),
+
+                      // onTap: () => Get.to(() => SignUpPage()),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        child: Text(
+                          'Login as Guest',
+                          style: TextStyle(
+                            color: AppColors.grey,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),

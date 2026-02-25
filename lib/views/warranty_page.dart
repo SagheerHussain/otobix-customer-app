@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/controllers/warranty_controller.dart';
+import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/views/claim_rsa_cars_list_page.dart';
 import 'package:otobix_customer_app/views/get_warranty_cars_list_page.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
@@ -15,7 +16,7 @@ class WarrantyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return 
+    return
     // 1 == 1
     //     ? const UnderDevelopmentPage(
     //         screenName: "Warranty",
@@ -24,10 +25,21 @@ class WarrantyPage extends StatelessWidget {
     //         completedPercentage: 50,
     //       )
     //     :
-         Scaffold(
-            appBar: AppBarWidget(title: 'Warranty'),
-            backgroundColor: AppColors.white,
-            body: SafeArea(
+    Scaffold(
+      appBar: AppBarWidget(title: 'Warranty'),
+      backgroundColor: AppColors.white,
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
+            // Banner Image
+            Image.asset(
+              AppImages.warrantyScreenBanner,
+              height: 200,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+            Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
@@ -45,7 +57,10 @@ class WarrantyPage extends StatelessWidget {
                 ),
               ),
             ),
-          );
+          ],
+        ),
+      ),
+    );
   }
 
   // Benefits Section
@@ -88,6 +103,7 @@ class WarrantyPage extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(height: 15),
         ],
       ),
     );

@@ -6,6 +6,7 @@ import 'package:otobix_customer_app/Models/home_nav_item.dart';
 import 'package:otobix_customer_app/Models/sell_my_car_banners_model.dart';
 import 'package:otobix_customer_app/controllers/login_controller.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
+import 'package:otobix_customer_app/services/auth_service.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_constants.dart';
@@ -20,6 +21,7 @@ import 'package:otobix_customer_app/views/pdi_page.dart';
 import 'package:otobix_customer_app/views/sell_my_car_page.dart';
 import 'package:otobix_customer_app/views/under_development_page.dart';
 import 'package:otobix_customer_app/views/warranty_page.dart';
+import 'package:otobix_customer_app/widgets/login_required_dialog_widget.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
 
 class HomePageController extends GetxController {
@@ -184,19 +186,39 @@ class HomePageController extends GetxController {
       icon: AppIcons.sellMyCar,
       title: 'Sell My Car',
       subtitle: 'List your car for auction',
-      pageBuilder: () => SellMyCarPage(),
+      // pageBuilder: () => SellMyCarPage(),
+      onTap: (context) async {
+        Get.to(() => SellMyCarPage());
+      },
     ),
     HomeNavItem(
       icon: AppIcons.viewMyAuctions,
       title: 'View My Auctions',
       subtitle: 'Track bids and offers',
-      pageBuilder: () => MyAuctionsPage(),
+      // pageBuilder: () => MyAuctionsPage(),
+      onTap: (context) async {
+        final isLoggedIn = await AuthService.isLoggedIn();
+
+        if (!isLoggedIn) {
+          LoginRequiredDialogWidget.show(
+            context,
+            message: "Login to view your auctions.",
+            onLogin: () => Get.to(() => LoginPage()),
+          );
+          return;
+        }
+
+        Get.to(() => MyAuctionsPage());
+      },
     ),
     HomeNavItem(
       icon: AppIcons.buyACar,
       title: 'Buy A Car',
       subtitle: 'Browse cars & place bids',
-      pageBuilder: () => BuyACarPage(),
+      // pageBuilder: () => BuyACarPage(),
+      onTap: (context) async {
+        Get.to(() => BuyACarPage());
+      },
     ),
     // HomeNavItem(
     //   icon: AppIcons.insurance,
@@ -263,8 +285,11 @@ class HomePageController extends GetxController {
     searchQuery.value = '';
   }
 
-  void openNavItem(HomeNavItem item) {
-    Get.to(() => item.pageBuilder());
+  // void openNavItem(HomeNavItem item) {
+  //   Get.to(() => item.pageBuilder());
+  // }
+  Future<void> openNavItem(BuildContext context, HomeNavItem item) async {
+    await item.onTap(context);
   }
 
   @override

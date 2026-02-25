@@ -34,6 +34,12 @@ class CarsListModel {
   final double oneClickPrice;
   final double otobuyOffer;
   final double soldAt;
+  final String registeredOwner;
+  final String registeredAddressAsPerRc;
+  final String contactNumber;
+  final String emailAddress;
+  final String chassisNumber;
+  final String engineNumber;
   final List<CarsListTitleAndImage>? imageUrls;
 
   final RxBool isFavorite;
@@ -71,6 +77,12 @@ class CarsListModel {
     required this.oneClickPrice,
     required this.otobuyOffer,
     required this.soldAt,
+    required this.registeredOwner,
+    required this.registeredAddressAsPerRc,
+    required this.contactNumber,
+    required this.emailAddress,
+    required this.chassisNumber,
+    required this.engineNumber,
     required this.imageUrls,
     bool isFavorite = false,
   }) : isFavorite = isFavorite.obs;
@@ -123,6 +135,12 @@ class CarsListModel {
       otobuyOffer:
           double.tryParse(data['otobuyOffer']?.toString() ?? '0') ?? 0.0,
       soldAt: double.tryParse(data['soldAt']?.toString() ?? '0') ?? 0.0,
+      registeredOwner: data['registeredOwner'] ?? '',
+      registeredAddressAsPerRc: data['registeredAddressAsPerRc'] ?? '',
+      contactNumber: data['contactNumber'] ?? '',
+      emailAddress: data['emailAddress'] ?? '',
+      chassisNumber: data['chassisNumber'] ?? '',
+      engineNumber: data['engineNumber'] ?? '',
       imageUrls: (data['imageUrls'] as List<dynamic>?)
           ?.map((e) => CarsListTitleAndImage.fromJson(e))
           .toList(),
@@ -163,6 +181,12 @@ class CarsListModel {
       'oneClickPrice': oneClickPrice,
       'otobuyOffer': otobuyOffer,
       'soldAt': soldAt,
+      'registeredOwner': registeredOwner,
+      'registeredAddressAsPerRc': registeredAddressAsPerRc,
+      'contactNumber': contactNumber,
+      'emailAddress': emailAddress,
+      'chassisNumber': chassisNumber,
+      'engineNumber': engineNumber,
       'imageUrls': imageUrls?.map((e) => e.toJson()).toList(),
     };
   }

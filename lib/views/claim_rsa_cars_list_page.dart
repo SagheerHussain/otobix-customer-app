@@ -14,7 +14,8 @@ class ClaimRsaCarsListPage extends StatelessWidget {
   ClaimRsaCarsListPage({super.key});
 
   final ClaimRsaCarsListController getxController = Get.put(
-    ClaimRsaCarsListController());
+    ClaimRsaCarsListController(),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -77,9 +78,7 @@ class ClaimRsaCarsListPage extends StatelessWidget {
 
           return InkWell(
             onTap: () {
-              Get.to(
-                () => ClaimRsaPage(appointmentId: car.appointmentId, carImageUrl: car.imageUrl),
-              );
+              Get.to(() => ClaimRsaPage(car: car));
             },
             child: Card(
               elevation: 4,
@@ -117,12 +116,14 @@ class ClaimRsaCarsListPage extends StatelessWidget {
                             ),
                           ),
                           errorWidget: (context, error, stackTrace) {
-                            return Image.asset(
-                              AppImages.carNotFound,
-                              // height: 160,
-                              height: screenWidth * 0.7,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
+                            return Padding(
+                              padding: const EdgeInsets.all(50),
+                              child: Image.asset(
+                                AppImages.carNotFound,
+                                height: screenWidth * 0.7,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
                             );
                           },
                         ),

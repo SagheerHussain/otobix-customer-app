@@ -20,7 +20,6 @@ class ClaimRsaCarsListController extends GetxController {
   /// List actually used by UI (after search/filter)
   final RxList<CarsListModel> filteredCarsList = <CarsListModel>[].obs;
 
-
   @override
   void onInit() {
     super.onInit();
@@ -47,7 +46,7 @@ class ClaimRsaCarsListController extends GetxController {
           '';
 
       final response = await ApiService.post(
-        endpoint: AppUrls.fetchInspectedCarsList,
+        endpoint: AppUrls.fetchInspectedCarsListForWarranty,
         body: {'phoneNumber': phoneNumber},
       );
 
@@ -68,7 +67,6 @@ class ClaimRsaCarsListController extends GetxController {
 
         // Initialize filtered list (show all before user types anything)
         filterCars();
-
       } else {
         debugPrint('Failed to load cars: ${response.statusCode}');
       }
@@ -96,6 +94,4 @@ class ClaimRsaCarsListController extends GetxController {
 
     filteredCarsList.assignAll(filtered);
   }
-
-
 }

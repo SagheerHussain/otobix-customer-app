@@ -75,14 +75,18 @@ class AppUrls {
   static String get filterCarsInBuyACar =>
       "${baseUrl}customer/buy-a-car/filter";
 
-  static String get fetchInspectedCarsList =>
-      "${baseUrl}customer/warranty/fetch-inspected-cars-list";
+  static String get fetchInspectedCarsListForWarranty =>
+      "${baseUrl}customer/warranty/fetch-last-sixty-days-inspected-cars-list"; //
 
-  static String get createRazorpayOrder =>
-      "${baseUrl}razorpay/create-order";
+  static String get createRazorpayOrder => "${baseUrl}razorpay/create-order";
 
   static String get verifyRazorpayPayment =>
       "${baseUrl}razorpay/verify-payment";
+
+  static String get ewiSaleApiForRSA => "${baseUrl}ewi/sale-api-for-rsa";
+
+  static String get ewiSaleApiForGetWarranty =>
+      "${baseUrl}ewi/sale-api-for-get-warranty";
 
   // static String get allUsersList => "${baseUrl}user/all-users-list";
 

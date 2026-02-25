@@ -10,7 +10,6 @@ import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/views/bottom_navigation_bar_page.dart';
 import 'package:otobix_customer_app/views/login_page.dart';
-import 'package:otobix_customer_app/views/registration_form_page.dart';
 
 void main() async {
   final start = await init();

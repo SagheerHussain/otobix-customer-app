@@ -78,7 +78,7 @@ class GetWarrantyCarsListPage extends StatelessWidget {
 
           return InkWell(
             onTap: () {
-              Get.to(() => GetWarrantyPage(appointmentId: car.appointmentId, carImageUrl: car.imageUrl));
+              Get.to(() => GetWarrantyPage(car: car));
             },
             child: Card(
               elevation: 4,
