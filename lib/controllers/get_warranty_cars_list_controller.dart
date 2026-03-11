@@ -15,7 +15,7 @@ class GetWarrantyCarsListController extends GetxController {
   final RxString searchQuery = ''.obs;
 
   /// Main list for this screen (all cars)
-  final RxList<CarsListModel> claimRsaCarsList = <CarsListModel>[].obs;
+  final RxList<CarsListModel> getWarrantyCarsList = <CarsListModel>[].obs;
 
   /// List actually used by UI (after search/filter)
   final RxList<CarsListModel> filteredCarsList = <CarsListModel>[].obs;
@@ -50,6 +50,8 @@ class GetWarrantyCarsListController extends GetxController {
         body: {'phoneNumber': phoneNumber},
       );
 
+      // debugPrint(response.body);
+
       if (response.statusCode == 200) {
         final decoded = jsonDecode(response.body) as Map<String, dynamic>;
         final List<dynamic> dataList = decoded['data'] as List<dynamic>;
@@ -63,7 +65,7 @@ class GetWarrantyCarsListController extends GetxController {
             )
             .toList();
 
-        claimRsaCarsList.assignAll(fetchedCarsList);
+        getWarrantyCarsList.assignAll(fetchedCarsList);
 
         // Initialize filtered list (show all before user types anything)
         filterCars();
@@ -82,11 +84,11 @@ class GetWarrantyCarsListController extends GetxController {
     final query = searchQuery.value.trim().toLowerCase();
 
     if (query.isEmpty) {
-      filteredCarsList.assignAll(claimRsaCarsList);
+      filteredCarsList.assignAll(getWarrantyCarsList);
       return;
     }
 
-    final filtered = claimRsaCarsList.where((car) {
+    final filtered = getWarrantyCarsList.where((car) {
       final appointmentId = car.appointmentId.toLowerCase();
       final reg = car.registrationNumber.toLowerCase();
       return appointmentId.contains(query) || reg.contains(query);

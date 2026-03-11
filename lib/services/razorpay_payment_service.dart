@@ -76,6 +76,7 @@ class RazorpayPaymentService {
     required String description,
     required String customerEmail,
     required String customerPhone,
+    required String userId,
     Map<String, dynamic>? notes,
     String? receipt,
   }) async {
@@ -94,6 +95,7 @@ class RazorpayPaymentService {
           "currency": "INR",
           "receipt": receipt,
           "notes": notes ?? {},
+          "userId": userId,
         },
       );
 
@@ -119,6 +121,7 @@ class RazorpayPaymentService {
         "order_id": orderId,
         "prefill": {"email": customerEmail, "contact": customerPhone},
         "notes": notes ?? {},
+        "userId": userId,
       });
     } on SocketException {
       throw Exception("No internet connection. Please check your network.");

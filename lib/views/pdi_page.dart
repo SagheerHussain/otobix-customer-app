@@ -1,9 +1,14 @@
-
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/controllers/pdi_controller.dart';
+import 'package:otobix_customer_app/services/auth_service.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
+import 'package:otobix_customer_app/views/login_page.dart';
+import 'package:otobix_customer_app/views/new_car_pdi_page.dart';
+import 'package:otobix_customer_app/views/used_car_pdi_page.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
+import 'package:otobix_customer_app/widgets/login_required_dialog_widget.dart';
 
 class PdiPage extends StatelessWidget {
   PdiPage({super.key});
@@ -24,37 +29,31 @@ class PdiPage extends StatelessWidget {
     //         color: AppColors.red,
     //         completedPercentage: 50,
     //       )
-    //     : 
-        Scaffold(
-            appBar: AppBarWidget(title: 'Pre Delivery Inspection'),
-            body: SafeArea(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    const SizedBox(height: 10),
-                    _buildBanner(
-                      context: context,
-                      bannerPath: AppImages.pdiBanner,
-                    ),
-                    const SizedBox(height: 14),
-                    _buildServiceCategoriesSection(context),
-                    const SizedBox(height: 16),
-                    _buildCoverageSection(context),
-                    const SizedBox(height: 16),
-                    _buildBanner(
-                      context: context,
-                      bannerPath: AppImages.pdiBanner2,
-                    ),
-                    const SizedBox(height: 16),
-                    _buildHowItWorksSection(context),
-                    const SizedBox(height: 16),
-                    _buildFaqSection(context),
-                    const SizedBox(height: 30),
-                  ],
-                ),
-              ),
-            ),
-          );
+    //     :
+    Scaffold(
+      appBar: AppBarWidget(title: 'Pre Delivery Inspection'),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
+              _buildBanner(context: context, bannerPath: AppImages.pdiBanner),
+              const SizedBox(height: 14),
+              _buildServiceCategoriesSection(context),
+              const SizedBox(height: 16),
+              _buildCoverageSection(context),
+              const SizedBox(height: 16),
+              _buildBanner(context: context, bannerPath: AppImages.pdiBanner2),
+              const SizedBox(height: 16),
+              _buildHowItWorksSection(context),
+              const SizedBox(height: 16),
+              _buildFaqSection(context),
+              const SizedBox(height: 30),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   // ===== BANNER =====
@@ -101,14 +100,50 @@ class PdiPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Obx(
-              () => Row(
-                children: [
-                  Expanded(child: _buildCategoryCard(0)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildCategoryCard(1)),
-                ],
-              ),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildCategoryCard(
+                    title: 'New Car PDI',
+                    alternateIcon: CupertinoIcons.car_detailed,
+                    onTap: () async {
+                      final isLoggedIn = await AuthService.isLoggedIn();
+                      if (isLoggedIn) {
+                        Get.to(() => NewCarPdiPage());
+                      } else {
+                        LoginRequiredDialogWidget.show(
+                          Get.context!,
+                          message: 'Login to request PDI.',
+                          onLogin: () {
+                            Get.offAll(LoginPage());
+                          },
+                        );
+                      }
+                    },
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildCategoryCard(
+                    title: 'Used Car PDI',
+                    alternateIcon: CupertinoIcons.car,
+                    onTap: () async {
+                      final isLoggedIn = await AuthService.isLoggedIn();
+                      if (isLoggedIn) {
+                        Get.to(() => UsedCarPdiPage());
+                      } else {
+                        LoginRequiredDialogWidget.show(
+                          Get.context!,
+                          message: 'Login to request PDI.',
+                          onLogin: () {
+                            Get.offAll(LoginPage());
+                          },
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -116,72 +151,73 @@ class PdiPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryCard(int index) {
-    final item = pdiController.serviceCategories[index];
-    // final bool isSelected = (item['isSelected'] == true);
-
+  Widget _buildCategoryCard({
+    required String title,
+    required IconData alternateIcon,
+    required VoidCallback onTap,
+  }) {
     return InkWell(
-      onTap: () => pdiController.selectCategory(index),
+      onTap: onTap,
       borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            // color: isSelected ? const Color(0xFF6FA2FF) : _border,
-            color: _border,
-            // width: isSelected ? 2 : 1,
-            width: 1,
+      child: Material(
+        elevation: 3,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: _border, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: .04),
+                blurRadius: 10,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: .04),
-              blurRadius: 10,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Container(
-              height: 72,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: _lightBlueBg,
-                borderRadius: BorderRadius.circular(10),
+          child: Column(
+            children: [
+              Container(
+                height: 72,
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: _lightBlueBg,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: _buildCategoryImageOrPlaceholder(
+                  alternateIcon: alternateIcon,
+                ),
               ),
-              child: _buildCategoryImageOrPlaceholder(item['imageAsset']),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              (item['title'] ?? '').toString(),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-                color: Color(0xFF0D2B55),
+              const SizedBox(height: 8),
+              Text(
+                (title).toString(),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF0D2B55),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildCategoryImageOrPlaceholder(String? asset) {
-    if (asset == null || asset.trim().isEmpty) {
-      return const Center(
-        child: Icon(
-          Icons.directions_car_rounded,
-          size: 42,
-          color: Color(0xFF0B3A73),
-        ),
+  Widget _buildCategoryImageOrPlaceholder({
+    String? imageUrl,
+    required IconData alternateIcon,
+  }) {
+    if (imageUrl == null || imageUrl.trim().isEmpty) {
+      return Center(
+        child: Icon(alternateIcon, size: 42, color: Color(0xFF0B3A73)),
       );
     }
 
     return Image.asset(
-      asset,
+      imageUrl,
       fit: BoxFit.contain,
       errorBuilder: (_, __, ___) {
         return const Center(
@@ -247,9 +283,9 @@ class PdiPage extends StatelessWidget {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: _lightBlueBg,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: _border),
+            // border: Border.all(color: _border),
           ),
           child: Row(
             children: [

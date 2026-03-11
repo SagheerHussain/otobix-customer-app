@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/services/auth_service.dart';
-import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/controllers/home_page_controller.dart';
 import 'package:otobix_customer_app/utils/app_constants.dart';
@@ -16,6 +15,7 @@ import 'package:otobix_customer_app/views/login_page.dart';
 import 'package:otobix_customer_app/views/my_auctions_page.dart';
 import 'package:otobix_customer_app/views/pdi_page.dart';
 import 'package:otobix_customer_app/views/sell_my_car_page.dart';
+import 'package:otobix_customer_app/views/service_history_page.dart';
 import 'package:otobix_customer_app/views/under_development_page.dart';
 import 'package:otobix_customer_app/views/user_notifications_page.dart';
 import 'package:otobix_customer_app/views/warranty_page.dart';
@@ -70,7 +70,20 @@ class HomePage extends StatelessWidget {
                       const SizedBox(width: 10),
                       Flexible(child: _buildSearchBar(context)),
                       IconButton(
-                        onPressed: () => Get.to(() => UserNotificationsPage()),
+                        onPressed: () async {
+                          final isLoggedIn = await AuthService.isLoggedIn();
+                          if (isLoggedIn) {
+                            Get.to(() => UserNotificationsPage());
+                          } else {
+                            LoginRequiredDialogWidget.show(
+                              Get.context!,
+                              message: 'Login to view notifications.',
+                              onLogin: () {
+                                Get.offAll(LoginPage());
+                              },
+                            );
+                          }
+                        },
                         icon: Icon(Icons.notifications, color: AppColors.grey),
                       ),
                     ],
@@ -133,7 +146,9 @@ class HomePage extends StatelessWidget {
                           const SizedBox(height: 20),
 
                           // Services section
-                          _buildTempServicesSection(context),
+                          _buildServicesSection(context),
+                          // _buildTempServicesSection(context),
+                          const SizedBox(height: 10),
                         ],
                       ),
                     ),
@@ -177,17 +192,17 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
 
-          // _buildTempNavigationItem(
-          //   icon: AppIcons.warranty,
-          //   title: 'Warranty',
-          //   subtitle:
-          //       'Explore Pre-Owned Cars from Certified & Verified Listings',
-          //   color: AppColors.grey,
-          //   onTap: () => Get.to(() => WarrantyPage()),
-          // ),
-          // const SizedBox(height: 10),
+          _buildTempNavigationItem(
+            icon: AppIcons.warranty,
+            title: 'Service History',
+            subtitle: 'Book Scientific and Tech Driven Doorstep Inspection',
+            color: AppColors.black,
+            onTap: () => Get.to(() => ServiceHistoryPage()),
+          ),
+          const SizedBox(height: 10),
+
           _buildTempNavigationItem(
             icon: AppIcons.sellMyCar,
             title: 'Sell My Car',
@@ -226,6 +241,25 @@ class HomePage extends StatelessWidget {
             color: AppColors.green,
             onTap: () => Get.to(() => BuyACarPage()),
           ),
+          const SizedBox(height: 10),
+
+          _buildTempNavigationItem(
+            icon: AppIcons.warranty,
+            title: 'Warranty',
+            subtitle: 'Drive worry-free with verified warranty plans',
+            color: AppColors.grey,
+            onTap: () => Get.to(() => WarrantyPage()),
+          ),
+          const SizedBox(height: 10),
+
+          _buildTempNavigationItem(
+            icon: AppIcons.pdi,
+            title: 'PDI',
+            subtitle: 'Certified pre-delivery inspection & report',
+            color: AppColors.deepOrange,
+            onTap: () => Get.to(() => PdiPage()),
+          ),
+          const SizedBox(width: 20),
         ],
       ),
     );
@@ -338,7 +372,7 @@ class HomePage extends StatelessWidget {
                   final isLoggedIn = await AuthService.isLoggedIn();
                   if (!isLoggedIn) {
                     LoginRequiredDialogWidget.show(
-                      context,
+                      Get.context!,
                       message: "Login to view your auctions.",
                       onLogin: () => Get.offAll(() => LoginPage()),
                     );
@@ -363,72 +397,79 @@ class HomePage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Warranty
               _buildNavigationItem(
-                // Insurance
-                icon: AppIcons.insurance,
-
-                title: 'Insurance',
-                onTap: () => Get.to(() => InsurancePage()),
-              ),
-              const SizedBox(width: 10),
-              _buildNavigationItem(
-                // Finance
-                icon: AppIcons.finance,
-                title: 'Finance',
-                onTap: () => Get.to(() => FinancePage()),
-              ),
-              const SizedBox(width: 10),
-              _buildNavigationItem(
-                // Warranty
                 icon: AppIcons.warranty,
-
                 title: 'Warranty',
                 onTap: () => Get.to(() => WarrantyPage()),
               ),
-            ],
-          ),
+              const SizedBox(width: 10),
 
-          const SizedBox(height: 10),
-
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+              // PDI
               _buildNavigationItem(
-                // PDI
                 icon: AppIcons.pdi,
                 title: 'PDI',
                 onTap: () => Get.to(() => PdiPage()),
               ),
               const SizedBox(width: 10),
-              _buildNavigationItem(
-                // Manage My Cars
-                icon: AppIcons.manageMyCars,
-                title: 'Manage My Cars',
-                onTap: () => Get.to(
-                  () => UnderDevelopmentPage(
-                    screenName: "Manage My Cars",
-                    icon: CupertinoIcons.car,
-                    color: AppColors.green,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              _buildNavigationItem(
-                // Refer and Earn
-                icon: AppIcons.referAndEarn,
 
-                title: 'Refer and Earn',
-                onTap: () => Get.to(
-                  () => UnderDevelopmentPage(
-                    screenName: "Refer and Earn",
-                    icon: CupertinoIcons.checkmark_shield,
-                    color: AppColors.blue,
-                  ),
-                ),
-              ),
+              // To fix allignment
+              const SizedBox(width: 80), // dummy
             ],
           ),
+
+          const SizedBox(height: 10),
+
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          //   crossAxisAlignment: CrossAxisAlignment.start,
+          //   children: [
+          //     // Insurance
+          //     _buildNavigationItem(
+          //       icon: AppIcons.insurance,
+
+          //       title: 'Insurance',
+          //       onTap: () => Get.to(() => InsurancePage()),
+          //     ),
+          //     const SizedBox(width: 10),
+
+          //     // Finance
+          //     _buildNavigationItem(
+          //       icon: AppIcons.finance,
+          //       title: 'Finance',
+          //       onTap: () => Get.to(() => FinancePage()),
+          //     ),
+          //     const SizedBox(width: 10),
+
+          //     const SizedBox(width: 10),
+          //     _buildNavigationItem(
+          //       // Manage My Cars
+          //       icon: AppIcons.manageMyCars,
+          //       title: 'Manage My Cars',
+          //       onTap: () => Get.to(
+          //         () => UnderDevelopmentPage(
+          //           screenName: "Manage My Cars",
+          //           icon: CupertinoIcons.car,
+          //           color: AppColors.green,
+          //         ),
+          //       ),
+          //     ),
+          //     const SizedBox(width: 10),
+          //     _buildNavigationItem(
+          //       // Refer and Earn
+          //       icon: AppIcons.referAndEarn,
+
+          //       title: 'Refer and Earn',
+          //       onTap: () => Get.to(
+          //         () => UnderDevelopmentPage(
+          //           screenName: "Refer and Earn",
+          //           icon: CupertinoIcons.checkmark_shield,
+          //           color: AppColors.blue,
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
         ],
       ),
     );
@@ -486,8 +527,8 @@ class HomePage extends StatelessWidget {
       AppConstants.bannerScreenNames.buyACar.toLowerCase(): () => BuyACarPage(),
       AppConstants.bannerScreenNames.sellYourCar.toLowerCase(): () =>
           SellMyCarPage(),
-      // AppConstants.bannerScreenNames.warranty.toLowerCase(): () =>
-      //     WarrantyPage(),
+      AppConstants.bannerScreenNames.warranty.toLowerCase(): () =>
+          WarrantyPage(),
       // AppConstants.bannerScreenNames.finance.toLowerCase(): () => FinancePage(),
       // AppConstants.bannerScreenNames.insurance.toLowerCase(): () =>
       // InsurancePage(),

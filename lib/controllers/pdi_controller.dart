@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:otobix_customer_app/views/new_and_used_cars_pdi_page.dart';
 
 class PdiController extends GetxController {
-  // ====== Service Categories (dummy data exactly like screenshot) ======
-  // final RxInt selectedCategoryIndex = 0.obs;
-
   /// Each item is a simple Map (no models, as requested)
   final RxList<Map<String, dynamic>> serviceCategories = <Map<String, dynamic>>[
     {
@@ -20,7 +16,7 @@ class PdiController extends GetxController {
     },
   ].obs;
 
-  // ====== What we cover (dummy list like screenshot) ======
+  // ====== What we cover ======
   final RxList<Map<String, dynamic>> coverageItems = <Map<String, dynamic>>[
     {'title': 'Body Structure/ Chassis', 'icon': Icons.grid_view_rounded},
     {'title': 'Engine & Transmission', 'icon': Icons.settings_rounded},
@@ -37,7 +33,7 @@ class PdiController extends GetxController {
     {'title': 'Vehicle Documentation', 'icon': Icons.description_rounded},
   ].obs;
 
-  // ====== How it Works (dummy data like screenshot) ======
+  // ====== How it Works ======
   final RxList<Map<String, dynamic>> howItWorksSteps = <Map<String, dynamic>>[
     {
       'title': 'Book an Appointment',
@@ -64,7 +60,7 @@ class PdiController extends GetxController {
     },
   ].obs;
 
-  // ====== FAQs (dummy data like screenshot) ======
+  // ====== FAQs ======
   final RxList<Map<String, dynamic>> faqs = <Map<String, dynamic>>[
     {
       'question': 'What is a Pre-Delivery Inspection ?',
@@ -119,28 +115,5 @@ class PdiController extends GetxController {
     } else {
       expandedFaqIndex.value = index;
     }
-  }
-
-  // ====== Functions (and you will use them in UI) ======
-
-  void selectCategory(int index) {
-    // selectedCategoryIndex.value = index;
-
-    // Update selection flags in the same list (no models)
-    for (int i = 0; i < serviceCategories.length; i++) {
-      serviceCategories[i]['isSelected'] = (i == index);
-    }
-    serviceCategories.refresh();
-    Get.to(
-      NewAndUsedCarsPdiPage(serviceCategory: serviceCategories[index]['title']),
-    );
-
-    // Get.snackbar('Category', serviceCategories[index]['title']);
-  }
-
-  @override
-  void onClose() {
-    // searchController.dispose();
-    super.onClose();
   }
 }
