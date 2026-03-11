@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:otobix_customer_app/Models/cars_list_model.dart';
+import 'package:otobix_customer_app/controllers/claim_rsa_cars_list_controller.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
@@ -67,35 +68,29 @@ class ClaimRsaController extends GetxController {
             : "",
         "dealerName": "Otobix",
         "areaOffice": car.inspectionLocation,
-        // "chassisNo": car.chassisNumber,
-        "chassisNo": "6",
+        "chassisNo": car.chassisNumber,
         "engineNo": car.engineNumber,
         "make": car.make,
         "model": car.model,
         "warrantyCover": warrantyCover,
         "warrantyPeriod": warrantyPeriod,
         "vehicleCc": car.cubicCapacity,
-        // "regNo": car.registrationNumber,
-        "regNo": "DL01AB1242",
+        "regNo": car.registrationNumber,
         "odometer": car.odometerReadingInKms,
 
         "policyHolderName": policyHolderNameCtrl.text.trim(),
         "fullBillingAddress": billingAddressCtrl.text.trim(),
-        "warrantySaleDate": car.registrationDate != null
-            ? formatDdMmYyyy(DateTime.now())
-            : "",
+        "warrantySaleDate": formatDdMmYyyy(DateTime.now()),
       };
 
       final response = await ApiService.post(
         endpoint: AppUrls.ewiSaleApiForRSA,
         body: requestBody,
       );
-      debugPrint("Response Body: ${response.body}");
+      // debugPrint("Response Body: ${response.body}");
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> json = _safeJson(response.body);
-
-        debugPrint("Response Data: ${json.toString()}");
 
         // your backend may return either:
         // 1) { pdf_url, pdf_file }
@@ -108,25 +103,40 @@ class ClaimRsaController extends GetxController {
 
         final String pdfUrl = (data['pdf_url'] ?? '').toString();
         final String pdfFileName = (data['pdf_file'] ?? '').toString();
+        // debugPrint("PDF Link: ${data['pdf_url'].toString()}");
 
-        if (pdfUrl.isNotEmpty && pdfFileName.isNotEmpty) {
-          // Get.back();
-          congratulationsDialog(
-            userEmail: userEmail,
-            pdfUrl: pdfUrl,
-            pdfFileName: pdfFileName,
-          );
-        } else {
-          // Get.back();
-          errorDialog();
-        }
+        Get.back();
+        final ClaimRsaCarsListController claimRsaCarsListController =
+            Get.isRegistered<ClaimRsaCarsListController>()
+            ? Get.find<ClaimRsaCarsListController>()
+            : Get.put(ClaimRsaCarsListController());
+        claimRsaCarsListController.filteredCarsList.clear();
+        claimRsaCarsListController.fetchCarsList();
+        congratulationsDialog(
+          userEmail: userEmail,
+          pdfUrl: pdfUrl,
+          pdfFileName: pdfFileName,
+          alreadyExists: false,
+        );
+      } else if (response.statusCode == 409) {
+        Get.back();
+        final ClaimRsaCarsListController claimRsaCarsListController =
+            Get.isRegistered<ClaimRsaCarsListController>()
+            ? Get.find<ClaimRsaCarsListController>()
+            : Get.put(ClaimRsaCarsListController());
+        claimRsaCarsListController.filteredCarsList.clear();
+        claimRsaCarsListController.fetchCarsList();
+        congratulationsDialog(
+          userEmail: userEmail,
+          pdfUrl: '',
+          pdfFileName: '',
+          alreadyExists: true,
+        );
       } else {
-        // Get.back();
         errorDialog();
       }
     } catch (error) {
-      debugPrint('Error loading cars: $error');
-      // Get.back();
+      debugPrint('Error Claiming RSA: $error');
       errorDialog();
     } finally {
       isClaimRsaLoading.value = false;
@@ -138,6 +148,7 @@ class ClaimRsaController extends GetxController {
     required String userEmail,
     required String pdfUrl,
     required String pdfFileName,
+    required bool alreadyExists,
   }) {
     Get.dialog(
       Dialog(
@@ -149,8 +160,8 @@ class ClaimRsaController extends GetxController {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                "Congratulations!",
+              Text(
+                !alreadyExists ? "Congratulations!" : "RSA Already Created!",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18,
@@ -159,8 +170,10 @@ class ClaimRsaController extends GetxController {
                 ),
               ),
               const SizedBox(height: 14),
-              const Text(
-                "Your EWI RSA has been\nissued and a notification will\nshortly be received on your\nregistered email.",
+              Text(
+                !alreadyExists
+                    ? "Your EWI RSA has been issued and a notification will shortly be received on your registered email."
+                    : "Your EWI RSA is already issued for this vehicle. A notification has already been sent to your registered email.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
@@ -175,31 +188,31 @@ class ClaimRsaController extends GetxController {
                 style: TextStyle(fontSize: 14, color: Colors.black),
               ),
               const SizedBox(height: 22),
+              if (pdfUrl.isNotEmpty && pdfFileName.isNotEmpty)
+                Column(
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        await downloadAndOpenPdf(
+                          pdfUrl: pdfUrl,
+                          fileName: pdfFileName,
+                        );
+                      },
+                      child: const Text(
+                        "Click here to view policy (PDF)",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 13, color: AppColors.blue),
+                      ),
+                    ),
 
-              GestureDetector(
-                onTap: () async {
-                  await downloadAndOpenPdf(
-                    pdfUrl: pdfUrl,
-                    fileName: pdfFileName,
-                  );
-                },
-                child: const Text(
-                  "Click here to view policy (PDF)",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: AppColors.blue,
-                    // decoration: TextDecoration.underline,
-                  ),
+                    const SizedBox(height: 28),
+                  ],
                 ),
-              ),
 
-              const SizedBox(height: 28),
               ButtonWidget(
                 text: 'Close',
                 isLoading: false.obs,
                 elevation: 5,
-                // width: double.infinity,
                 backgroundColor: AppColors.red,
                 onTap: () {
                   Get.back();
@@ -246,33 +259,16 @@ class ClaimRsaController extends GetxController {
               ),
               const SizedBox(height: 18),
               const Text(
-                "Phone: +91 9830 300300",
+                "Phone: +91 9088 822999",
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: Colors.black),
               ),
               const SizedBox(height: 22),
 
-              // GestureDetector(
-              //   onTap: () {
-              //     // TODO: open PDF link
-              //   },
-              //   child: const Text(
-              //     "Click here to view policy (PDF)",
-              //     textAlign: TextAlign.center,
-              //     style: TextStyle(
-              //       fontSize: 13,
-              //       color: Colors.blue,
-              //       // decoration: TextDecoration.underline,
-              //     ),
-              //   ),
-              // ),
-
-              // const SizedBox(height: 28),
               ButtonWidget(
                 text: 'Close',
                 isLoading: false.obs,
                 elevation: 5,
-                // width: double.infinity,
                 backgroundColor: AppColors.red,
                 onTap: () {
                   Get.back();

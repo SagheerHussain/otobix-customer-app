@@ -97,5 +97,4 @@ Future<Widget> init() async {
   }
 
   return start;
-  // return RegistrationFormPage(userRole: 'Customer', phoneNumber: '9857463524');
 }

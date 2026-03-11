@@ -1,13 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:otobix_customer_app/services/auth_service.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/controllers/warranty_controller.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/views/claim_rsa_cars_list_page.dart';
 import 'package:otobix_customer_app/views/get_warranty_cars_list_page.dart';
+import 'package:otobix_customer_app/views/login_page.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
+import 'package:otobix_customer_app/widgets/login_required_dialog_widget.dart';
 
 class WarrantyPage extends StatelessWidget {
   WarrantyPage({super.key});
@@ -166,8 +169,19 @@ class WarrantyPage extends StatelessWidget {
               borderRadius: 5,
               fontSize: 13,
               backgroundColor: AppColors.blue,
-              onTap: () {
-                Get.to(() => ClaimRsaCarsListPage());
+              onTap: () async {
+                final isLoggedIn = await AuthService.isLoggedIn();
+                if (isLoggedIn) {
+                  Get.to(() => ClaimRsaCarsListPage());
+                } else {
+                  LoginRequiredDialogWidget.show(
+                    Get.context!,
+                    message: 'Login to claim RSA.',
+                    onLogin: () {
+                      Get.offAll(LoginPage());
+                    },
+                  );
+                }
               },
             ),
           ),
@@ -181,8 +195,19 @@ class WarrantyPage extends StatelessWidget {
               borderRadius: 5,
               fontSize: 13,
               backgroundColor: AppColors.blue,
-              onTap: () {
-                Get.to(() => GetWarrantyCarsListPage());
+              onTap: () async {
+                final isLoggedIn = await AuthService.isLoggedIn();
+                if (isLoggedIn) {
+                  Get.to(() => GetWarrantyCarsListPage());
+                } else {
+                  LoginRequiredDialogWidget.show(
+                    Get.context!,
+                    message: 'Login to get Warranty.',
+                    onLogin: () {
+                      Get.offAll(LoginPage());
+                    },
+                  );
+                }
               },
             ),
           ),

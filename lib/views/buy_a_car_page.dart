@@ -119,7 +119,7 @@ class BuyACarPage extends StatelessWidget {
                   );
                 } else {
                   LoginRequiredDialogWidget.show(
-                    context,
+                    Get.context!,
                     message: 'Login to view more details.',
                     onLogin: () {
                       Get.offAll(LoginPage());

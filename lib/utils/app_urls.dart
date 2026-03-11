@@ -27,8 +27,10 @@ class AppUrls {
 
   static String get searchCarMakes =>
       "${baseUrl}customer/sell-my-car/search-car-makes";
+
   static String get searchCarModelsByMake =>
       "${baseUrl}customer/sell-my-car/search-car-models-by-make";
+
   static String get searchCarVariantsByMakeModel =>
       "${baseUrl}customer/sell-my-car/search-car-variants-by-make-model";
 
@@ -76,7 +78,10 @@ class AppUrls {
       "${baseUrl}customer/buy-a-car/filter";
 
   static String get fetchInspectedCarsListForWarranty =>
-      "${baseUrl}customer/warranty/fetch-last-sixty-days-inspected-cars-list"; //
+      "${baseUrl}customer/warranty/fetch-inspected-cars-list-for-warranty";
+
+  static String getWarrantyOptions({required String registrationNumber}) =>
+      "${baseUrl}customer/warranty/fetch-warranty-options-for-car?registrationNumber=$registrationNumber";
 
   static String get createRazorpayOrder => "${baseUrl}razorpay/create-order";
 
@@ -87,6 +92,19 @@ class AppUrls {
 
   static String get ewiSaleApiForGetWarranty =>
       "${baseUrl}ewi/sale-api-for-get-warranty";
+
+  static String get searchMakeForPdi => "${baseUrl}customer/pdi/search-make";
+
+  static String get searchModelByMakeForPdi =>
+      "${baseUrl}customer/pdi/search-model-by-make";
+
+  static String fetchPdiPrice({required String make, required String model}) =>
+      "${baseUrl}customer/pdi/fetch-pdi-price?make=$make&model=$model";
+
+  static String get submitPdiRequest => "${baseUrl}customer/pdi/submit-request";
+
+  static String get fetchNormalizedMakeAndModel =>
+      "${baseUrl}customer/pdi/normalize-make-model";
 
   // static String get allUsersList => "${baseUrl}user/all-users-list";
 

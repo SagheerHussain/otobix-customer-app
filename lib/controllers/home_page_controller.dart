@@ -8,18 +8,14 @@ import 'package:otobix_customer_app/controllers/login_controller.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
 import 'package:otobix_customer_app/services/auth_service.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
-import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_icons.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/views/buy_a_car_page.dart';
-import 'package:otobix_customer_app/views/finance_page.dart';
-import 'package:otobix_customer_app/views/insurance_page.dart';
 import 'package:otobix_customer_app/views/login_page.dart';
 import 'package:otobix_customer_app/views/my_auctions_page.dart';
 import 'package:otobix_customer_app/views/pdi_page.dart';
 import 'package:otobix_customer_app/views/sell_my_car_page.dart';
-import 'package:otobix_customer_app/views/under_development_page.dart';
 import 'package:otobix_customer_app/views/warranty_page.dart';
 import 'package:otobix_customer_app/widgets/login_required_dialog_widget.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
@@ -214,7 +210,7 @@ class HomePageController extends GetxController {
     HomeNavItem(
       icon: AppIcons.buyACar,
       title: 'Buy A Car',
-      subtitle: 'Browse cars & place bids',
+      subtitle: 'Browse verified cars & compare prices',
       // pageBuilder: () => BuyACarPage(),
       onTap: (context) async {
         Get.to(() => BuyACarPage());
@@ -232,18 +228,22 @@ class HomePageController extends GetxController {
     //   subtitle: 'Explore installment plans',
     //   pageBuilder: () => FinancePage(),
     // ),
-    // HomeNavItem(
-    //   icon: AppIcons.warranty,
-    //   title: 'Warranty',
-    //   subtitle: 'Protect your purchase',
-    //   pageBuilder: () => WarrantyPage(),
-    // ),
-    // HomeNavItem(
-    //   icon: AppIcons.pdi,
-    //   title: 'PDI',
-    //   subtitle: 'Vehicle inspection service',
-    //   pageBuilder: () => PdiPage(),
-    // ),
+    HomeNavItem(
+      icon: AppIcons.warranty,
+      title: 'Warranty',
+      subtitle: 'Protect your purchase',
+      onTap: (context) async {
+        Get.to(() => WarrantyPage());
+      },
+    ),
+    HomeNavItem(
+      icon: AppIcons.pdi,
+      title: 'PDI',
+      subtitle: 'Vehicle inspection service',
+      onTap: (context) async {
+        Get.to(() => PdiPage());
+      },
+    ),
     // HomeNavItem(
     //   icon: AppIcons.manageMyCars,
     //   title: 'Manage My Cars',
