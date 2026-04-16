@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:otobix_customer_app/controllers/login_controller.dart';
-import 'package:otobix_customer_app/controllers/register_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:get/get.dart';
-import 'package:otobix_customer_app/views/buy_a_car_page.dart';
 import 'package:otobix_customer_app/views/forget_password_page.dart';
 import 'package:otobix_customer_app/views/home_page.dart.dart';
-import 'package:otobix_customer_app/views/register_page.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 
 class LoginPage extends StatelessWidget {
@@ -34,25 +31,25 @@ class LoginPage extends StatelessWidget {
                     SizedBox(height: 10),
                     _buildSignInText(),
                     SizedBox(height: 30),
-                    _buildCustomTextField(
-                      icon: Icons.person,
-                      label: 'User Name / User ID',
-                      controller: getxController.userNameController,
-                      hintText: 'e.g. amitparekh007',
-                      keyboardType: TextInputType.text,
-                      isRequired: true,
-                    ),
-                    SizedBox(height: 15),
-                    _buildCustomTextField(
-                      icon: Icons.lock,
-                      label: 'Password',
-                      controller: getxController.passwordController,
-                      hintText: 'e.g. amit123',
-                      keyboardType: TextInputType.visiblePassword,
-                      isRequired: true,
-                      isPasswordField: true,
-                    ),
-                    SizedBox(height: 15),
+                    // _buildCustomTextField(
+                    //   icon: Icons.person,
+                    //   label: 'User Name / User ID',
+                    //   controller: getxController.userNameController,
+                    //   hintText: 'e.g. amitparekh007',
+                    //   keyboardType: TextInputType.text,
+                    //   isRequired: true,
+                    // ),
+                    // SizedBox(height: 15),
+                    // _buildCustomTextField(
+                    //   icon: Icons.lock,
+                    //   label: 'Password',
+                    //   controller: getxController.passwordController,
+                    //   hintText: 'e.g. amit123',
+                    //   keyboardType: TextInputType.visiblePassword,
+                    //   isRequired: true,
+                    //   isPasswordField: true,
+                    // ),
+                    // SizedBox(height: 15),
                     _buildCustomTextField(
                       label: 'Contact Number',
                       controller: getxController.phoneNumberController,
@@ -61,47 +58,53 @@ class LoginPage extends StatelessWidget {
                       keyboardType: TextInputType.phone,
                       isRequired: true,
                       onSubmitted: (value) {
-                        // Validate all fields first
-                        // if (formKey.currentState!.validate()) {
-                        getxController.loginUser();
-                        // }
+                        getxController.sendOTP();
+
+                        // // Validate all fields first
+                        // // if (formKey.currentState!.validate()) {
+                        // getxController.loginUser();
+                        // // }
                       },
                     ),
-                    SizedBox(height: 10),
-                    _buildForgetPasswordButton(),
-                    SizedBox(height: 15),
-                    _buildContinueButton(context),
+                    SizedBox(height: 5),
+                    _buildGetWhatsappMessagesOption(),
+                    // _buildForgetPasswordButton(),
                     SizedBox(height: 30),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Don\'t have an account?',
-                          style: TextStyle(color: AppColors.grey),
-                        ),
-                        SizedBox(width: 5),
-                        InkWell(
-                          onTap: () {
-                            Get.delete<RegisterController>();
-                            Get.to(() => RegisterPage());
-                          },
-                          borderRadius: BorderRadius.circular(50),
+                    _buildContinueButton(context),
+                    SizedBox(height: 25),
+                    // Row(
+                    //   mainAxisAlignment: MainAxisAlignment.center,
+                    //   children: [
+                    //     Text(
+                    //       'Don\'t have an account?',
+                    //       style: TextStyle(
+                    //         color: AppColors.black,
+                    //         fontWeight: FontWeight.w600,
+                    //       ),
+                    //     ),
+                    //     SizedBox(width: 5),
+                    //     InkWell(
+                    //       onTap: () {
+                    //         Get.delete<RegisterController>();
+                    //         Get.to(() => RegisterPage());
+                    //       },
+                    //       borderRadius: BorderRadius.circular(50),
 
-                          // onTap: () => Get.to(() => SignUpPage()),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 3),
-                            child: Text(
-                              'Register',
-                              style: TextStyle(
-                                color: AppColors.green,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 10),
+                    //       // onTap: () => Get.to(() => SignUpPage()),
+                    //       child: Padding(
+                    //         padding: const EdgeInsets.symmetric(horizontal: 3),
+                    //         child: Text(
+                    //           'Register',
+                    //           style: TextStyle(
+                    //             color: AppColors.green,
+                    //             fontWeight: FontWeight.w700,
+                    //           ),
+                    //         ),
+                    //       ),
+                    //     ),
+                    //   ],
+                    // ),
+                    SizedBox(height: 15),
                     InkWell(
                       onTap: () {
                         Get.to(() => HomePage());
@@ -109,10 +112,14 @@ class LoginPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(50),
 
                       // onTap: () => Get.to(() => SignUpPage()),
-                      child: Padding(
+                      child: Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
+                          horizontal: 70,
                           vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.grey),
+                          borderRadius: BorderRadius.circular(50),
                         ),
                         child: Text(
                           'Login as Guest',
@@ -123,6 +130,7 @@ class LoginPage extends StatelessWidget {
                         ),
                       ),
                     ),
+                    SizedBox(height: 25),
                   ],
                 ),
               ),
@@ -340,6 +348,81 @@ class LoginPage extends StatelessWidget {
     );
   }
 
+  // Get whatsapp messages option
+  Widget _buildGetWhatsappMessagesOption() {
+    return Obx(
+      () => InkWell(
+        onTap: () {
+          // Toggle the checkbox value when tapping anywhere on the container
+          getxController.updateWhatsappConsent(
+            !getxController.whatsappConsent.value,
+          );
+        },
+        borderRadius: BorderRadius.circular(10), // Optional: for ripple effect
+        child: Container(
+          // margin: const EdgeInsets.only(top: 5),
+          padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
+
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Image.asset(
+                  AppImages.whatsappIcon,
+                  height: 22,
+                  width: 22,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'WhatsApp Updates',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: getxController.whatsappConsent.value
+                            ? Colors.green
+                            : AppColors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Receive important updates on WhatsApp',
+                      style: TextStyle(fontSize: 11, color: AppColors.grey),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                height: 40,
+                width: 40,
+                child: Checkbox(
+                  value: getxController.whatsappConsent.value,
+                  onChanged: (bool? value) {
+                    getxController.updateWhatsappConsent(value ?? false);
+                  },
+                  activeColor: Colors.green,
+                  checkColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   // Forget Password Button
   Widget _buildForgetPasswordButton() {
     return Align(
@@ -362,13 +445,13 @@ class LoginPage extends StatelessWidget {
   Widget _buildContinueButton(BuildContext context) => ButtonWidget(
     text: 'Continue',
     isLoading: getxController.isLoading,
-    // onTap: () => getxController.sendOTP(phoneNumber: phoneController.text),
-    onTap: () {
-      // Validate all fields first
-      // if (formKey.currentState!.validate()) {
-      getxController.loginUser();
-      // }
-    },
+    onTap: () => getxController.sendOTP(),
+    // onTap: () {
+    //   // Validate all fields first
+    //   // if (formKey.currentState!.validate()) {
+    //   getxController.loginUser();
+    //   // }
+    // },
     height: 40,
     width: 150,
     backgroundColor: AppColors.green,

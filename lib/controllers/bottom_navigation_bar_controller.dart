@@ -18,6 +18,7 @@ class BottomNavigationBarController extends GetxController {
 
   List<Widget> get pages => [
     HomePage(),
+
     // UnderDevelopmentPage(
     //   screenName: "My Cars",
     //   icon: CupertinoIcons.car_detailed,
@@ -30,7 +31,6 @@ class BottomNavigationBarController extends GetxController {
     //   color: AppColors.grey,
     //   showAppBar: false,
     // ),
-   
     ProfilePage(),
   ];
 
@@ -58,7 +58,7 @@ class BottomNavigationBarController extends GetxController {
       if (response.statusCode == 200 && data['success'] == true) {
         await SharedPrefsHelper.remove(SharedPrefsHelper.tokenKey);
         await SharedPrefsHelper.remove(SharedPrefsHelper.userKey);
-        await SharedPrefsHelper.remove(SharedPrefsHelper.userTypeKey);
+        await SharedPrefsHelper.remove(SharedPrefsHelper.userRoleKey);
         await SharedPrefsHelper.remove(SharedPrefsHelper.userIdKey);
 
         ToastWidget.show(

@@ -3,6 +3,7 @@ class AppImages {
   static const String appLogo = 'lib/assets/images/appLogo.png';
   static const String splashLogo = 'lib/assets/images/splashLogo.png';
   static const String homeScreenLogo = 'lib/assets/images/homeScreenLogo.png';
+  static const String whatsappIcon = 'lib/assets/icons/whatsappIcon.png';
 
   // Car Images
   static const String carNotFound = 'lib/assets/images/carNotFound.png';
@@ -21,11 +22,12 @@ class AppImages {
   static const String topBanner3 = 'lib/assets/images/bannerImage3.png';
   static const String topBanner4 = 'lib/assets/images/bannerImage4.png';
 
-  // PDI Images
-  static const String pdiBanner = 'lib/assets/images/pdiBanner.jpg';
-  static const String pdiBanner2 = 'lib/assets/images/pdiBanner2.jpg';
-
-  // Warranty Screen Banner
+  // Screen Banners
+  static const String pdiScreenBanner = 'lib/assets/images/pdiScreenBanner.jpg';
+  static const String pdiScreenBanner2 =
+      'lib/assets/images/pdiScreenBanner2.jpg';
   static const String warrantyScreenBanner =
       'lib/assets/images/warrantyScreenBanner.jpg';
+  static const String insuranceScreenBanner =
+      'lib/assets/images/insuranceScreenBanner.jpg';
 }

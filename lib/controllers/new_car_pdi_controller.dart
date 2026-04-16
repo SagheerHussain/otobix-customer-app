@@ -6,6 +6,8 @@ import 'package:get/get.dart';
 import 'package:otobix_customer_app/controllers/razorpay_payment_controller.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
+import 'package:otobix_customer_app/services/user_activity_log_service.dart';
+import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
 
@@ -640,13 +642,12 @@ class NewCarPdiController extends GetxController {
 
     isSubmitPdiLoading.value = true;
 
-    try {
-      final userId =
-          await SharedPrefsHelper.getString(SharedPrefsHelper.userIdKey) ?? "";
-      final userEmail =
-          await SharedPrefsHelper.getString(SharedPrefsHelper.userEmailKey) ??
-          "";
+    final userId =
+        await SharedPrefsHelper.getString(SharedPrefsHelper.userIdKey) ?? "";
+    final userEmail =
+        await SharedPrefsHelper.getString(SharedPrefsHelper.userEmailKey) ?? "";
 
+    try {
       // ✅ Start payment and WAIT for success
       final RazorpayPaymentController paymentController =
           Get.isRegistered<RazorpayPaymentController>()
@@ -719,6 +720,20 @@ class NewCarPdiController extends GetxController {
           subtitle: 'Successfully submitted PDI request',
           type: ToastType.success,
         );
+        // Log event
+        UserActivityLogService.logEvent(
+          userId: userId,
+          event: AppConstants.userActivityLogEvents.pdiPurchased,
+          eventDetails: 'Successfully purchased new car pdi',
+          metadata: {
+            "paymentId": success.paymentId,
+            "pdiType": pdiLineTitle,
+            "make": selectedMake.value,
+            "model": selectedModel.value,
+            "inspectionDate": selectedStartDateTimeUtcIso,
+            "total": total.value,
+          },
+        );
       } else if (response.statusCode == 400) {
         final String errorMsg = responseBody['message'];
         ToastWidget.show(
@@ -743,6 +758,20 @@ class NewCarPdiController extends GetxController {
         subtitle: 'Error submitting PDI request',
         type: ToastType.error,
       );
+      // Log event
+      UserActivityLogService.logEvent(
+        userId: userId,
+        event: AppConstants.userActivityLogEvents.pdiIncompleteJourney,
+        eventDetails: 'Error purchasing new car pdi',
+        metadata: {
+          "pdiType": pdiLineTitle,
+          "make": selectedMake.value,
+          "model": selectedModel.value,
+          "inspectionDate": selectedStartDateTimeUtcIso,
+          "total": total.value,
+          "error": error.toString(),
+        },
+      );
     } finally {
       isSubmitPdiLoading.value = false;
     }
@@ -760,8 +789,8 @@ class NewCarPdiController extends GetxController {
     selectedTimeSlot.value = timeSlots.first;
 
     // optional defaults
-    selectedFuel.value = fuelTypes.first;
-    selectedTransmission.value = transmissions.first;
+    // selectedFuel.value = fuelTypes.first;
+    // selectedTransmission.value = transmissions.first;
 
     final userPhone =
         await SharedPrefsHelper.getString(

@@ -12,11 +12,13 @@ import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_icons.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/views/buy_a_car_page.dart';
+import 'package:otobix_customer_app/views/insurance_page.dart';
 import 'package:otobix_customer_app/views/login_page.dart';
 import 'package:otobix_customer_app/views/my_auctions_page.dart';
 import 'package:otobix_customer_app/views/pdi_page.dart';
 import 'package:otobix_customer_app/views/sell_my_car_page.dart';
 import 'package:otobix_customer_app/views/warranty_page.dart';
+import 'package:otobix_customer_app/widgets/guest_user_register_choice_dialog_widget.dart';
 import 'package:otobix_customer_app/widgets/login_required_dialog_widget.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
 
@@ -144,7 +146,7 @@ class HomePageController extends GetxController {
       if (response.statusCode == 200 && data['success'] == true) {
         await SharedPrefsHelper.remove(SharedPrefsHelper.tokenKey);
         await SharedPrefsHelper.remove(SharedPrefsHelper.userKey);
-        await SharedPrefsHelper.remove(SharedPrefsHelper.userTypeKey);
+        await SharedPrefsHelper.remove(SharedPrefsHelper.userRoleKey);
         await SharedPrefsHelper.remove(SharedPrefsHelper.userIdKey);
         await SharedPrefsHelper.remove(SharedPrefsHelper.userPhoneNumberKey);
 
@@ -217,12 +219,6 @@ class HomePageController extends GetxController {
       },
     ),
     // HomeNavItem(
-    //   icon: AppIcons.insurance,
-    //   title: 'Insurance',
-    //   subtitle: 'Get coverage options',
-    //   pageBuilder: () => InsurancePage(),
-    // ),
-    // HomeNavItem(
     //   icon: AppIcons.finance,
     //   title: 'Finance',
     //   subtitle: 'Explore installment plans',
@@ -242,6 +238,14 @@ class HomePageController extends GetxController {
       subtitle: 'Vehicle inspection service',
       onTap: (context) async {
         Get.to(() => PdiPage());
+      },
+    ),
+    HomeNavItem(
+      icon: AppIcons.insurance,
+      title: 'Insurance',
+      subtitle: 'Get coverage options',
+      onTap: (context) async {
+        navigateToInsurancePage();
       },
     ),
     // HomeNavItem(
@@ -290,6 +294,37 @@ class HomePageController extends GetxController {
   // }
   Future<void> openNavItem(BuildContext context, HomeNavItem item) async {
     await item.onTap(context);
+  }
+
+  // Navigate to insurance page
+  Future<void> navigateToInsurancePage() async {
+    final isLoggedIn = await AuthService.isLoggedIn();
+    if (!isLoggedIn) {
+      GuestUserRegisterChoiceDialogWidget.show(
+        context: Get.context!,
+        title: "Phone Number Required",
+        subtitle: "Please enter your phone number to use insurance feature",
+        registerUserButtonText: "Register & Use Insurance",
+        guestUserButtonText: "Browse as Guest",
+        //   // After successful registration, navigate to InsurancePage
+        // onRegisterSuccess: () {
+        //   Get.off(() => InsurancePage());
+        // },
+        // User chose to continue without registering
+        onTappedBrowseAsGuestButton: (enteredPhoneNumber) {
+          Get.to(
+            () => InsurancePage(
+              isGuestUser: true,
+              phoneNumber: enteredPhoneNumber,
+            ),
+          );
+        },
+      );
+      return;
+    }
+
+    // User is already logged in
+    Get.to(() => InsurancePage());
   }
 
   @override

@@ -33,7 +33,7 @@ class ServiceHistoryPage extends StatelessWidget {
               children: [
                 _buildTopBanner(
                   context: context,
-                  bannerPath: AppImages.pdiBanner,
+                  bannerPath: AppImages.pdiScreenBanner,
                 ),
                 const SizedBox(height: 12),
                 _buildRegistrationCard(),

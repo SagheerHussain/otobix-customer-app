@@ -100,12 +100,12 @@ class SellMyCarPage extends StatelessWidget {
                       const Text(
                         'Car Details',
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
                         ),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 5),
                       Text(
                         'Fill in your car details to get the best offer',
                         style: TextStyle(fontSize: 14, color: Colors.grey[600]),
@@ -139,6 +139,7 @@ class SellMyCarPage extends StatelessWidget {
                               child: ButtonWidget(
                                 text: 'Fetch Details',
                                 height: 35,
+                                fontSize: 13,
                                 isLoading:
                                     getxController.isFetchCarDetailsLoading,
                                 onTap: () {

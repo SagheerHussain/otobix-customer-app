@@ -1,24 +1,24 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/services/auth_service.dart';
+import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
+import 'package:otobix_customer_app/services/user_activity_log_service.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/controllers/home_page_controller.dart';
 import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_icons.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/views/buy_a_car_page.dart';
-import 'package:otobix_customer_app/views/finance_page.dart';
 import 'package:otobix_customer_app/views/insurance_page.dart';
 import 'package:otobix_customer_app/views/login_page.dart';
 import 'package:otobix_customer_app/views/my_auctions_page.dart';
 import 'package:otobix_customer_app/views/pdi_page.dart';
 import 'package:otobix_customer_app/views/sell_my_car_page.dart';
 import 'package:otobix_customer_app/views/service_history_page.dart';
-import 'package:otobix_customer_app/views/under_development_page.dart';
 import 'package:otobix_customer_app/views/user_notifications_page.dart';
 import 'package:otobix_customer_app/views/warranty_page.dart';
+import 'package:otobix_customer_app/widgets/guest_user_register_choice_dialog_widget.dart';
 import 'package:otobix_customer_app/widgets/home_banners_widgets.dart';
 import 'package:otobix_customer_app/widgets/login_required_dialog_widget.dart';
 
@@ -379,6 +379,20 @@ class HomePage extends StatelessWidget {
                     return;
                   }
                   Get.to(() => MyAuctionsPage());
+                  // Log event
+                  final String userId =
+                      await SharedPrefsHelper.getString(
+                        SharedPrefsHelper.userIdKey,
+                      ) ??
+                      '';
+                  UserActivityLogService.logEvent(
+                    userId: userId,
+                    event: AppConstants
+                        .userActivityLogEvents
+                        .viewMyAuctionPageOpened,
+                    eventDetails: 'User opened view my auctions page',
+                    metadata: {},
+                  );
                 },
               ),
               const SizedBox(width: 10),
@@ -413,8 +427,41 @@ class HomePage extends StatelessWidget {
               ),
               const SizedBox(width: 10),
 
-              // To fix allignment
-              const SizedBox(width: 80), // dummy
+              // Insurance
+              _buildNavigationItem(
+                icon: AppIcons.insurance,
+                title: 'Insurance',
+                onTap: () async {
+                  final isLoggedIn = await AuthService.isLoggedIn();
+                  if (!isLoggedIn) {
+                    GuestUserRegisterChoiceDialogWidget.show(
+                      context: Get.context!,
+                      title: "Phone Number Required",
+                      subtitle:
+                          "Please enter your phone number to use insurance feature",
+                      registerUserButtonText: "Register & Use Insurance",
+                      guestUserButtonText: "Browse as Guest",
+                      //   // After successful registration, navigate to InsurancePage
+                      // onRegisterSuccess: () {
+                      //   Get.off(() => InsurancePage());
+                      // },
+                      // User chose to continue without registering
+                      onTappedBrowseAsGuestButton: (enteredPhoneNumber) {
+                        Get.to(
+                          () => InsurancePage(
+                            isGuestUser: true,
+                            phoneNumber: enteredPhoneNumber,
+                          ),
+                        );
+                      },
+                    );
+                    return;
+                  }
+
+                  // User is already logged in
+                  Get.to(() => InsurancePage());
+                },
+              ),
             ],
           ),
 
@@ -424,13 +471,7 @@ class HomePage extends StatelessWidget {
           //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           //   crossAxisAlignment: CrossAxisAlignment.start,
           //   children: [
-          //     // Insurance
-          //     _buildNavigationItem(
-          //       icon: AppIcons.insurance,
 
-          //       title: 'Insurance',
-          //       onTap: () => Get.to(() => InsurancePage()),
-          //     ),
           //     const SizedBox(width: 10),
 
           //     // Finance
@@ -520,8 +561,13 @@ class HomePage extends StatelessWidget {
   }
 
   // Navigate to screen on banner tap
-  void _navigateToScreenOnBannerTap(String? screenName) {
+  void _navigateToScreenOnBannerTap(String? screenName) async {
     final name = (screenName ?? '').trim().toLowerCase();
+
+    if (name == AppConstants.bannerScreenNames.insurance.toLowerCase()) {
+      await homeController.navigateToInsurancePage();
+      return;
+    }
 
     final routes = <String, Widget Function()>{
       AppConstants.bannerScreenNames.buyACar.toLowerCase(): () => BuyACarPage(),
@@ -529,9 +575,9 @@ class HomePage extends StatelessWidget {
           SellMyCarPage(),
       AppConstants.bannerScreenNames.warranty.toLowerCase(): () =>
           WarrantyPage(),
-      // AppConstants.bannerScreenNames.finance.toLowerCase(): () => FinancePage(),
       // AppConstants.bannerScreenNames.insurance.toLowerCase(): () =>
-      // InsurancePage(),
+      //     InsurancePage(),
+      // AppConstants.bannerScreenNames.finance.toLowerCase(): () => FinancePage(),
     };
 
     final builder = routes[name];

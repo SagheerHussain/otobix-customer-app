@@ -9,6 +9,7 @@ import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 import 'package:otobix_customer_app/views/login_page.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class ProfileController extends GetxController {
   RxString imageUrl = ''.obs;

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:otobix_customer_app/Models/cars_list_model_for_buy_a_car.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
+import 'package:otobix_customer_app/services/user_activity_log_service.dart';
 import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
@@ -326,6 +327,19 @@ class BuyACarController extends GetxController {
           Get.back();
           _showSuccessDialog();
         }
+        // Log event
+        UserActivityLogService.logEvent(
+          userId: userId,
+          event: isUserClickedOnInterested(activityType)
+              ? AppConstants.userActivityLogEvents.buyACarInterestedClicked
+              : AppConstants.userActivityLogEvents.buyACarMoreImagesViewed,
+          eventDetails: 'Interested buyer stored successfully',
+          metadata: {
+            'dealerDocId': car.dealerDocId,
+            'carDocId': car.carDocId,
+            'activityType': activityType,
+          },
+        );
       } else {
         if (isUserClickedOnInterested(activityType)) {
           ToastWidget.show(
@@ -393,6 +407,16 @@ class BuyACarController extends GetxController {
     // ✅ set query (lowercase optional depending on backend)
     searchQuery.value = q.toLowerCase();
 
+    // Log event
+    final String userId =
+        await SharedPrefsHelper.getString(SharedPrefsHelper.userIdKey) ?? '';
+    UserActivityLogService.logEvent(
+      userId: userId,
+      event: AppConstants.userActivityLogEvents.buyACarSearchUsed,
+      eventDetails: 'User searched in Buy A Car',
+      metadata: {'searchQuery': searchQuery.value},
+    );
+
     // ✅ clear old lists (important)
     _clearListsAndStopPagination();
 
@@ -413,6 +437,17 @@ class BuyACarController extends GetxController {
 
     // ✅ build payload and hit filter API
     final payload = filtersController.buildAppliedFilterPayload();
+
+    // Log event
+    final String userId =
+        await SharedPrefsHelper.getString(SharedPrefsHelper.userIdKey) ?? '';
+    UserActivityLogService.logEvent(
+      userId: userId,
+      event: AppConstants.userActivityLogEvents.buyACarSearchFiltered,
+      eventDetails: 'User applied filters in Buy A Car',
+      metadata: payload,
+    );
+
     await _fetchCarsFromFilterApi(payload: payload);
   }
 
