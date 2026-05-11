@@ -15,12 +15,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: List installed Xcodes
-        run: ls /Applications | grep Xcode
-
       # IMPORTANT
-      - name: Select Xcode 26
-        run: sudo xcode-select -s /Applications/Xcode_26.app
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.3.app
 
       - name: Verify Xcode
         run: xcodebuild -version
