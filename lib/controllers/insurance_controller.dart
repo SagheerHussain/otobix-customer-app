@@ -20,6 +20,8 @@ class InsuranceController extends GetxController {
   final RxString selectedVariant = ''.obs;
   final RxString selectedFuelType = ''.obs;
   final RxString selectedRegionCode = ''.obs;
+  final RxString selectedStateName = ''.obs;
+  final RxString selectedCityName = ''.obs;
   final RxString selectedManufacturingDate = ''.obs;
 
   final RxInt selectedMakeId = 0.obs;
@@ -53,6 +55,9 @@ class InsuranceController extends GetxController {
   RxList<Map<String, dynamic>> modelsList = <Map<String, dynamic>>[].obs;
   RxList<Map<String, dynamic>> variantsList = <Map<String, dynamic>>[].obs;
   RxList<Map<String, dynamic>> fuelTypesList = <Map<String, dynamic>>[].obs;
+
+  // Add this RxList to store formatted RTO items
+  RxList<String> formattedRtoItems = <String>[].obs;
 
   // Car type options
   final List<Map<String, dynamic>> carTypeOptions = [
@@ -130,6 +135,8 @@ class InsuranceController extends GetxController {
       selectedFuelTypeId.value = 0;
       selectedRegisteredCityId.value = 0;
       selectedRegionCode.value = '';
+      selectedStateName.value = '';
+      selectedCityName.value = '';
 
       manufactureDateController.clear();
 
@@ -218,8 +225,10 @@ class InsuranceController extends GetxController {
           "modelId": selectedModelId.value,
           "variantId": selectedVariantId.value,
           "fuelTypeId": selectedFuelTypeId.value,
-          "registrationCode": selectedRegisteredCityId.value,
-          "registrationRtoCode": selectedRegionCode.value,
+          "registeredCityId": selectedRegisteredCityId.value,
+          "regionCode": selectedRegionCode.value,
+          "stateName": selectedStateName.value,
+          "cityName": selectedCityName.value,
           "manufacturingDate": selectedManufacturingDate.value,
           "vehicleOwnedBy":
               selectedOwnerType.value, //1 for Individual 2 for Corporate
@@ -350,6 +359,25 @@ class InsuranceController extends GetxController {
     }
   }
 
+  // Add this method to create formatted RTO items
+  void updateFormattedRtoItems() {
+    formattedRtoItems.value = rtoList.map((rto) {
+      final regionCode = rto['RegionCode']?.toString() ?? '';
+      final cityName = rto['CityName']?.toString() ?? '';
+      final stateName = rto['StateName']?.toString() ?? '';
+
+      if (cityName.isNotEmpty && stateName.isNotEmpty) {
+        return '$regionCode - $cityName ($stateName)';
+      } else if (cityName.isNotEmpty) {
+        return '$regionCode - $cityName';
+      } else if (stateName.isNotEmpty) {
+        return '$regionCode ($stateName)';
+      } else {
+        return regionCode;
+      }
+    }).toList();
+  }
+
   // Fetch RTO List API
   Future<void> fetchRtoList() async {
     if (isFetchRtoListLoading.value) return;
@@ -365,8 +393,17 @@ class InsuranceController extends GetxController {
       if (response.statusCode == 200) {
         final data = responseBody['data'] ?? [];
         rtoList.value = List<Map<String, dynamic>>.from(data);
+
+        // Update formatted items
+        updateFormattedRtoItems();
+
         selectedRegisteredCityId.value = rtoList.first['RegisteredCityId'];
         selectedRegionCode.value = rtoList.first['RegionCode'];
+        selectedStateName.value = rtoList.first['StateName'];
+        selectedCityName.value = rtoList.first['CityName'];
+
+        // // Set selected RTO display value
+        // selectedRto.value = formattedRtoItems.first;
       } else {
         ToastWidget.show(
           context: Get.context!,
@@ -676,19 +713,70 @@ class InsuranceController extends GetxController {
     _setVariantEnabled(false);
   }
 
-  void onRtoSelected(String? value) {
-    selectedRto.value = value ?? '';
-    // _clearQuoteData();
+  // Modify onRtoSelected method to handle formatted strings
+  void onRtoSelected(String? formattedValue) {
+    selectedRto.value = formattedValue ?? '';
 
-    final selectedItem = value == null || value.isEmpty
-        ? null
-        : _findItemByLabel(list: rtoList, labelKey: 'RegionCode', value: value);
+    if (formattedValue == null || formattedValue.isEmpty) return;
 
-    selectedRegionCode.value = _safeString(selectedItem?['RegionCode']);
-    selectedRegisteredCityId.value = _safeInt(
-      selectedItem?['RegisteredCityId'],
-    );
+    // Find the original RTO data by matching the RegionCode
+    final selectedItem = rtoList.firstWhere((rto) {
+      final regionCode = rto['RegionCode']?.toString() ?? '';
+      final formatted = _getFormattedRtoString(rto);
+      return formatted == formattedValue;
+    }, orElse: () => {});
+
+    if (selectedItem.isNotEmpty) {
+      selectedRegionCode.value = _safeString(selectedItem['RegionCode']);
+      selectedStateName.value = _safeString(selectedItem['StateName']);
+      selectedCityName.value = _safeString(selectedItem['CityName']);
+      selectedRegisteredCityId.value = _safeInt(
+        selectedItem['RegisteredCityId'],
+      );
+    }
   }
+
+  // Helper method to get formatted string from RTO data
+  String _getFormattedRtoString(Map<String, dynamic> rto) {
+    final regionCode = rto['RegionCode']?.toString() ?? '';
+    final cityName = rto['CityName']?.toString() ?? '';
+    final stateName = rto['StateName']?.toString() ?? '';
+
+    if (cityName.isNotEmpty && stateName.isNotEmpty) {
+      return '$regionCode - $cityName ($stateName)';
+    } else if (cityName.isNotEmpty) {
+      return '$regionCode - $cityName';
+    } else if (stateName.isNotEmpty) {
+      return '$regionCode ($stateName)';
+    } else {
+      return regionCode;
+    }
+  }
+
+  // Add this method to get original RegionCode from formatted string (if needed elsewhere)
+  String getRegionCodeFromFormatted(String formattedValue) {
+    final matchedRto = rtoList.firstWhere(
+      (rto) => _getFormattedRtoString(rto) == formattedValue,
+      orElse: () => {},
+    );
+    return matchedRto['RegionCode']?.toString() ?? '';
+  }
+
+  // void onRtoSelected(String? value) {
+  //   selectedRto.value = value ?? '';
+  //   // _clearQuoteData();
+
+  //   final selectedItem = value == null || value.isEmpty
+  //       ? null
+  //       : _findItemByLabel(list: rtoList, labelKey: 'RegionCode', value: value);
+
+  //   selectedRegionCode.value = _safeString(selectedItem?['RegionCode']);
+  //   selectedStateName.value = _safeString(selectedItem?['StateName']);
+  //   selectedCityName.value = _safeString(selectedItem?['CityName']);
+  //   selectedRegisteredCityId.value = _safeInt(
+  //     selectedItem?['RegisteredCityId'],
+  //   );
+  // }
 
   Future<void> onMakeSelected(String? value) async {
     selectedMake.value = value ?? '';
@@ -797,7 +885,9 @@ class InsuranceController extends GetxController {
   bool _validateNewCarFields() {
     if (selectedRto.value.trim().isEmpty ||
         selectedRegisteredCityId.value == 0 ||
-        selectedRegionCode.value.trim().isEmpty) {
+        selectedRegionCode.value.trim().isEmpty ||
+        selectedStateName.value.trim().isEmpty ||
+        selectedCityName.value.trim().isEmpty) {
       ToastWidget.show(
         context: Get.context!,
         title: 'Required',

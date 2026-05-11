@@ -17,6 +17,7 @@ import 'package:otobix_customer_app/views/login_page.dart';
 import 'package:otobix_customer_app/views/my_auctions_page.dart';
 import 'package:otobix_customer_app/views/pdi_page.dart';
 import 'package:otobix_customer_app/views/sell_my_car_page.dart';
+import 'package:otobix_customer_app/views/service_history_page.dart';
 import 'package:otobix_customer_app/views/warranty_page.dart';
 import 'package:otobix_customer_app/widgets/guest_user_register_choice_dialog_widget.dart';
 import 'package:otobix_customer_app/widgets/login_required_dialog_widget.dart';
@@ -240,12 +241,31 @@ class HomePageController extends GetxController {
         Get.to(() => PdiPage());
       },
     ),
+    // HomeNavItem(
+    //   icon: AppIcons.insurance,
+    //   title: 'Insurance',
+    //   subtitle: 'Get coverage options',
+    //   onTap: (context) async {
+    //     navigateToInsurancePage();
+    //   },
+    // ),
     HomeNavItem(
-      icon: AppIcons.insurance,
-      title: 'Insurance',
-      subtitle: 'Get coverage options',
+      icon: AppIcons.finance,
+      title: 'Service History',
+      subtitle: 'Get maintenance & repair history',
       onTap: (context) async {
-        navigateToInsurancePage();
+        final isLoggedIn = await AuthService.isLoggedIn();
+
+        if (!isLoggedIn) {
+          LoginRequiredDialogWidget.show(
+            context,
+            message: "Login to view service history.",
+            onLogin: () => Get.to(() => LoginPage()),
+          );
+          return;
+        }
+
+        Get.to(() => ServiceHistoryPage());
       },
     ),
     // HomeNavItem(
@@ -325,6 +345,22 @@ class HomePageController extends GetxController {
 
     // User is already logged in
     Get.to(() => InsurancePage());
+  }
+
+  // Navigate to service history page
+  Future<void> navigateToServiceHistoryPage() async {
+    final isLoggedIn = await AuthService.isLoggedIn();
+    if (!isLoggedIn) {
+      LoginRequiredDialogWidget.show(
+        Get.context!,
+        message: "Login to view service history.",
+        onLogin: () => Get.to(() => LoginPage()),
+      );
+      return;
+    }
+
+    // User is already logged in
+    Get.to(() => ServiceHistoryPage());
   }
 
   @override

@@ -34,6 +34,12 @@ class AuctionDetailsUpcomingSection extends StatelessWidget {
               const SizedBox(height: 10),
               _buildCarImage(),
               _buildCarName(),
+              if (auctionDetailsController
+                  .auctionDetails
+                  .value
+                  .retailAssociateContactNumber
+                  .isNotEmpty)
+                _buildContactRetailAssociate(),
               _buildShowMyCurrentExpectedPrice(),
               _buildSetExpectedPriceButton(),
               _buildRemainingTime(controller: myAuctionsController),
@@ -140,6 +146,72 @@ class AuctionDetailsUpcomingSection extends StatelessWidget {
       maxLines: 2,
       overflow: TextOverflow.ellipsis,
       style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+    );
+  }
+
+  // Contact Retail Associate
+  Widget _buildContactRetailAssociate() {
+    final String retailAssociateNumber = auctionDetailsController
+        .auctionDetails
+        .value
+        .retailAssociateContactNumber;
+
+    // Only show widget if number is not empty
+    if (retailAssociateNumber.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return GestureDetector(
+      onTap: () async {
+        await auctionDetailsController.callRetailAssociate();
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(40),
+          border: Border.all(
+            color: AppColors.green.withValues(alpha: 0.3),
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: const BoxDecoration(
+                color: AppColors.green,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.call_outlined,
+                color: Colors.white,
+                size: 15,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Call Retail Associate',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppColors.blue,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(Icons.chevron_right, size: 18, color: AppColors.green),
+          ],
+        ),
+      ),
     );
   }
 

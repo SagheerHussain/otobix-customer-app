@@ -20,6 +20,7 @@ class AuctionDetailsModel {
   final DateTime? movedToOtobuyAt;
   final String registeredOwner;
   final int ownerSerialNumber;
+  final String retailAssociateContactNumber;
 
   AuctionDetailsModel({
     required this.carId,
@@ -41,6 +42,7 @@ class AuctionDetailsModel {
     required this.movedToOtobuyAt,
     required this.registeredOwner,
     required this.ownerSerialNumber,
+    required this.retailAssociateContactNumber,
   });
 
   // Factory method to create AuctionDetails from JSON
@@ -79,6 +81,7 @@ class AuctionDetailsModel {
       ),
       registeredOwner: json['registeredOwner'] ?? '',
       ownerSerialNumber: json['ownerSerialNumber'] ?? 1,
+      retailAssociateContactNumber: json['retailAssociateContactNumber'] ?? '',
     );
   }
 
@@ -101,6 +104,7 @@ class AuctionDetailsModel {
       'priceDiscovery': priceDiscovery,
       'customerExpectedPrice': customerExpectedPrice,
       'movedToOtobuyAt': movedToOtobuyAt,
+      'retailAssociateContactNumber': retailAssociateContactNumber,
     };
   }
 
@@ -125,6 +129,7 @@ class AuctionDetailsModel {
     DateTime? movedToOtobuyAt,
     String? registeredOwner,
     int? ownerSerialNumber,
+    String? retailAssociateContactNumber,
   }) {
     return AuctionDetailsModel(
       carId: carId ?? this.carId,
@@ -147,6 +152,8 @@ class AuctionDetailsModel {
       movedToOtobuyAt: movedToOtobuyAt ?? this.movedToOtobuyAt,
       registeredOwner: registeredOwner ?? this.registeredOwner,
       ownerSerialNumber: ownerSerialNumber ?? this.ownerSerialNumber,
+      retailAssociateContactNumber:
+          retailAssociateContactNumber ?? this.retailAssociateContactNumber,
     );
   }
 
@@ -172,6 +179,7 @@ class AuctionDetailsModel {
       movedToOtobuyAt: DateTime.now(),
       registeredOwner: '',
       ownerSerialNumber: 1,
+      retailAssociateContactNumber: '',
     );
   }
 }

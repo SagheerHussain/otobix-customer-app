@@ -1,13 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:otobix_customer_app/Models/service_history_reports_model.dart';
 import 'package:otobix_customer_app/controllers/service_history_controller.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
-import 'package:otobix_customer_app/utils/app_icons.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
+import 'package:otobix_customer_app/widgets/empty_data_widget.dart';
+import 'package:otobix_customer_app/widgets/shimmer_widget.dart';
 
 class ServiceHistoryPage extends StatelessWidget {
   ServiceHistoryPage({super.key});
@@ -18,7 +19,7 @@ class ServiceHistoryPage extends StatelessWidget {
 
   // Simple colors to match the screenshot look
   static const Color _lightBlueBg = Color(0xFFEAF2FF);
-  static const Color _border = Color(0xFFCED7E6);
+  // static const Color _border = Color(0xFFCED7E6);
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +34,7 @@ class ServiceHistoryPage extends StatelessWidget {
               children: [
                 _buildTopBanner(
                   context: context,
-                  bannerPath: AppImages.pdiScreenBanner,
+                  bannerPath: AppImages.serviceHistoryBanner,
                 ),
                 const SizedBox(height: 12),
                 _buildRegistrationCard(),
@@ -64,46 +65,6 @@ class ServiceHistoryPage extends StatelessWidget {
           width: MediaQuery.of(context).size.width,
           fit: BoxFit.cover,
         ),
-      ),
-    );
-  }
-
-  Widget _buildTopBanner1() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 20),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        gradient: const LinearGradient(
-          colors: [Color(0xff103b7a), Color(0xff6f88aa)],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'SERVICE HISTORY',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 27,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 0.5,
-              height: 1,
-            ),
-          ),
-          SizedBox(height: 10),
-          Text(
-            'Check Service History, Challans\n& View Important Dates',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              height: 1.2,
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -188,8 +149,8 @@ class ServiceHistoryPage extends StatelessWidget {
           Center(
             child: ButtonWidget(
               text: 'Get Service History',
-              isLoading: false.obs,
-              onTap: serviceHistoryController.onGetServiceHistory,
+              isLoading: serviceHistoryController.isServiceHistoryLoading,
+              onTap: serviceHistoryController.fetchServiceHistory,
               height: 34,
               width: 175,
               elevation: 2,
@@ -233,16 +194,16 @@ class ServiceHistoryPage extends StatelessWidget {
                   color: const Color(0xffd0d8e4),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                // child: const Icon(
-                //   Icons.assignment_outlined,
-                //   color: Color(0xff3d5f92),
-                //   size: 28,
-                // ),
-                child: SvgPicture.asset(
-                  AppIcons.warranty,
-                  height: 20,
-                  width: 20,
+                child: const Icon(
+                  Icons.receipt_long,
+                  color: Color(0xff3d5f92),
+                  size: 28,
                 ),
+                // child: SvgPicture.asset(
+                //   AppIcons.deleteIcon,
+                //   height: 20,
+                //   width: 20,
+                // ),
               ),
               const SizedBox(width: 10),
               const Expanded(
@@ -274,8 +235,10 @@ class ServiceHistoryPage extends StatelessWidget {
                 height: 26,
                 child: ButtonWidget(
                   text: 'VIEW',
-                  isLoading: false.obs,
-                  onTap: serviceHistoryController.onViewSampleReport,
+                  isLoading:
+                      serviceHistoryController.isSampleServiceHistoryPdfLoading,
+                  onTap: serviceHistoryController
+                      .downloadAndOpenSampleServiceHistoryPdf,
                   width: 70,
                   fontSize: 11,
                   borderRadius: 4,
@@ -291,8 +254,39 @@ class ServiceHistoryPage extends StatelessWidget {
   }
 
   Widget _buildReportsSection() {
-    return Obx(
-      () => Column(
+    return Obx(() {
+      final isLoading = serviceHistoryController.isServiceHistoryLoading.value;
+      final hasLoaded = serviceHistoryController.hasLoadedReports.value;
+      final reports = serviceHistoryController.serviceHistoryReportsList;
+
+      if (!hasLoaded || (isLoading && reports.isEmpty)) {
+        return _buildLoadingWidget();
+      }
+
+      if (reports.isEmpty) {
+        return Column(
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: const Text(
+                'Your Reports',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: Color(0xff143d79),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            EmptyDataWidget(
+              message: 'No reports available',
+              icon: Icons.article_outlined,
+            ),
+          ],
+        );
+      }
+
+      return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
@@ -305,21 +299,23 @@ class ServiceHistoryPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           ListView.separated(
-            itemCount: serviceHistoryController.reports.length,
+            itemCount:
+                serviceHistoryController.serviceHistoryReportsList.length,
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             separatorBuilder: (context, index) => const SizedBox(height: 10),
             itemBuilder: (context, index) {
-              final report = serviceHistoryController.reports[index];
+              final report =
+                  serviceHistoryController.serviceHistoryReportsList[index];
               return _buildReportCard(report);
             },
           ),
         ],
-      ),
-    );
+      );
+    });
   }
 
-  Widget _buildReportCard(Map<String, dynamic> report) {
+  Widget _buildReportCard(ServiceHistoryReportsModel report) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(8),
@@ -342,14 +338,14 @@ class ServiceHistoryPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: const Icon(
-                      Icons.directions_car_filled_rounded,
+                      CupertinoIcons.car_detailed,
                       size: 40,
                       color: Color(0xff4a5e78),
                     ),
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    report['registrationNumber'],
+                    report.registrationNumber,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -370,7 +366,7 @@ class ServiceHistoryPage extends StatelessWidget {
                       children: [
                         Expanded(
                           child: Text(
-                            report['carName'],
+                            '${report.make} ${report.model}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -382,20 +378,30 @@ class ServiceHistoryPage extends StatelessWidget {
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 6,
+                            horizontal: 10,
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xffd6ffd9),
+                            color: report.status.toLowerCase() == 'completed'
+                                ? const Color(0xffd6ffd9)
+                                : AppColors.grey.withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(10),
-                            border: Border.all(color: const Color(0xff7ed58c)),
+                            border: Border.all(
+                              color: report.status.toLowerCase() == 'completed'
+                                  ? const Color(0xff7ed58c)
+                                  : AppColors.grey.withValues(alpha: 0.3),
+                            ),
                           ),
                           child: Text(
-                            report['status'],
-                            style: const TextStyle(
+                            report.status.toLowerCase() == 'completed'
+                                ? 'GENERATED'
+                                : 'PENDING',
+                            style: TextStyle(
                               fontSize: 9,
                               fontWeight: FontWeight.w800,
-                              color: Color(0xff1e9f39),
+                              color: report.status.toLowerCase() == 'completed'
+                                  ? const Color(0xff1e9f39)
+                                  : AppColors.black,
                             ),
                           ),
                         ),
@@ -408,7 +414,7 @@ class ServiceHistoryPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Transmission - ${report['transmission']}',
+                              'Body Type - ${report.bodyType}',
                               style: const TextStyle(
                                 fontSize: 10,
                                 color: Colors.black87,
@@ -416,7 +422,7 @@ class ServiceHistoryPage extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              'Year - ${report['year']}',
+                              'Year - ${report.registrationDate?.year}',
                               style: const TextStyle(
                                 fontSize: 10,
                                 color: Colors.black87,
@@ -430,7 +436,7 @@ class ServiceHistoryPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Fuel Type - ${report['fuelType']}',
+                              'Fuel Type - ${report.fuelType}',
                               style: const TextStyle(
                                 fontSize: 10,
                                 color: Colors.black87,
@@ -438,7 +444,7 @@ class ServiceHistoryPage extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              'Ownership - ${report['ownership']}',
+                              'Ownership - ${serviceHistoryController.getOwnerSerialNumberString(ownerSerialNumber: report.ownerSerialNumber)}',
                               style: const TextStyle(
                                 fontSize: 10,
                                 color: Colors.black87,
@@ -470,7 +476,7 @@ class ServiceHistoryPage extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    report['transactionId'],
+                    report.paymentId,
                     style: const TextStyle(
                       fontSize: 10.5,
                       color: Colors.black87,
@@ -490,7 +496,9 @@ class ServiceHistoryPage extends StatelessWidget {
                           style: TextStyle(fontWeight: FontWeight.w500),
                         ),
                         TextSpan(
-                          text: report['date'],
+                          text: serviceHistoryController.formatDateWithSuffix(
+                            report.updatedAt,
+                          ),
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ],
@@ -498,32 +506,66 @@ class ServiceHistoryPage extends StatelessWidget {
                   ),
                 ],
               ),
+
               // const SizedBox(width: 10),
-              Row(
+              Column(
                 children: [
-                  ButtonWidget(
-                    text: 'VIEW',
-                    isLoading: false.obs,
-                    onTap: () => serviceHistoryController.onViewReport(report),
-                    width: 60,
-                    height: 26,
-                    fontSize: 11,
-                    borderRadius: 4,
-                    elevation: 1,
-                    backgroundColor: const Color(0xff153d79),
+                  // ButtonWidget(
+                  //   text: 'VIEW',
+                  //   isLoading: false.obs,
+                  //   onTap:
+                  //       () => serviceHistoryController.onViewReport(
+                  //         xlsxFileUrl: report.xlsxFileUrl,
+                  //       ),
+                  //   width: 60,
+                  //   height: 26,
+                  //   fontSize: 11,
+                  //   borderRadius: 4,
+                  //   elevation: 1,
+                  //   backgroundColor: const Color(0xff153d79),
+                  // ),
+                  // const SizedBox(width: 6),
+                  // ButtonWidget(
+                  //   text: 'DOWNLOAD REPORT',
+                  //   isLoading: false.obs,
+                  //   onTap:
+                  //       () => serviceHistoryController.onDownloadReport(
+                  //         pdfFileUrl: report.otobixPdfReportUrl,
+                  //       ),
+                  //   height: 26,
+                  //   width: 120,
+                  //   fontSize: 10,
+                  //   borderRadius: 4,
+                  //   elevation: 1,
+                  //   backgroundColor: const Color(0xff153d79),
+                  // ),
+                  _buildDownloadButton(
+                    text: 'PDF Report',
+                    isLoading: serviceHistoryController.isDownloadReportLoading,
+                    isRequestCompletedAndFilesAreAvailable:
+                        report.status.toLowerCase() == 'completed' &&
+                            report.otobixPdfReportUrl.isNotEmpty
+                        ? true
+                        : false,
+                    onTap: () => serviceHistoryController.onDownloadReport(
+                      pdfFileUrl: report.otobixPdfReportUrl,
+                      paymentId: report.paymentId,
+                    ),
                   ),
-                  const SizedBox(width: 6),
-                  ButtonWidget(
-                    text: 'DOWNLOAD REPORT',
-                    isLoading: false.obs,
-                    onTap: () =>
-                        serviceHistoryController.onDownloadReport(report),
-                    height: 26,
-                    width: 120,
-                    fontSize: 10,
-                    borderRadius: 4,
-                    elevation: 1,
-                    backgroundColor: const Color(0xff153d79),
+                  const SizedBox(height: 3),
+                  _buildDownloadButton(
+                    text: 'Service Details',
+                    isLoading:
+                        serviceHistoryController.isDownloadDetailsLoading,
+                    isRequestCompletedAndFilesAreAvailable:
+                        report.status.toLowerCase() == 'completed' &&
+                            report.xlsxFileUrl.isNotEmpty
+                        ? true
+                        : false,
+                    onTap: () => serviceHistoryController.onDownloadDetails(
+                      xlsxFileUrl: report.xlsxFileUrl,
+                      paymentId: report.paymentId,
+                    ),
                   ),
                 ],
               ),
@@ -531,6 +573,244 @@ class ServiceHistoryPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDownloadButton({
+    required String text,
+    required RxBool isLoading,
+    required bool isRequestCompletedAndFilesAreAvailable,
+    required VoidCallback onTap,
+  }) {
+    return SizedBox(
+      height: 30,
+      width: 130,
+      child: ElevatedButton(
+        onPressed: isRequestCompletedAndFilesAreAvailable ? onTap : null,
+
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          side: const BorderSide(color: Color(0xFFD9D9D9)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7)),
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+        ),
+        child: Obx(() {
+          if (isLoading.value) {
+            return const SizedBox(
+              width: 13,
+              height: 13,
+              child: CircularProgressIndicator(
+                strokeWidth: 1.5,
+                color: AppColors.blue,
+              ),
+            );
+          }
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.download_rounded,
+                size: 15,
+                color: isRequestCompletedAndFilesAreAvailable
+                    ? AppColors.blue
+                    : AppColors.grey,
+              ),
+              const SizedBox(width: 5),
+              Text(
+                text,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 10,
+                  color: isRequestCompletedAndFilesAreAvailable
+                      ? AppColors.blue
+                      : AppColors.grey,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
+  // Loading widget for service history reports
+  Widget _buildLoadingWidget() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Your Reports',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            color: Color(0xff143d79),
+          ),
+        ),
+        const SizedBox(height: 8),
+        ListView.separated(
+          itemCount: 3,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          separatorBuilder: (_, __) => const SizedBox(height: 10),
+          itemBuilder: (context, index) {
+            return Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xff8fa4c1)),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Column(
+                        children: [
+                          const ShimmerWidget(
+                            height: 55,
+                            width: 78,
+                            borderRadius: 6,
+                          ),
+                          const SizedBox(height: 4),
+                          const ShimmerWidget(
+                            height: 10,
+                            width: 70,
+                            borderRadius: 4,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Expanded(
+                                  child: ShimmerWidget(
+                                    height: 12,
+                                    width: double.infinity,
+                                    borderRadius: 4,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                const ShimmerWidget(
+                                  height: 20,
+                                  width: 70,
+                                  borderRadius: 20,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: const [
+                                      ShimmerWidget(
+                                        height: 10,
+                                        width: 100,
+                                        borderRadius: 4,
+                                      ),
+                                      SizedBox(height: 6),
+                                      ShimmerWidget(
+                                        height: 10,
+                                        width: 80,
+                                        borderRadius: 4,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 15),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: const [
+                                      ShimmerWidget(
+                                        height: 10,
+                                        width: 95,
+                                        borderRadius: 4,
+                                      ),
+                                      SizedBox(height: 6),
+                                      ShimmerWidget(
+                                        height: 10,
+                                        width: 85,
+                                        borderRadius: 4,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: Divider(),
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            ShimmerWidget(
+                              height: 10,
+                              width: 85,
+                              borderRadius: 4,
+                            ),
+                            SizedBox(height: 6),
+                            ShimmerWidget(
+                              height: 10,
+                              width: 120,
+                              borderRadius: 4,
+                            ),
+                            SizedBox(height: 10),
+                            ShimmerWidget(
+                              height: 10,
+                              width: 110,
+                              borderRadius: 4,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Column(
+                        children: const [
+                          ShimmerWidget(
+                            height: 30,
+                            width: 130,
+                            borderRadius: 7,
+                          ),
+                          SizedBox(height: 6),
+                          ShimmerWidget(
+                            height: 30,
+                            width: 130,
+                            borderRadius: 7,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }

@@ -13,6 +13,7 @@ import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/utils/socket_events.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum ScreenType {
   upcoming,
@@ -827,5 +828,42 @@ class AuctionDetailsController extends GetxController {
     final end = auctionDetails.value.auctionEndTime;
     if (end == null) return false; // null => consider < 30 days
     return DateTime.now().isAfter(end.add(const Duration(days: 30)));
+  }
+
+  // Call Retail Associate
+  Future<void> callRetailAssociate() async {
+    try {
+      String phoneNumber = auctionDetails.value.retailAssociateContactNumber;
+      // Remove any non-digit characters except '+'
+      String cleanNumber = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
+
+      // Add country code if missing (adjust based on your needs)
+      if (!cleanNumber.startsWith('+') && !cleanNumber.startsWith('00')) {
+        // Default to India country code +91, adjust as needed
+        cleanNumber = '+91$cleanNumber';
+      }
+
+      final Uri phoneUri = Uri(scheme: 'tel', path: cleanNumber);
+
+      // Check if dialer is available
+      if (await canLaunchUrl(phoneUri)) {
+        await launchUrl(phoneUri);
+      } else {
+        ToastWidget.show(
+          context: Get.context!,
+          title: 'Error',
+          subtitle: 'Could not open dialer',
+          type: ToastType.error,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error calling retail associate: $e');
+      ToastWidget.show(
+        context: Get.context!,
+        title: 'Error',
+        subtitle: 'Unable to make call',
+        type: ToastType.error,
+      );
+    }
   }
 }

@@ -427,39 +427,20 @@ class HomePage extends StatelessWidget {
               ),
               const SizedBox(width: 10),
 
-              // Insurance
               _buildNavigationItem(
-                icon: AppIcons.insurance,
-                title: 'Insurance',
+                icon: AppIcons.finance,
+                title: 'Service History',
                 onTap: () async {
                   final isLoggedIn = await AuthService.isLoggedIn();
                   if (!isLoggedIn) {
-                    GuestUserRegisterChoiceDialogWidget.show(
-                      context: Get.context!,
-                      title: "Phone Number Required",
-                      subtitle:
-                          "Please enter your phone number to use insurance feature",
-                      registerUserButtonText: "Register & Use Insurance",
-                      guestUserButtonText: "Browse as Guest",
-                      //   // After successful registration, navigate to InsurancePage
-                      // onRegisterSuccess: () {
-                      //   Get.off(() => InsurancePage());
-                      // },
-                      // User chose to continue without registering
-                      onTappedBrowseAsGuestButton: (enteredPhoneNumber) {
-                        Get.to(
-                          () => InsurancePage(
-                            isGuestUser: true,
-                            phoneNumber: enteredPhoneNumber,
-                          ),
-                        );
-                      },
+                    LoginRequiredDialogWidget.show(
+                      Get.context!,
+                      message: "Login to view service history.",
+                      onLogin: () => Get.offAll(() => LoginPage()),
                     );
                     return;
                   }
-
-                  // User is already logged in
-                  Get.to(() => InsurancePage());
+                  Get.to(() => ServiceHistoryPage());
                 },
               ),
             ],
@@ -467,50 +448,89 @@ class HomePage extends StatelessWidget {
 
           const SizedBox(height: 10),
 
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          //   crossAxisAlignment: CrossAxisAlignment.start,
-          //   children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              //  // Insurance
+              // _buildNavigationItem(
+              //   icon: AppIcons.insurance,
+              //   title: 'Insurance',
+              //   onTap: () async {
+              //     final isLoggedIn = await AuthService.isLoggedIn();
+              //     if (!isLoggedIn) {
+              //       GuestUserRegisterChoiceDialogWidget.show(
+              //         context: Get.context!,
+              //         title: "Phone Number Required",
+              //         subtitle:
+              //             "Please enter your phone number to use insurance feature",
+              //         registerUserButtonText: "Register & Use Insurance",
+              //         guestUserButtonText: "Browse as Guest",
+              //         //   // After successful registration, navigate to InsurancePage
+              //         // onRegisterSuccess: () {
+              //         //   Get.off(() => InsurancePage());
+              //         // },
+              //         // User chose to continue without registering
+              //         onTappedBrowseAsGuestButton: (enteredPhoneNumber) {
+              //           Get.to(
+              //             () => InsurancePage(
+              //               isGuestUser: true,
+              //               phoneNumber: enteredPhoneNumber,
+              //             ),
+              //           );
+              //         },
+              //       );
+              //       return;
+              //     }
 
-          //     const SizedBox(width: 10),
+              //     // User is already logged in
+              //     Get.to(() => InsurancePage());
+              //   },
+              // ),
+              // Service History
 
-          //     // Finance
-          //     _buildNavigationItem(
-          //       icon: AppIcons.finance,
-          //       title: 'Finance',
-          //       onTap: () => Get.to(() => FinancePage()),
-          //     ),
-          //     const SizedBox(width: 10),
+              // const SizedBox(width: 10),
+              // const SizedBox(width: 80),
+              // const SizedBox(width: 10),
+              // const SizedBox(width: 80),
 
-          //     const SizedBox(width: 10),
-          //     _buildNavigationItem(
-          //       // Manage My Cars
-          //       icon: AppIcons.manageMyCars,
-          //       title: 'Manage My Cars',
-          //       onTap: () => Get.to(
-          //         () => UnderDevelopmentPage(
-          //           screenName: "Manage My Cars",
-          //           icon: CupertinoIcons.car,
-          //           color: AppColors.green,
-          //         ),
-          //       ),
-          //     ),
-          //     const SizedBox(width: 10),
-          //     _buildNavigationItem(
-          //       // Refer and Earn
-          //       icon: AppIcons.referAndEarn,
+              // // Finance
+              // _buildNavigationItem(
+              //   icon: AppIcons.finance,
+              //   title: 'Finance',
+              //   onTap: () => Get.to(() => FinancePage()),
+              // ),
+              // const SizedBox(width: 10),
 
-          //       title: 'Refer and Earn',
-          //       onTap: () => Get.to(
-          //         () => UnderDevelopmentPage(
-          //           screenName: "Refer and Earn",
-          //           icon: CupertinoIcons.checkmark_shield,
-          //           color: AppColors.blue,
-          //         ),
-          //       ),
-          //     ),
-          //   ],
-          // ),
+              // const SizedBox(width: 10),
+              // _buildNavigationItem(
+              //   // Manage My Cars
+              //   icon: AppIcons.manageMyCars,
+              //   title: 'Manage My Cars',
+              //   onTap: () => Get.to(
+              //     () => UnderDevelopmentPage(
+              //       screenName: "Manage My Cars",
+              //       icon: CupertinoIcons.car,
+              //       color: AppColors.green,
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(width: 10),
+              // _buildNavigationItem(
+              //   // Refer and Earn
+              //   icon: AppIcons.referAndEarn,
+
+              //   title: 'Refer and Earn',
+              //   onTap: () => Get.to(
+              //     () => UnderDevelopmentPage(
+              //       screenName: "Refer and Earn",
+              //       icon: CupertinoIcons.checkmark_shield,
+              //       color: AppColors.blue,
+              //     ),
+              //   ),
+              // ),
+            ],
+          ),
         ],
       ),
     );
@@ -564,8 +584,13 @@ class HomePage extends StatelessWidget {
   void _navigateToScreenOnBannerTap(String? screenName) async {
     final name = (screenName ?? '').trim().toLowerCase();
 
-    if (name == AppConstants.bannerScreenNames.insurance.toLowerCase()) {
-      await homeController.navigateToInsurancePage();
+    // if (name == AppConstants.bannerScreenNames.insurance.toLowerCase()) {
+    //   await homeController.navigateToInsurancePage();
+    //   return;
+    // }
+
+    if (name == AppConstants.bannerScreenNames.serviceHistory.toLowerCase()) {
+      await homeController.navigateToServiceHistoryPage();
       return;
     }
 

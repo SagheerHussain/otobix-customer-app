@@ -307,19 +307,35 @@ class InsurancePage extends StatelessWidget {
       label: 'RTO',
       hintText: 'Select RTO',
       icon: Icons.location_city_outlined,
-      items: insuranceController.rtoList
-          .map((rto) => rto['RegionCode'] as String)
-          .toList(),
+      items: insuranceController.formattedRtoItems, // Use formatted items
       isRequired: true,
       onChanged: (value) => insuranceController.onRtoSelected(value),
       validator: (value) {
-        if (value == 'invalid') {
+        if (value == null || value.isEmpty || value == 'invalid') {
           return 'This RTO is not available';
         }
         return null;
       },
     );
   }
+  // Widget _buildRtoList() {
+  //   return InsuranceDropdownWidget(
+  //     label: 'RTO',
+  //     hintText: 'Select RTO',
+  //     icon: Icons.location_city_outlined,
+  //     items: insuranceController.rtoList
+  //         .map((rto) => rto['RegionCode'] as String)
+  //         .toList(),
+  //     isRequired: true,
+  //     onChanged: (value) => insuranceController.onRtoSelected(value),
+  //     validator: (value) {
+  //       if (value == 'invalid') {
+  //         return 'This RTO is not available';
+  //       }
+  //       return null;
+  //     },
+  //   );
+  // }
 
   // Show car makes
   Widget _buildCarMakes() {
@@ -1289,7 +1305,7 @@ class InsurancePage extends StatelessWidget {
             SizedBox(
               width: 82,
               child: Text(
-                (report['registrationRtoCode'] ?? '-').toString(),
+                (report['regionCode'] ?? '-').toString(),
                 maxLines: 1,
                 textAlign: TextAlign.center,
                 overflow: TextOverflow.ellipsis,
@@ -1353,7 +1369,7 @@ class InsurancePage extends StatelessWidget {
                 children: [
                   _buildInfoText(
                     'RTO',
-                    (report['registrationRtoCode'] ?? '-').toString(),
+                    (report['regionCode'] ?? '-').toString(),
                   ),
                   const SizedBox(width: 10),
                   _buildInfoText(

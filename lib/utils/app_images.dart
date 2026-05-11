@@ -30,4 +30,8 @@ class AppImages {
       'lib/assets/images/warrantyScreenBanner.jpg';
   static const String insuranceScreenBanner =
       'lib/assets/images/insuranceScreenBanner.jpg';
+
+  // Service History Banner
+  static const String serviceHistoryBanner =
+      'lib/assets/images/serviceHistoryBanner.jpg';
 }

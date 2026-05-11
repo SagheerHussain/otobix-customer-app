@@ -261,6 +261,21 @@ class AppUrls {
 
   // static String get removeCar => "${baseUrl}car/remove-car";
 
+  static String get fetchSampleServiceHistoryPdf =>
+      "${baseUrl}service-history/fetch-sample-pdf";
+
+  static String fetchServiceHistory({
+    required String registrationNumber,
+    required String userId,
+  }) =>
+      "${baseUrl}service-history/fetch-details?registrationNumber=$registrationNumber&userId=$userId";
+
+  static String fetchServiceHistoryReportsList({required String userId}) =>
+      "${baseUrl}service-history/fetch-reports-list?userId=$userId";
+
+  static String get submitServiceHistoryRequest =>
+      "${baseUrl}service-history/submit-request";
+
   static String get getEntityNamesList =>
       "${baseUrl}entity-documents/get-entity-names-list";
 

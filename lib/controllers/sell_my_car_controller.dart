@@ -670,7 +670,8 @@ class SellMyCarController extends GetxController {
       // required fields
       request.fields['carRegistrationNumber'] = carRegistrationNumberController
           .text
-          .trim();
+          .trim()
+          .toUpperCase();
       // request.fields['ownerName'] = ownerNameController.text.trim();
       request.fields['ownerName'] = unmaskedOwnerName.trim();
       request.fields['make'] = makeController.text.trim();

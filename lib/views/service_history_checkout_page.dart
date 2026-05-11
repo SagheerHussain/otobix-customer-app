@@ -6,10 +6,51 @@ import 'package:otobix_customer_app/widgets/app_bar_widget.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 
 class ServiceHistoryCheckoutPage extends StatelessWidget {
-  ServiceHistoryCheckoutPage({super.key});
+  final String registrationNumber;
+  final String chassisNumber;
+  final String engineNumber;
+  final String make;
+  final String model;
+  final String bodyType;
+  final DateTime? registrationDate;
+  final String fuelType;
+  final int ownerSerialNumber;
+  final double rate;
+  final double gst;
+  final double total;
 
-  final ServiceHistoryCheckoutController serviceHistoryCheckoutController =
-      Get.put(ServiceHistoryCheckoutController());
+  ServiceHistoryCheckoutPage({
+    super.key,
+    required this.registrationNumber,
+    required this.chassisNumber,
+    required this.engineNumber,
+    required this.make,
+    required this.model,
+    required this.bodyType,
+    required this.registrationDate,
+    required this.fuelType,
+    required this.ownerSerialNumber,
+    required this.rate,
+    required this.gst,
+    required this.total,
+  }) : serviceHistoryCheckoutController = Get.put(
+         ServiceHistoryCheckoutController(
+           registrationNumber: registrationNumber,
+           chassisNumber: chassisNumber,
+           engineNumber: engineNumber,
+           make: make,
+           model: model,
+           bodyType: bodyType,
+           registrationDate: registrationDate,
+           fuelType: fuelType,
+           ownerSerialNumber: ownerSerialNumber,
+           rate: rate,
+           gst: gst,
+           total: total,
+         ),
+       );
+
+  final ServiceHistoryCheckoutController serviceHistoryCheckoutController;
 
   @override
   Widget build(BuildContext context) {
@@ -17,30 +58,61 @@ class ServiceHistoryCheckoutPage extends StatelessWidget {
       appBar: AppBarWidget(title: 'Service History Checkout'),
       backgroundColor: AppColors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(10),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: const Color(0xffdfe3e8),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                children: [
-                  _buildTopSummaryCard(),
-                  const SizedBox(height: 10),
-                  _buildDeliveryInfoCard(),
-                  const SizedBox(height: 10),
-                  _buildBillDetailsCard(),
-                  const SizedBox(height: 20),
-                  _buildCheckoutButton(),
-                  const SizedBox(height: 5),
-                ],
+        child: Stack(
+          children: [
+            SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xffdfe3e8),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    children: [
+                      _buildTopSummaryCard(),
+                      const SizedBox(height: 10),
+                      _buildDeliveryInfoCard(),
+                      const SizedBox(height: 10),
+                      _buildBillDetailsCard(),
+                      const SizedBox(height: 20),
+                      _buildCheckoutButton(),
+                      const SizedBox(height: 5),
+                    ],
+                  ),
+                ),
               ),
             ),
-          ),
+
+            Obx(
+              () =>
+                  serviceHistoryCheckoutController
+                      .isSubmitServiceHistoryRequestLoading
+                      .value
+                  ? Container(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(color: AppColors.white),
+                            const SizedBox(height: 15),
+                            Text(
+                              'Processing your request, Please wait...',
+                              style: TextStyle(
+                                color: AppColors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ],
         ),
       ),
     );
@@ -57,28 +129,28 @@ class ServiceHistoryCheckoutPage extends StatelessWidget {
       child: Column(
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            // crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 76,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Icon(
-                  Icons.directions_car_filled_rounded,
-                  size: 40,
-                  color: Color(0xff4a5e78),
-                ),
-              ),
-              const SizedBox(width: 10),
+              // Container(
+              //   width: 76,
+              //   height: 52,
+              //   decoration: BoxDecoration(
+              //     color: Colors.white,
+              //     borderRadius: BorderRadius.circular(6),
+              //   ),
+              //   child: const Icon(
+              //     CupertinoIcons.car_detailed,
+              //     size: 40,
+              //     color: Color(0xff4a5e78),
+              //   ),
+              // ),
+              // const SizedBox(width: 10),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    serviceHistoryCheckoutController.carDetails['carName'],
-                    maxLines: 1,
+                    '${serviceHistoryCheckoutController.make} ${serviceHistoryCheckoutController.model}',
+                    maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 13,
@@ -88,21 +160,24 @@ class ServiceHistoryCheckoutPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Transmission - ${serviceHistoryCheckoutController.carDetails['transmission']}',
-                            style: const TextStyle(
+                            'Body Type - ${serviceHistoryCheckoutController.bodyType}',
+                            style: TextStyle(
+                              overflow: TextOverflow.ellipsis,
                               fontSize: 10,
-                              color: Color(0xff6c7785),
+                              color: Color(0xff4f6075),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           Text(
-                            'Fuel Type - ${serviceHistoryCheckoutController.carDetails['fuelType']}',
-                            style: const TextStyle(
+                            'Fuel Type - ${serviceHistoryCheckoutController.fuelType}',
+                            style: TextStyle(
+                              overflow: TextOverflow.ellipsis,
                               fontSize: 10,
                               color: Color(0xff4f6075),
                               fontWeight: FontWeight.w500,
@@ -110,21 +185,23 @@ class ServiceHistoryCheckoutPage extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(width: 10),
+                      const SizedBox(width: 15),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Year - ${serviceHistoryCheckoutController.carDetails['year']}',
-                            style: const TextStyle(
+                            'Year - ${serviceHistoryCheckoutController.registrationDate?.year}',
+                            style: TextStyle(
+                              overflow: TextOverflow.ellipsis,
                               fontSize: 10,
                               color: Color(0xff4f6075),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
                           Text(
-                            'Ownership - ${serviceHistoryCheckoutController.carDetails['ownership']}',
-                            style: const TextStyle(
+                            'Owner - ${serviceHistoryCheckoutController.getOwnerSerialNumberString()}',
+                            style: TextStyle(
+                              overflow: TextOverflow.ellipsis,
                               fontSize: 10,
                               color: Color(0xff4f6075),
                               fontWeight: FontWeight.w500,
@@ -281,21 +358,19 @@ class ServiceHistoryCheckoutPage extends StatelessWidget {
           const SizedBox(height: 8),
           _buildBillRow(
             'Service History',
-            serviceHistoryCheckoutController.billDetails['serviceHistory']!,
+            '₹ ${serviceHistoryCheckoutController.rate.toStringAsFixed(0)}',
           ),
           const SizedBox(height: 3),
           _buildBillRow(
-            'GST 18%',
-            serviceHistoryCheckoutController.billDetails['gst']!,
+            'GST',
+            '₹ ${serviceHistoryCheckoutController.gst.toStringAsFixed(0)}',
           ),
           const Divider(color: AppColors.white, thickness: .5),
           _buildBillRow(
             'Total',
-            serviceHistoryCheckoutController.billDetails['total']!,
+            '₹ ${serviceHistoryCheckoutController.total.toStringAsFixed(0)}',
             isTotal: true,
           ),
-          // const SizedBox(height: 10),
-          // _buildOffersField(),
         ],
       ),
     );
@@ -326,51 +401,13 @@ class ServiceHistoryCheckoutPage extends StatelessWidget {
     );
   }
 
-  Widget _buildOffersField() {
-    return InkWell(
-      onTap: serviceHistoryCheckoutController.onOffersAndCouponsTap,
-      borderRadius: BorderRadius.circular(6),
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-        decoration: BoxDecoration(
-          color: const Color(0xffedf0f5),
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: const Color(0xff6884a8),
-            style: BorderStyle.solid,
-          ),
-        ),
-        child: Row(
-          children: const [
-            Icon(
-              Icons.local_offer_outlined,
-              size: 18,
-              color: Color(0xff2f5585),
-            ),
-            SizedBox(width: 6),
-            Expanded(
-              child: Text(
-                'Offers & Coupons',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Color(0xff35537d),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            Icon(Icons.keyboard_arrow_down, color: Color(0xff35537d), size: 22),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildCheckoutButton() {
     return ButtonWidget(
       text: 'Proceed to Checkout',
+      // isLoading: serviceHistoryCheckoutController.isSubmitServiceHistoryRequestLoading,
       isLoading: false.obs,
-      onTap: serviceHistoryCheckoutController.onProceedToCheckout,
+      onTap: () =>
+          serviceHistoryCheckoutController.submitServiceHistoryRequest(),
       width: 250,
       height: 35,
       elevation: 2,
