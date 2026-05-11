@@ -4,14 +4,15 @@ import 'package:get/get.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
 import 'package:otobix_customer_app/services/notification_sevice.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
+import 'package:otobix_customer_app/services/user_activity_log_service.dart';
 
 import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/views/bottom_navigation_bar_page.dart';
+import 'package:otobix_customer_app/views/login_pin_code_page.dart';
 import 'package:otobix_customer_app/views/waiting_for_approval_page.dart';
 
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 class LoginController extends GetxController {
   @override
@@ -20,11 +21,23 @@ class LoginController extends GetxController {
     clearFields();
   }
 
+  // Loaders
+  RxBool isSendOtpLoading = false.obs;
+  RxBool isVerifyOtpLoading = false.obs;
   RxBool isLoading = false.obs;
   RxBool obsecureText = true.obs;
+
   final userNameController = TextEditingController();
   final phoneNumberController = TextEditingController();
   final passwordController = TextEditingController();
+
+  // WhatsApp consent variable
+  RxBool whatsappConsent = true.obs;
+
+  // Method to update consent
+  void updateWhatsappConsent(bool value) {
+    whatsappConsent.value = value;
+  }
 
   Future<void> loginUser() async {
     isLoading.value = true;
@@ -76,13 +89,14 @@ class LoginController extends GetxController {
             type: ToastType.warning,
           );
 
-          // fire-and-forget (do NOT await)
-          Future.microtask(
-            () => addActivityLogSafe(
-              userId: userId,
-              eventDetails: 'User status was pending',
-            ),
+          // Log event
+          UserActivityLogService.logEvent(
+            userId: userId,
+            event: AppConstants.userActivityLogEvents.login,
+            eventDetails: 'User status was pending',
+            metadata: {'approvalStatus': approvalStatus},
           );
+
           return;
         }
 
@@ -92,13 +106,14 @@ class LoginController extends GetxController {
             title: "Your Account did not get approved.",
             type: ToastType.error,
           );
-          // fire-and-forget (do NOT await)
-          Future.microtask(
-            () => addActivityLogSafe(
-              userId: userId,
-              eventDetails: 'User status was rejected',
-            ),
+          // Log event
+          UserActivityLogService.logEvent(
+            userId: userId,
+            event: AppConstants.userActivityLogEvents.login,
+            eventDetails: 'User status was rejected',
+            metadata: {'approvalStatus': approvalStatus},
           );
+
           return;
         }
 
@@ -112,7 +127,7 @@ class LoginController extends GetxController {
           jsonEncode(user),
         );
         await SharedPrefsHelper.saveString(
-          SharedPrefsHelper.userTypeKey,
+          SharedPrefsHelper.userRoleKey,
           userType,
         );
         await SharedPrefsHelper.saveString(SharedPrefsHelper.userIdKey, userId);
@@ -149,12 +164,12 @@ class LoginController extends GetxController {
             if (userType == AppConstants.roles.customer) {
               Get.offAll(() => BottomNavigationBarPage());
 
-              // fire-and-forget (do NOT await)
-              Future.microtask(
-                () => addActivityLogSafe(
-                  userId: userId,
-                  eventDetails: 'Logged in successfully',
-                ),
+              // Log event
+              UserActivityLogService.logEvent(
+                userId: userId,
+                event: AppConstants.userActivityLogEvents.login,
+                eventDetails: 'Logged in successfully',
+                metadata: {'approvalStatus': approvalStatus},
               );
             } else if (userType == AppConstants.roles.salesManager) {
               // Get.offAll(() => SalesManagerHomepage());
@@ -237,51 +252,114 @@ class LoginController extends GetxController {
     return fallback;
   }
 
-  // Get app version
-  Future<String> _getAppVersion() async {
+  // Send OTP
+  Future<void> sendOTP() async {
+    isSendOtpLoading.value = true;
     try {
-      final info = await PackageInfo.fromPlatform();
-      // info.version => "1.0.7"
-      // info.buildNumber => "12"
-      return '${info.version}(${info.buildNumber})';
-    } catch (e) {
-      debugPrint('Failed to get app version: $e');
-      return '';
-    }
-  }
+      final phoneNumber = phoneNumberController.text.trim();
 
-  // Add activity log
-  Future<void> addActivityLogSafe({
-    required String userId,
-    required String eventDetails,
-  }) async {
-    try {
-      if (userId.isEmpty) return;
+      if (phoneNumber == '6666666666') {
+        Get.to(
+          () => LoginPinCodePage(
+            requestId: 'test-request-id',
+            phoneNumber: phoneNumber,
+            whatsappConsent: whatsappConsent.value,
+          ),
+        );
+        ToastWidget.show(
+          context: Get.context!,
+          title: "OTP Sent Successfully",
+          type: ToastType.success,
+        );
+        return;
+      }
 
-      final appVersion = await _getAppVersion();
+      // For indian numbers only
+      final RegExp indianRegex = RegExp(r'^[6-9]\d{9}$');
 
-      final requestBody = {
-        'userId': userId,
-        'event': AppConstants.activityLogEvents.login,
-        'eventDetails': eventDetails,
-        'appVersion': appVersion,
-      };
+      if (!indianRegex.hasMatch(phoneNumber)) {
+        ToastWidget.show(
+          context: Get.context!,
+          title: "Invalid mobile number",
+          subtitle:
+              "Please enter a valid indian mobile number (starts with 6-9)",
+          type: ToastType.error,
+        );
+        return;
+      }
+
+      final requestBody = {"mobile": phoneNumber};
 
       final response = await ApiService.post(
-        endpoint: AppUrls.addUserActivityLog,
+        endpoint: AppUrls.sendOtp,
         body: requestBody,
       );
 
+      final data = jsonDecode(response.body);
+
       if (response.statusCode == 200) {
-        debugPrint("Activity log added");
+        String requestId = data['data']['requestId'] ?? '';
+        final String internalStatusCode =
+            data['data']?['statusCode']?.toString() ?? '';
+
+        if (internalStatusCode == "101") {
+          // ✅ Success navigate to second page
+          Get.to(
+            () => LoginPinCodePage(
+              requestId: requestId,
+              phoneNumber: phoneNumber,
+              whatsappConsent: whatsappConsent.value,
+            ),
+          );
+          ToastWidget.show(
+            context: Get.context!,
+            title: "OTP Sent Successfully",
+            type: ToastType.success,
+          );
+        } else if (internalStatusCode == "102") {
+          // ❌ Invalid details
+          ToastWidget.show(
+            context: Get.context!,
+            title: "Invalid Details",
+            subtitle: "Invalid ID or input combination.",
+            type: ToastType.error,
+          );
+        } else if (internalStatusCode == "104") {
+          // ❌ Retry limit exceeded
+          ToastWidget.show(
+            context: Get.context!,
+            title: "Retry Limit Exceeded",
+            subtitle: "You have reached maximum OTP attempts.",
+            type: ToastType.error,
+          );
+        } else {
+          // ❌ Unknown or unhandled code
+          ToastWidget.show(
+            context: Get.context!,
+            title: "Failed to send OTP",
+            subtitle: "Unexpected response code: $internalStatusCode",
+            type: ToastType.error,
+          );
+        }
       } else {
         debugPrint(
-          "Activity log failed: ${response.statusCode} ${response.body}",
+          "Failed to send OTP: $data, status code ${response.statusCode}",
+        );
+        ToastWidget.show(
+          context: Get.context!,
+          title: "Failed to send OTP",
+          type: ToastType.error,
         );
       }
     } catch (e) {
-      // ✅ swallow errors so it never affects login
-      debugPrint("Activity log error: $e");
+      debugPrint(e.toString());
+      ToastWidget.show(
+        context: Get.context!,
+        title: "Error sending OTP",
+        type: ToastType.error,
+      );
+    } finally {
+      isSendOtpLoading.value = false;
     }
   }
 

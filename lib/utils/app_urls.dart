@@ -15,6 +15,9 @@ class AppUrls {
 
   static String get login => "${baseUrl}user/login";
 
+  static String get loginOrRegisterUsingOtp =>
+      "${baseUrl}user/login-or-register-using-otp";
+
   static String get register => "${baseUrl}user/register";
 
   static String get setNewPassword => "${baseUrl}user/set-new-password";
@@ -105,6 +108,30 @@ class AppUrls {
 
   static String get fetchNormalizedMakeAndModel =>
       "${baseUrl}customer/pdi/normalize-make-model";
+
+  static String get fetchInsuranceQuotes =>
+      "${baseUrl}customer/insurance/fetch-quotes";
+
+  static String fetchInsuranceGeneratedQuotesList({required String userId}) =>
+      "${baseUrl}customer/insurance/get-generated-quotes-list?userId=$userId";
+
+  static String get getInsuranceRtoList =>
+      "${baseUrl}customer/insurance/get-rto-list";
+
+  static String get getInsuranceMakesList =>
+      "${baseUrl}customer/insurance/get-makes-list";
+
+  static String getInsuranceModelsList({required int makeId}) =>
+      "${baseUrl}customer/insurance/get-models-list?makeId=$makeId";
+
+  static String getInsuranceVariantsList({required int modelId}) =>
+      "${baseUrl}customer/insurance/get-variants-list?modelId=$modelId";
+
+  static String getInsuranceVariantsListUsingFuelType({
+    required int modelId,
+    required int fuelTypeId,
+  }) =>
+      "${baseUrl}customer/insurance/get-variants-list-using-fuel-type?modelId=$modelId&fuelTypeId=$fuelTypeId";
 
   // static String get allUsersList => "${baseUrl}user/all-users-list";
 
@@ -233,6 +260,21 @@ class AppUrls {
   // static String get markCarAsSold => "${baseUrl}otobuy/mark-car-as-sold";
 
   // static String get removeCar => "${baseUrl}car/remove-car";
+
+  static String get fetchSampleServiceHistoryPdf =>
+      "${baseUrl}service-history/fetch-sample-pdf";
+
+  static String fetchServiceHistory({
+    required String registrationNumber,
+    required String userId,
+  }) =>
+      "${baseUrl}service-history/fetch-details?registrationNumber=$registrationNumber&userId=$userId";
+
+  static String fetchServiceHistoryReportsList({required String userId}) =>
+      "${baseUrl}service-history/fetch-reports-list?userId=$userId";
+
+  static String get submitServiceHistoryRequest =>
+      "${baseUrl}service-history/submit-request";
 
   static String get getEntityNamesList =>
       "${baseUrl}entity-documents/get-entity-names-list";

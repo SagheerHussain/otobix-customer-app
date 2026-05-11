@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:month_year_picker/month_year_picker.dart';
 import 'package:otobix_customer_app/services/app_update_service.dart';
 import 'package:otobix_customer_app/services/notification_sevice.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
@@ -10,6 +11,7 @@ import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/views/bottom_navigation_bar_page.dart';
 import 'package:otobix_customer_app/views/login_page.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() async {
   final start = await init();
@@ -38,6 +40,15 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      ////////////// For month year picker only /////////////////////////
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        MonthYearPickerLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('en')],
+      ////////////// For month year picker only /////////////////////////
       navigatorKey: Get
           .key, // enables Get.* navigation from services (for route to specific screen via notification click)
       debugShowCheckedModeBanner: false,
@@ -83,7 +94,7 @@ Future<Widget> init() async {
 
   final token = await SharedPrefsHelper.getString(SharedPrefsHelper.tokenKey);
   final userRole = await SharedPrefsHelper.getString(
-    SharedPrefsHelper.userTypeKey,
+    SharedPrefsHelper.userRoleKey,
   );
   // debugPrint('PlayerID: ${await OneSignal.User.pushSubscription.id}');
   // Decide first screen BEFORE runApp
@@ -97,4 +108,5 @@ Future<Widget> init() async {
   }
 
   return start;
+  // return LoginPinCodePage(requestId: '123', phoneNumber: '6666666666'); // temp
 }

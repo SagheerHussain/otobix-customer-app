@@ -11,7 +11,9 @@ import 'package:otobix_customer_app/controllers/get_warranty_cars_list_controlle
 import 'package:otobix_customer_app/controllers/razorpay_payment_controller.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
+import 'package:otobix_customer_app/services/user_activity_log_service.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
+import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/widgets/button_widget.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
@@ -48,6 +50,8 @@ class GetWarrantyController extends GetxController {
 
   // Fetch warranty options
   Future<void> fetchWarrantyOptions({
+    required String carId,
+    required String appointmentId,
     required String registrationNumber,
   }) async {
     if (isWarrantyOptionsLoading.value) return;
@@ -56,8 +60,8 @@ class GetWarrantyController extends GetxController {
     try {
       final response = await ApiService.get(
         endpoint: AppUrls.getWarrantyOptions(
-          // registrationNumber: registrationNumber,
-          registrationNumber: "WB08Q9069",
+          registrationNumber: registrationNumber,
+          // registrationNumber: "WB08Q9069",
         ),
       );
 
@@ -87,6 +91,22 @@ class GetWarrantyController extends GetxController {
             type: ToastType.error,
           );
         }
+
+        // Log event
+        final String userId =
+            await SharedPrefsHelper.getString(SharedPrefsHelper.userIdKey) ??
+            '';
+        UserActivityLogService.logEvent(
+          userId: userId,
+          event: AppConstants.userActivityLogEvents.warrantyPageOpened,
+          eventDetails: 'User opened warranty page for a car',
+          metadata: {
+            'carId': carId,
+            'appointmentId': appointmentId,
+            'registrationNumber': registrationNumber,
+            'warrantyOptions': warrantyOptions.toJson(),
+          },
+        );
       } else {
         ToastWidget.show(
           context: Get.context!,
@@ -255,6 +275,27 @@ class GetWarrantyController extends GetxController {
           pdfUrl: pdfUrl,
           pdfFileName: pdfFileName,
           alreadyExists: false,
+        );
+        // Log event
+        UserActivityLogService.logEvent(
+          userId: userId,
+          event: AppConstants.userActivityLogEvents.warrantyPurchased,
+          eventDetails: 'Successfully purchased warranty',
+          metadata: {
+            "carId": car.id,
+            "appointmentId": car.appointmentId,
+            "regNo": car.registrationNumber,
+            "paymentId": success.paymentId,
+            "make": car.make,
+            "model": car.model,
+            "warrantyCover": warrantyCover,
+            "warrantyPeriod": warrantyPeriod,
+            "warrantyPrice": selectedWarrantyOption.warrantyPrice,
+            "warrantyPriceAfterMarkup":
+                selectedWarrantyOption.warrantyPriceAfterMarkup,
+            "warrantyPriceAfterGst":
+                selectedWarrantyOption.warrantyPriceAfterGst,
+          },
         );
       } else if (response.statusCode == 409) {
         Get.back();

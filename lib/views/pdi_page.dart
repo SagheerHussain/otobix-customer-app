@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/controllers/pdi_controller.dart';
 import 'package:otobix_customer_app/services/auth_service.dart';
+import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
+import 'package:otobix_customer_app/services/user_activity_log_service.dart';
+import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/views/login_page.dart';
 import 'package:otobix_customer_app/views/new_car_pdi_page.dart';
@@ -37,13 +40,19 @@ class PdiPage extends StatelessWidget {
           child: Column(
             children: [
               const SizedBox(height: 10),
-              _buildBanner(context: context, bannerPath: AppImages.pdiBanner),
+              _buildBanner(
+                context: context,
+                bannerPath: AppImages.pdiScreenBanner,
+              ),
               const SizedBox(height: 14),
               _buildServiceCategoriesSection(context),
               const SizedBox(height: 16),
               _buildCoverageSection(context),
               const SizedBox(height: 16),
-              _buildBanner(context: context, bannerPath: AppImages.pdiBanner2),
+              _buildBanner(
+                context: context,
+                bannerPath: AppImages.pdiScreenBanner2,
+              ),
               const SizedBox(height: 16),
               _buildHowItWorksSection(context),
               const SizedBox(height: 16),
@@ -110,6 +119,20 @@ class PdiPage extends StatelessWidget {
                       final isLoggedIn = await AuthService.isLoggedIn();
                       if (isLoggedIn) {
                         Get.to(() => NewCarPdiPage());
+                        // Log event
+                        final String userId =
+                            await SharedPrefsHelper.getString(
+                              SharedPrefsHelper.userIdKey,
+                            ) ??
+                            '';
+                        UserActivityLogService.logEvent(
+                          userId: userId,
+                          event: AppConstants
+                              .userActivityLogEvents
+                              .pdiNewCarClicked,
+                          eventDetails: 'User opened new car pdi page',
+                          metadata: {},
+                        );
                       } else {
                         LoginRequiredDialogWidget.show(
                           Get.context!,
@@ -131,6 +154,20 @@ class PdiPage extends StatelessWidget {
                       final isLoggedIn = await AuthService.isLoggedIn();
                       if (isLoggedIn) {
                         Get.to(() => UsedCarPdiPage());
+                        // Log event
+                        final String userId =
+                            await SharedPrefsHelper.getString(
+                              SharedPrefsHelper.userIdKey,
+                            ) ??
+                            '';
+                        UserActivityLogService.logEvent(
+                          userId: userId,
+                          event: AppConstants
+                              .userActivityLogEvents
+                              .pdiUsedCarClicked,
+                          eventDetails: 'User opened used car pdi page',
+                          metadata: {},
+                        );
                       } else {
                         LoginRequiredDialogWidget.show(
                           Get.context!,

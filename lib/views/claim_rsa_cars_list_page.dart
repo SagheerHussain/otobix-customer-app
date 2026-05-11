@@ -20,7 +20,7 @@ class ClaimRsaCarsListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBarWidget(title: 'Claim RSA Cars'),
+      appBar: AppBarWidget(title: 'Your Eligible Cars'),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),

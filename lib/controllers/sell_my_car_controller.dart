@@ -11,6 +11,7 @@ import 'package:otobix_customer_app/controllers/dropdown_textfield_widget_contro
 import 'package:otobix_customer_app/services/api_service.dart';
 import 'package:otobix_customer_app/services/auth_service.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
+import 'package:otobix_customer_app/services/user_activity_log_service.dart';
 import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
@@ -646,18 +647,18 @@ class SellMyCarController extends GetxController {
         : isRequestCallbackLoading;
     loading.value = true;
 
+    final customerContactNumber =
+        await SharedPrefsHelper.getString(
+          SharedPrefsHelper.userPhoneNumberKey,
+        ) ??
+        '';
+
     try {
       final uri = Uri.parse(AppUrls.addTelecallingRequest);
       final request = http.MultipartRequest('POST', uri);
 
       final token =
           await SharedPrefsHelper.getString(SharedPrefsHelper.tokenKey) ?? '';
-
-      final customerContactNumber =
-          await SharedPrefsHelper.getString(
-            SharedPrefsHelper.userPhoneNumberKey,
-          ) ??
-          '';
 
       if (token.isNotEmpty) {
         request.headers.addAll({
@@ -669,7 +670,8 @@ class SellMyCarController extends GetxController {
       // required fields
       request.fields['carRegistrationNumber'] = carRegistrationNumberController
           .text
-          .trim();
+          .trim()
+          .toUpperCase();
       // request.fields['ownerName'] = ownerNameController.text.trim();
       request.fields['ownerName'] = unmaskedOwnerName.trim();
       request.fields['make'] = makeController.text.trim();
@@ -731,6 +733,35 @@ class SellMyCarController extends GetxController {
       // debugPrint('Inspection API body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        // Log event
+        if (isSchedule) {
+          UserActivityLogService.logEvent(
+            userId: isLoggedIn
+                ? customerContactNumber
+                : contactNumberController.text,
+            event:
+                AppConstants.userActivityLogEvents.sellMyCarScheduleInspection,
+            eventDetails: 'Inspection scheduled successfully',
+            metadata: {
+              'carRegistrationNumber': carRegistrationNumberController.text
+                  .trim(),
+              'inspectionDateTime': inspectionDateTimeUtcForApi,
+              'inspectionAddress': inspectionAddressController.text.trim(),
+            },
+          );
+        } else {
+          UserActivityLogService.logEvent(
+            userId: isLoggedIn
+                ? customerContactNumber
+                : contactNumberController.text,
+            event: AppConstants.userActivityLogEvents.sellMyCarRequestACallback,
+            eventDetails: 'Callback requested successfully',
+            metadata: {
+              'carRegistrationNumber': carRegistrationNumberController.text
+                  .trim(),
+            },
+          );
+        }
         return true;
       }
       if (response.statusCode == 400) {
@@ -769,6 +800,21 @@ class SellMyCarController extends GetxController {
         subtitle: 'Error submitting request',
         type: ToastType.error,
       );
+      // Log event
+      final isLoggedIn = await AuthService.isLoggedIn();
+      UserActivityLogService.logEvent(
+        userId: isLoggedIn
+            ? customerContactNumber
+            : contactNumberController.text,
+        event: AppConstants.userActivityLogEvents.sellMyCarIncompleteJourney,
+        eventDetails: 'Api Failed with error',
+        metadata: {
+          'carRegistrationNumber': carRegistrationNumberController.text.trim(),
+          'apiType': isSchedule ? 'Schedule Inspection' : 'Request a Callback',
+          'error': e.toString(),
+        },
+      );
+
       return false;
     } finally {
       loading.value = false;

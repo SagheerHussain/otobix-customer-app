@@ -8,10 +8,12 @@ import 'package:otobix_customer_app/Models/auction_details_model.dart';
 import 'package:otobix_customer_app/services/api_service.dart';
 import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
 import 'package:otobix_customer_app/services/socket_service.dart';
+import 'package:otobix_customer_app/services/user_activity_log_service.dart';
 import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_urls.dart';
 import 'package:otobix_customer_app/utils/socket_events.dart';
 import 'package:otobix_customer_app/widgets/toast_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 enum ScreenType {
   upcoming,
@@ -36,7 +38,7 @@ class AuctionDetailsController extends GetxController {
   late final String appointmentId;
 
   @override
-  void onInit() {
+  void onInit() async {
     super.onInit();
     // Fetch appointmentId from Get.arguments
     appointmentId = Get.arguments['appointmentId'];
@@ -108,6 +110,22 @@ class AuctionDetailsController extends GetxController {
               'Successfully updated expected price to Rs. ${NumberFormat.decimalPattern('en_IN').format(customerExpectedPrice)}/-',
           type: ToastType.success,
         );
+        // Log event
+        final String userId =
+            await SharedPrefsHelper.getString(SharedPrefsHelper.userIdKey) ??
+            '';
+        UserActivityLogService.logEvent(
+          userId: userId,
+          event: auctionDetails.value.customerExpectedPrice != 0
+              ? AppConstants.userActivityLogEvents.viewMyAuctionCepRevised
+              : AppConstants.userActivityLogEvents.viewMyAuctionCepEntered,
+          eventDetails:
+              'User ${auctionDetails.value.customerExpectedPrice != 0 ? 'revised' : 'set'} customer expected price for vehicle',
+          metadata: {
+            'carId': carId,
+            'customerExpectedPrice': customerExpectedPrice,
+          },
+        );
       } else {
         debugPrint('Failed to update expected price ${response.statusCode}');
         ToastWidget.show(
@@ -153,6 +171,17 @@ class AuctionDetailsController extends GetxController {
           title: 'Removed Car Successfully',
           type: ToastType.success,
         );
+        // Log event
+        UserActivityLogService.logEvent(
+          userId: userId,
+          event: AppConstants.userActivityLogEvents.viewMyAuctionCarRemoved,
+          eventDetails: 'User removed the car',
+          metadata: {
+            'carId': carId,
+            'reasonOfRemoval': reasonOfRemoval,
+            'appointmentId': appointmentId,
+          },
+        );
       } else {
         debugPrint('Failed to remove the car ${response.statusCode}');
         ToastWidget.show(
@@ -190,6 +219,20 @@ class AuctionDetailsController extends GetxController {
           context: Get.context!,
           title: 'Car successfully moved to otobuy',
           type: ToastType.success,
+        );
+        // Log event
+        final String userId =
+            await SharedPrefsHelper.getString(SharedPrefsHelper.userIdKey) ??
+            '';
+        UserActivityLogService.logEvent(
+          userId: userId,
+          event: AppConstants.userActivityLogEvents.viewMyAuctionMovedToOtobuy,
+          eventDetails: 'User moved car to Otobuy',
+          metadata: {
+            'carId': carId,
+            'oneClickPrice': oneClickPrice,
+            'appointmentId': appointmentId,
+          },
         );
       } else {
         debugPrint('Failed to move car to otobuy ${response.statusCode}');
@@ -233,6 +276,19 @@ class AuctionDetailsController extends GetxController {
       );
 
       if (response.statusCode == 200) {
+        // Log event
+        UserActivityLogService.logEvent(
+          userId: userId,
+          event: AppConstants.userActivityLogEvents.viewMyAuctionOfferAccepted,
+          eventDetails: 'User accepted offer',
+          metadata: {
+            'carId': carId,
+            'soldTo': soldTo,
+            'soldAt': soldAt,
+            'appointmentId': appointmentId,
+          },
+        );
+
         return true;
       } else {
         debugPrint('Failed to accept the offer ${response.statusCode}');
@@ -365,6 +421,22 @@ class AuctionDetailsController extends GetxController {
       final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 200) {
+        // Log event
+        final String userId =
+            await SharedPrefsHelper.getString(SharedPrefsHelper.userIdKey) ??
+            '';
+        UserActivityLogService.logEvent(
+          userId: userId,
+          event: AppConstants.userActivityLogEvents.viewMyAuctionRerunRequested,
+          eventDetails: 'User submitted re-auction request',
+          metadata: {
+            'appointmentId': appointmentId,
+            'carId': auctionDetails.value.carId,
+            'make': details.make,
+            'model': details.model,
+          },
+        );
+
         return true;
       }
 
@@ -399,7 +471,7 @@ class AuctionDetailsController extends GetxController {
       final userId =
           await SharedPrefsHelper.getString(SharedPrefsHelper.userIdKey) ?? '';
       final userRole =
-          await SharedPrefsHelper.getString(SharedPrefsHelper.userTypeKey) ??
+          await SharedPrefsHelper.getString(SharedPrefsHelper.userRoleKey) ??
           '';
       final customerContactNumber =
           await SharedPrefsHelper.getString(
@@ -435,6 +507,24 @@ class AuctionDetailsController extends GetxController {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
+        // Log event
+        UserActivityLogService.logEvent(
+          userId: userId,
+          event: AppConstants
+              .userActivityLogEvents
+              .viewMyAuctionReinspectionRequested,
+          eventDetails: 'User requested re-inspection',
+          metadata: {
+            'appointmentId': appointmentId,
+            'carId': auctionDetails.value.carId,
+            'carRegistrationNumber': auctionDetails.value.registrationNumber
+                .trim(),
+            'make': auctionDetails.value.make.trim(),
+            'model': auctionDetails.value.model.trim(),
+            'inspectionStatus': 'Re-Inspection',
+            'addedBy': AppConstants.roles.customer,
+          },
+        );
         return true;
       } else {
         ToastWidget.show(
@@ -738,5 +828,42 @@ class AuctionDetailsController extends GetxController {
     final end = auctionDetails.value.auctionEndTime;
     if (end == null) return false; // null => consider < 30 days
     return DateTime.now().isAfter(end.add(const Duration(days: 30)));
+  }
+
+  // Call Retail Associate
+  Future<void> callRetailAssociate() async {
+    try {
+      String phoneNumber = auctionDetails.value.retailAssociateContactNumber;
+      // Remove any non-digit characters except '+'
+      String cleanNumber = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
+
+      // Add country code if missing (adjust based on your needs)
+      if (!cleanNumber.startsWith('+') && !cleanNumber.startsWith('00')) {
+        // Default to India country code +91, adjust as needed
+        cleanNumber = '+91$cleanNumber';
+      }
+
+      final Uri phoneUri = Uri(scheme: 'tel', path: cleanNumber);
+
+      // Check if dialer is available
+      if (await canLaunchUrl(phoneUri)) {
+        await launchUrl(phoneUri);
+      } else {
+        ToastWidget.show(
+          context: Get.context!,
+          title: 'Error',
+          subtitle: 'Could not open dialer',
+          type: ToastType.error,
+        );
+      }
+    } catch (e) {
+      debugPrint('Error calling retail associate: $e');
+      ToastWidget.show(
+        context: Get.context!,
+        title: 'Error',
+        subtitle: 'Unable to make call',
+        type: ToastType.error,
+      );
+    }
   }
 }

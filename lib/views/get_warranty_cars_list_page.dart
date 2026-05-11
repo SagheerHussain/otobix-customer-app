@@ -20,7 +20,7 @@ class GetWarrantyCarsListPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBarWidget(title: 'Get Warranty Cars'),
+      appBar: AppBarWidget(title: 'Your Eligible Cars'),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 15),

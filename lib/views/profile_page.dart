@@ -1,8 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:otobix_customer_app/controllers/bottom_navigation_bar_controller.dart';
 import 'package:otobix_customer_app/controllers/profile_controller.dart';
+import 'package:otobix_customer_app/services/user_activity_log_service.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/views/delete_account_page.dart';
 import 'package:otobix_customer_app/views/privacy_policy_page.dart';
@@ -81,8 +80,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
                   const SizedBox(height: 30),
 
-                
-
                   // ProfileOption(
                   //   icon: CupertinoIcons.car_detailed,
                   //   color: AppColors.green,
@@ -141,6 +138,32 @@ class _ProfilePageState extends State<ProfilePage> {
                     description: "Sign out of your account securely.",
                     onTap: () {
                       profileController.logout();
+                    },
+                  ),
+                  const SizedBox(height: 15),
+                  FutureBuilder(
+                    future: UserActivityLogService.getAppVersion(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 15,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.grey.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(50),
+                          ),
+                          child: Text(
+                            'App Version: ${snapshot.data}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox();
                     },
                   ),
                 ],

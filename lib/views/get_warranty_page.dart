@@ -22,6 +22,8 @@ class GetWarrantyPage extends StatelessWidget {
     // ✅ fetch once when page builds (safe)
     WidgetsBinding.instance.addPostFrameCallback((_) {
       getWarrantyController.fetchWarrantyOptions(
+        carId: car.id,
+        appointmentId: car.appointmentId,
         registrationNumber: car.registrationNumber,
       );
     });

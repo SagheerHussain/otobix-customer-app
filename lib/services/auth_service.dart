@@ -9,7 +9,7 @@ class AuthService {
       SharedPrefsHelper.userIdKey,
     );
     final userRole = await SharedPrefsHelper.getString(
-      SharedPrefsHelper.userTypeKey,
+      SharedPrefsHelper.userRoleKey,
     );
 
     bool isNullOrEmpty(String? v) => v == null || v.trim().isEmpty;

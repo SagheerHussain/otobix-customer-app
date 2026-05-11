@@ -2,8 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:otobix_customer_app/services/auth_service.dart';
+import 'package:otobix_customer_app/services/shared_prefs_helper.dart';
+import 'package:otobix_customer_app/services/user_activity_log_service.dart';
 import 'package:otobix_customer_app/utils/app_colors.dart';
 import 'package:otobix_customer_app/controllers/warranty_controller.dart';
+import 'package:otobix_customer_app/utils/app_constants.dart';
 import 'package:otobix_customer_app/utils/app_images.dart';
 import 'package:otobix_customer_app/views/claim_rsa_cars_list_page.dart';
 import 'package:otobix_customer_app/views/get_warranty_cars_list_page.dart';
@@ -19,16 +22,7 @@ class WarrantyPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return
-    // 1 == 1
-    //     ? const UnderDevelopmentPage(
-    //         screenName: "Warranty",
-    //         icon: CupertinoIcons.wrench,
-    //         color: AppColors.blue,
-    //         completedPercentage: 50,
-    //       )
-    //     :
-    Scaffold(
+    return Scaffold(
       appBar: AppBarWidget(title: 'Warranty'),
       backgroundColor: AppColors.white,
       body: SafeArea(
@@ -173,6 +167,19 @@ class WarrantyPage extends StatelessWidget {
                 final isLoggedIn = await AuthService.isLoggedIn();
                 if (isLoggedIn) {
                   Get.to(() => ClaimRsaCarsListPage());
+                  // Log event
+                  final String userId =
+                      await SharedPrefsHelper.getString(
+                        SharedPrefsHelper.userIdKey,
+                      ) ??
+                      '';
+                  UserActivityLogService.logEvent(
+                    userId: userId,
+                    event:
+                        AppConstants.userActivityLogEvents.warrantyRsaClicked,
+                    eventDetails: 'User opened claim rsa (cars list) page',
+                    metadata: {},
+                  );
                 } else {
                   LoginRequiredDialogWidget.show(
                     Get.context!,
@@ -199,6 +206,21 @@ class WarrantyPage extends StatelessWidget {
                 final isLoggedIn = await AuthService.isLoggedIn();
                 if (isLoggedIn) {
                   Get.to(() => GetWarrantyCarsListPage());
+                  // Log event
+                  final String userId =
+                      await SharedPrefsHelper.getString(
+                        SharedPrefsHelper.userIdKey,
+                      ) ??
+                      '';
+                  UserActivityLogService.logEvent(
+                    userId: userId,
+                    event: AppConstants
+                        .userActivityLogEvents
+                        .warrantyGetNowClicked,
+                    eventDetails:
+                        'User opened get warranty now (cars list) page',
+                    metadata: {},
+                  );
                 } else {
                   LoginRequiredDialogWidget.show(
                     Get.context!,
